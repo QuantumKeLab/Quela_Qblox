@@ -1,4 +1,5 @@
-import os
+import os, sys
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 from numpy import NaN
 from numpy import array, linspace
 from utils.tutorial_utils import show_args
@@ -151,8 +152,8 @@ if __name__ == "__main__":
     
 
     """ Fill in """
-    QD_path = 'Modularize/QD_backup/2024_3_31/DR2#171_SumInfo.pkl'
-    ro_elements = ['q2','q3']
+    QD_path = r'Modularize/QD_backup/2024_4_23/DR1#11_SumInfo.pkl'
+    ro_elements = ['q0']
     execution = True
     z_shifter = 0 # V
 

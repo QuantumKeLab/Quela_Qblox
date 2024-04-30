@@ -1,5 +1,6 @@
 """This program includes PowerRabi and TimeRabi. When it's PoweRabi, default ctrl pulse duration is 20ns."""
-
+import os, sys
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 from numpy import linspace, array, arange
 from utils.tutorial_utils import show_args
 from qcodes.parameters import ManualParameter
@@ -132,10 +133,10 @@ def rabi_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,Fctrl:dict,spe
 if __name__ == "__main__":
     
     """ Fill in """
-    QD_path = 'Modularize/QD_backup/2024_4_2/DR4#171_SumInfo.pkl'
+    QD_path = r'Modularize/QD_backup/2024_4_24/DR1#11_SumInfo.pkl'
     execution = True
     ro_elements = {
-        "q3":{"xy_atte":0}
+        "q0":{"xy_atte":0}
     }
 
 
@@ -153,7 +154,7 @@ if __name__ == "__main__":
         """ Storing """
         if trustable:   
             QD_agent.refresh_log("after Rabi")
-            # QD_agent.QD_keeper()
+            QD_agent.QD_keeper()
 
 
     """ Close """

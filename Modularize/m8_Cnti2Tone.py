@@ -1,3 +1,5 @@
+import os, sys
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 from numpy import NaN
 from numpy import array, linspace
 from qblox_instruments import Cluster
@@ -24,7 +26,7 @@ def Two_tone_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,IF:float=100e6
     #     xyamp = qubit_info.rxy.amp180(XYL)
     # Avoid warning
     qubit_info.clock_freqs.f01(NaN)
-
+    
     f01_samples = linspace(f01_high-xyf_span_Hz,f01_high,points)
     set_LO_frequency(QD_agent.quantum_device,q=q,module_type='drive',LO_frequency=f01_high)
     freq = ManualParameter(name="freq", unit="Hz", label="Frequency")
@@ -34,7 +36,7 @@ def Two_tone_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,IF:float=100e6
         frequencies=freq,
         q=q,
         spec_amp=xyamp,
-        spec_Du=10e-6,
+        spec_Du=48e-6,
         R_amp={str(q):qubit_info.measure.pulse_amp()},
         R_duration={str(q):qubit_info.measure.pulse_duration()},
         R_integration={str(q):qubit_info.measure.integration_time()},
@@ -109,10 +111,10 @@ def conti2tone_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,cluster:
         if xyf_guess != 0:
             guess_fq = [xyf_guess]
         else:
-            guess_fq = [6.1e9] #[advised_fq-500e6, advised_fq, advised_fq+500e6]
+            guess_fq = [5.3e9] #[advised_fq-500e6, advised_fq, advised_fq+500e6]
 
         if xyAmp_guess == 0:
-            xyAmp_guess = [0.4, 0.5, 0.6, 0.7, 0.8]
+            xyAmp_guess = [0, 0.01, 0.02, 0.03, 0.04, 0.05]
         else:
             xyAmp_guess = [xyAmp_guess]
         
@@ -120,7 +122,7 @@ def conti2tone_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,cluster:
             ori_data = []
             for XYL in xyAmp_guess:
                 Fctrl[specific_qubits](QD_agent.Fluxmanager.get_sweetBiasFor(specific_qubits)) 
-                QS_results = Two_tone_spec(QD_agent,meas_ctrl,xyamp=XYL,IF=xy_if,f01_guess=XYF,q=specific_qubits,xyf_span_Hz=xyf_span,points=50,n_avg=500,run=True,ref_IQ=QD_agent.refIQ[specific_qubits]) # 
+                QS_results = Two_tone_spec(QD_agent,meas_ctrl,xyamp=XYL,IF=xy_if,f01_guess=XYF,q=specific_qubits,xyf_span_Hz=xyf_span,points=100,n_avg=500,run=True,ref_IQ=QD_agent.refIQ[specific_qubits]) # 
                 Fctrl[specific_qubits](0.0)
                 cluster.reset() # *** important
                 if XYL != 0:
@@ -133,7 +135,7 @@ def conti2tone_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,cluster:
                 
     else:
         qu = specific_qubits
-        QS_results = Two_tone_spec(QD_agent,meas_ctrl,xyamp=0.1,IF=xy_if,f01_guess=4e9,q=qu,xyf_span_Hz=xyf_span,points=50,n_avg=500,run=False,ref_IQ=QD_agent.refIQ[qu])
+        QS_results = Two_tone_spec(QD_agent,meas_ctrl,xyamp=0.1,IF=xy_if,f01_guess=4e9,q=qu,xyf_span_Hz=xyf_span,points=100,n_avg=500,run=False,ref_IQ=QD_agent.refIQ[qu])
 
         return 0
    
@@ -147,10 +149,10 @@ if __name__ == "__main__":
     execution = True
     update = 1
     #
-    QD_path = 'Modularize/QD_backup/2024_4_1/DR4#171_SumInfo.pkl'
+    QD_path = r'Modularize/QD_backup/2024_4_23/DR1#11_SumInfo.pkl'
     #
     ro_elements = {
-        "q3":{"xyf_guess":6.1e9,"xyl_guess":0.4,"xy_atte":0,"g_guess":0} # g you can try [42e6, 54e6, 62e6], higher g makes fq lower
+        "q0":{"xyf_guess":5.3e9,"xyl_guess":0.01,"xy_atte":0,"g_guess":0} # g you can try [42e6, 54e6, 62e6], higher g makes fq lower
     }
 
 
@@ -165,7 +167,7 @@ if __name__ == "__main__":
         xyf = ro_elements[qubit]["xyf_guess"]
         xyl = ro_elements[qubit]["xyl_guess"]
         g = 48e6 if ro_elements[qubit]["g_guess"] == 0 else ro_elements[qubit]["g_guess"]
-        tt_results[qubit] = conti2tone_executor(QD_agent,meas_ctrl,cluster,specific_qubits=qubit,xyf_guess=xyf,xyAmp_guess=xyl,run=execution,guess_g=g,xy_if=150e6)
+        tt_results[qubit] = conti2tone_executor(QD_agent,meas_ctrl,cluster,specific_qubits=qubit,xyf_guess=xyf,xyAmp_guess=xyl,run=execution,guess_g=g,xy_if=150e6, xyf_span=300e6)
 
         if execution and xyl != 0:
             update_2toneResults_for(QD_agent,qubit,tt_results,xyl)

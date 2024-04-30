@@ -1,5 +1,7 @@
 # import xarray as xr
 # import quantify_core.data.handling as dh
+import os, sys
+sys.path.append(r"C:\Users\User\Documents\GitHub\Quela_Qblox")
 from Modularize.support.QDmanager import QDmanager
 # from quantify_core.analysis.spectroscopy_analysis import ResonatorSpectroscopyAnalysis
 # from quantify_core.analysis.base_analysis import Basic2DAnalysis
@@ -40,23 +42,13 @@ from Modularize.support.QDmanager import QDmanager
 
 # from Modularize.support import QDmanager
 from numpy import array
-QD_path = 'Modularize/QD_backup/2024_3_31/DR2#171_SumInfo.pkl'
+QD_path = r'Modularize/QD_backup/2024_4_23/DR1#11_SumInfo.pkl'
 QD_agent = QDmanager(QD_path)
 QD_agent.QD_loader()
-for i in ["q0","q1","q2","q3","q4"]:
+for i in ["q0"]:
     qu = QD_agent.quantum_device.get_element(i)
-    rof = qu.clock_freqs.readout()
-    xyf = qu.clock_freqs.f01()
-    xyl = qu.rxy.amp180()
-    T1 = QD_agent.Notewriter.get_T1For(target_q=i)
-    T2 = QD_agent.Notewriter.get_T2For(target_q=i)
-    print(f"***{i}:")
-    print(f"rof : {rof}")
-    print(f"xyf : {xyf}")
-    print(f"xyl : {xyl}")
-    print(f"T1 : {T1}")
-    print(f"T2 : {T2}")
-    print("===========================\n")
+    qu.clock_freqs.readout(5.7675e9)
+    
 # def aprx_fq(disper_MHz:float,bareF_MHz:float,g_MHz:float=45.0):
 #     return bareF_MHz-(g_MHz**2)/disper_MHz
 

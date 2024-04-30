@@ -1,4 +1,5 @@
-
+import os, sys
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 from utils.tutorial_utils import show_args
 from Modularize.support import QDmanager, Data_manager
 from quantify_scheduler.gettables import ScheduleGettable
@@ -10,7 +11,7 @@ def Single_shot_ref_spec(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:str='
     sche_func = Qubit_SS_sche   
     analysis_result = {}
     qubit_info = QD_agent.quantum_device.get_element(q)
-    
+    # qubit_info.measure.pulse_amp(2*qubit_info.measure.pulse_amp()) 
 
     # qubit_info.clock_freqs.readout(5.7225e9)
     if want_state == 'g':
@@ -80,8 +81,8 @@ if __name__ == "__main__":
     
     """ Fill in """
     execution = True
-    QD_path = 'Modularize/QD_backup/2024_4_1/DR4#171_SumInfo.pkl'
-    ro_elements = ['q3']
+    QD_path = r'Modularize/QD_backup/2024_4_23/DR1#11_SumInfo.pkl'
+    ro_elements = ['q0']
 
 
     """ Preparations """

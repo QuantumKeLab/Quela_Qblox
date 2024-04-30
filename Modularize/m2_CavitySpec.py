@@ -1,4 +1,5 @@
 import os, sys
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 from numpy import NaN
 from Modularize.support import uw
 from numpy import array, linspace
@@ -12,7 +13,7 @@ from quantify_core.measurement.control import MeasurementControl
 from Modularize.support import init_meas, init_system_atte, shut_down, QRM_nco_init
 from Modularize.support.Pulse_schedule_library import One_tone_sche, pulse_preview
 from quantify_core.analysis.spectroscopy_analysis import ResonatorSpectroscopyAnalysis
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+
 
 def Cavity_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,ro_bare_guess:dict,ro_span_Hz:int=15e6,n_avg:int=300,points:int=200,run:bool=True,q:str='q1',Experi_info:dict={},ro_amp:float=0)->dict:
     """
@@ -105,13 +106,13 @@ def cavitySpectro_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,ro_ba
 if __name__ == "__main__":
     
     """ fill in part """
-    execution = True
+    execution = 0
     chip_info_restore = 0
-    init_RO_DigiAtte = 26
+    init_RO_DigiAtte = 30
     real_atte_ro = 0
     # guess [5.72088012 5.83476623 5.90590196 6.01276471 6.1014995 ] @DR2 
     ro_bare=dict(
-        q1 = 6.207e9,
+        q0 = 5.761e9,
         
     )
     #q1 or q3 = 5.8175e9,
@@ -121,13 +122,13 @@ if __name__ == "__main__":
     # Create or Load chip information
     # chip_info = cds.Chip_file()
     # Reload the QuantumDevice or build up a new one
-    QD_path, dr, ip, mode, vpn = 'Modularize/QD_backup/2024_4_2/DR4#171_SumInfo.pkl','dr4','171','l',False #uw.init_meas_window()
+    QD_path, dr, ip, mode, vpn = uw.init_meas_window()
     QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,
                                                         dr_loc=dr,
                                                         cluster_ip=ip,
                                                         mode=mode,
                                                         vpn=vpn,
-                                                        qubit_number=6)
+                                                        qubit_number=1)
     # Set the system attenuations
     init_system_atte(QD_agent.quantum_device,list(Fctrl.keys()),ro_out_att=init_RO_DigiAtte)
     

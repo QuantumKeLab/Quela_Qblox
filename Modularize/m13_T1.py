@@ -1,4 +1,5 @@
-import os
+import os, sys
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 from numpy import mean, array, arange, std
 from utils.tutorial_utils import show_args
 from qcodes.parameters import ManualParameter
@@ -48,6 +49,7 @@ def T1(QD_agent:QDmanager,meas_ctrl:MeasurementControl,freeduration:float=80e-6,
         meas_ctrl.setpoints(samples)
         for i in range(times):
             T1_ds = meas_ctrl.run('T1')
+            print(f"the {i} time: ")
             # Save the raw data into netCDF
             Data_manager().save_raw_data(QD_agent=QD_agent,ds=T1_ds,histo_label=i,qb=q,exp_type='T1')
             I,Q= dataset_to_array(dataset=T1_ds,dims=1)
@@ -83,7 +85,7 @@ def T1_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,Fctrl:dict,speci
 
     if run:
         Fctrl[specific_qubits](float(QD_agent.Fluxmanager.get_sweetBiasFor(specific_qubits)))
-        T1_results, T1_hist = T1(QD_agent,meas_ctrl,q=specific_qubits,times=histo_counts,freeduration=freeDura,ref_IQ=QD_agent.refIQ[specific_qubits],run=True)
+        T1_results, T1_hist = T1(QD_agent,meas_ctrl,q=specific_qubits,times=histo_counts,freeduration=freeDura,ref_IQ=QD_agent.refIQ[specific_qubits],run=True,n_avg=500)
         Fctrl[specific_qubits](0.0)
         Fit_analysis_plot(T1_results[linecut],P_rescale=False,Dis=None)
         mean_T1_us = round(mean(array(T1_hist[specific_qubits])),1)
@@ -102,9 +104,9 @@ if __name__ == "__main__":
 
     """ Fill in """
     execution = True
-    QD_path = 'Modularize/QD_backup/2024_4_2/DR4#171_SumInfo.pkl'
+    QD_path = r'Modularize/QD_backup/2024_4_24/DR1#11_SumInfo.pkl'
     ro_elements = {
-        "q3":{"evoT":50e-6,"histo_counts":100}
+        "q0":{"evoT":60e-6,"histo_counts":100}
     }
 
 

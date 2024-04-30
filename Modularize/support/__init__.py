@@ -1,5 +1,6 @@
 import pickle
 from typing import Callable
+from Modularize.support.Experiment_setup import ip_register
 from Modularize.support.Experiment_setup import get_FluxController
 from qcodes.instrument import find_or_create_instrument
 from typing import Tuple
@@ -49,9 +50,10 @@ def init_meas(QuantumDevice_path:str='',dr_loc:str='',cluster_ip:str='10',qubit_
         if dr_loc == '':
             raise ValueError ("arg 'dr_loc' should not be ''!")
     elif mode.lower() in ['load', 'l']:
-        cluster_ip = get_ip_specifier(QuantumDevice_path)
+        
         cfg, pth = {}, QuantumDevice_path 
-        dr_loc = get_dr_loca(QuantumDevice_path)
+        dr_loc = get_dr_loca(QuantumDevice_path).split("#")[0].split("/")[-1]
+        cluster_ip = ip_register[dr_loc.lower()]
     else:
         raise KeyError("The given mode can not be recognized!")
     
@@ -62,7 +64,6 @@ def init_meas(QuantumDevice_path:str='',dr_loc:str='',cluster_ip:str='10',qubit_
         ip, ser = connect_clusters_withinMulti(dr_loc,cluster_ip)
         cluster = Cluster(name = f"cluster{dr_loc.lower()}", identifier = ip)
     else:
-        from Modularize.support.Experiment_setup import ip_register
         if cluster_ip == '11':
             cluster = Cluster(name = f"cluster{dr_loc.lower()}",identifier = f"qum.phys.sinica.edu.tw", port=5025)
         elif cluster_ip == '10':

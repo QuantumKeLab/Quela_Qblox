@@ -1,3 +1,5 @@
+import os, sys
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 from Modularize.m2_CavitySpec import Cavity_spec
 from Modularize.support import Data_manager, QDmanager
 from quantify_core.measurement.control import MeasurementControl
@@ -27,9 +29,9 @@ if __name__ == "__main__":
 
     """ Fill in """
     execution = True
-    QD_path = 'Modularize/QD_backup/2024_4_2/DR4#171_SumInfo.pkl'
+    QD_path = r'Modularize/QD_backup/2024_4_22/DR1#11_SumInfo.pkl'
     ro_elements = {
-        "q1":{"ro_amp":0.3,"ro_atte":40}
+        "q0":{"ro_amp":0.1,"ro_atte":40}
     }
     freq_shift = 0
 

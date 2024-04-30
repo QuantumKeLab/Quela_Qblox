@@ -1,3 +1,5 @@
+import os, sys
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 from numpy import array, linspace
 from utils.tutorial_utils import show_args
 from qcodes.parameters import ManualParameter
@@ -102,9 +104,9 @@ if __name__ == "__main__":
     """ fill in """
     execution = True
     sweetSpot_dispersive = False
-    QD_path = 'Modularize/QD_backup/2024_4_1/DR4#171_SumInfo.pkl'
+    QD_path = r'Modularize/QD_backup/2024_4_22/DR1#11_SumInfo.pkl'
     ro_elements = {    # measurement target q from this dict 
-        "q3": {"ro_atte":30}
+        "q0": {"ro_atte":0}
     }
 
     """ preparations """
@@ -113,7 +115,7 @@ if __name__ == "__main__":
     """ Running """
     for qubit in ro_elements:
         QD_agent.Notewriter.save_DigiAtte_For(ro_elements[qubit]["ro_atte"],qubit,'ro')
-        powerCavity_executor(QD_agent,meas_ctrl,Fctrl,specific_qubits=qubit,run=execution,sweet_spot=sweetSpot_dispersive)
+        powerCavity_executor(QD_agent,meas_ctrl,Fctrl,specific_qubits=qubit,run=execution,sweet_spot=sweetSpot_dispersive,max_power=0.4)
         cluster.reset()
         if not execution:
             break

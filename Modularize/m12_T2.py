@@ -1,4 +1,5 @@
-
+import os, sys
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 from utils.tutorial_utils import show_args
 from qcodes.parameters import ManualParameter
 from numpy import std, arange, array, average, mean
@@ -56,9 +57,9 @@ def Ramsey(QD_agent:QDmanager,meas_ctrl:MeasurementControl,freeduration:float,ar
         
         for i in range(times):
             ramsey_ds = meas_ctrl.run('Ramsey')
-
+            print(f"the {i} time: ")
             # Save the raw data into netCDF
-            Data_manager().save_raw_data(QD_agent=QD_agent,ds=ramsey_ds,histo_label=i,qb=q,exp_type='T2')
+            Data_manager().save_raw_data(QD_agent=QD_agent,ds=ramsey_ds,label=i,qb=q,exp_type='T2')
 
             I,Q= dataset_to_array(dataset=ramsey_ds,dims=1)
             data= IQ_data_dis(I,Q,ref_I=ref_IQ[0],ref_Q=ref_IQ[1])
@@ -94,11 +95,12 @@ def ramsey_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,Fctrl:dict,s
         Fctrl[specific_qubits](float(QD_agent.Fluxmanager.get_sweetBiasFor(specific_qubits)))
         Ramsey_results, T2_hist, average_actual_detune= Ramsey(QD_agent,meas_ctrl,arti_detune=artificial_detune,freeduration=freeDura,n_avg=1000,q=specific_qubits,times=histo_counts,ref_IQ=QD_agent.refIQ[specific_qubits],points=100,run=True)
         Fctrl[specific_qubits](0.0)
-
+        
         Fit_analysis_plot(Ramsey_results[linecut],P_rescale=False,Dis=None)
         # set the histo save path
         mean_T2_us = round(mean(array(T2_hist[specific_qubits])),1)
-        sd_T2_us = round(std(array(T2_hist[specific_qubits])),1)
+        sd_T2_us = round(std(array(T2_hist[specific_qubits])),2)
+        print(f"avg T2 = {mean_T2_us} +/- {sd_T2_us} us")
         Data_manager().save_histo_pic(QD_agent,T2_hist,specific_qubits,mode="t2",T1orT2=f"{mean_T2_us}+/-{sd_T2_us}")
         
     
@@ -115,10 +117,10 @@ if __name__ == "__main__":
     
     """ Fill in """
     execution = True
-    modify_xyf= True
-    QD_path = 'Modularize/QD_backup/2024_4_2/DR4#171_SumInfo.pkl'
+    modify_xyf= 0
+    QD_path = r'Modularize/QD_backup/2024_4_24/DR1#11_SumInfo.pkl'
     ro_elements = {
-        "q3":{"detune":0,"evoT":40e-6,"histo_counts":1}
+        "q0":{"detune":0e6,"evoT":20e-6,"histo_counts":1}
     }
 
 
@@ -138,7 +140,7 @@ if __name__ == "__main__":
 
         if modify_xyf:
             original_xyf = QD_agent.quantum_device.get_element(qubit).clock_freqs.f01()
-            QD_agent.quantum_device.get_element(qubit).clock_freqs.f01(original_xyf-average_actual_detune)
+            QD_agent.quantum_device.get_element(qubit).clock_freqs.f01(original_xyf+average_actual_detune)
         
         if histo_total >= 10:
             QD_agent.Notewriter.save_T2_for(mean_T2_us,qubit)

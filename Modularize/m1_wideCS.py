@@ -148,27 +148,24 @@ if __name__ == "__main__":
     #chip_info = cds.Chip_file()
     
     # Reload the QuantumDevice or build up a new one
-    QD_path, dr, ip, mode, vpn = '','dr2','192.168.1.10','n',False #init_meas_window()
+    QD_path, dr, ip, mode, vpn = '','dr1','192.168.1.11','n',False #init_meas_window()
     QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,
                                                         dr_loc=dr,
                                                         cluster_ip=ip,
                                                         mode=mode,
                                                         vpn=vpn)
-    print(f"{cluster.modules[7]}\n")
+    print(f"{cluster.modules[5]}\n")
 
     # Set the system attenuations
     init_system_atte(QD_agent.quantum_device,list(Fctrl.keys()),ro_out_att=0)
-    for i in range(6):
-        getattr(cluster.module8, f"sequencer{i}").nco_prop_delay_comp_en(True)
-        getattr(cluster.module8, f"sequencer{i}").nco_prop_delay_comp(50)
 
     # Initial value
-    lo_start_freq = 5.6e9
-    lo_stop_freq = 6.2e9
-    num_data = 1500
+    lo_start_freq = 5.73e9
+    lo_stop_freq = 5.79e9
+    num_data = 100
     
     # Readout select
-    readout_module = cluster.modules[7]
+    readout_module = cluster.modules[5]
 
     wideCS(readout_module=readout_module, lo_start_freq=lo_start_freq, lo_stop_freq=lo_stop_freq, num_data=num_data)
 

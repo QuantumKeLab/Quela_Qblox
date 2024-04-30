@@ -780,6 +780,7 @@ def Qubit_SS_sche(
     q:str,
     ini_state:str,
     pi_amp: dict,
+    pi_dura:dict,
     R_amp: dict,
     R_duration: dict,
     R_integration:dict,
@@ -796,7 +797,7 @@ def Qubit_SS_sche(
     spec_pulse = Readout(sched,q,R_amp,R_duration,powerDep=False)
     
     if ini_state=='e': 
-        X_pi_p(sched,pi_amp,q,spec_pulse,freeDu=0)
+        X_pi_p(sched,pi_amp,q,pi_dura[q],spec_pulse,freeDu=0)
         
     else: None
     Integration(sched,q,R_inte_delay,R_integration,spec_pulse,0,single_shot=True,get_trace=False,trace_recordlength=0)
@@ -1001,8 +1002,8 @@ def Qubit_state_single_shot_plot(results:dict,Plot_type:str,y_scale:str):
         ax1.plot(I_fit, Mge,'--r',alpha=0.8,lw=2)
         ax1.plot(I_fit, Mge+Mee,'--k',alpha=1,lw=1)
     elif Plot_type== 'both': 
-        ax.scatter(1000*Ig, 1000*Qg, color="blue", alpha=0.5, s=5)
-        ax.scatter(1000*Ie, 1000*Qe, color="red", alpha=0.5, s=5)
+        ax.scatter(1000*Ig, 1000*Qg, color="blue", alpha=0.5, s=0.3)
+        ax.scatter(1000*Ie, 1000*Qe, color="red", alpha=0.5, s=0.3)
         ax1.plot(I_ro, Inte_g_data,'bo',alpha=0.5,ms=8)
         ax1.plot(I_fit, Mgg,'b',alpha=0.8,lw=2)
         ax1.plot(I_fit, Meg,'--b',alpha=0.8,lw=2)
