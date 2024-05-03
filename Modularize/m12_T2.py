@@ -1,24 +1,27 @@
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+from qblox_instruments import Cluster
 from utils.tutorial_utils import show_args
 from qcodes.parameters import ManualParameter
-from numpy import std, arange, array, average, mean
 from Modularize.support import QDmanager, Data_manager
 from quantify_scheduler.gettables import ScheduleGettable
+from numpy import std, arange, array, average, mean, sign
 from quantify_core.measurement.control import MeasurementControl
+from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
 from Modularize.support import init_meas, init_system_atte, shut_down
-from Modularize.support.Pulse_schedule_library import Ramsey_sche, set_LO_frequency, pulse_preview, IQ_data_dis, dataset_to_array, T2_fit_analysis, Fit_analysis_plot
+from Modularize.support.Pulse_schedule_library import Ramsey_sche, set_LO_frequency, pulse_preview, IQ_data_dis, dataset_to_array, T2_fit_analysis, Fit_analysis_plot, Fit_T2_cali_analysis_plot
 
 
-def Ramsey(QD_agent:QDmanager,meas_ctrl:MeasurementControl,freeduration:float,arti_detune:int=0,IF:int=130e6,n_avg:int=1000,points:int=101,run:bool=True,q='q1',times=1, ref_IQ:list=[0,0],Experi_info:dict={}):
+def Ramsey(QD_agent:QDmanager,meas_ctrl:MeasurementControl,freeduration:float,arti_detune:int=0,IF:int=150e6,n_avg:int=1000,points:int=101,run:bool=True,q='q1', ref_IQ:list=[0,0],Experi_info:dict={},exp_idx:int=0,data_folder:str=''):
     
     T2_us = {}
-    analysis_result = []
-    T2_us[q] = []
+    analysis_result = {}
     Real_detune= {}
-    Real_detune[q]= []
+    
     qubit = QD_agent.quantum_device.get_element(q)
+    
     New_fxy= qubit.clock_freqs.f01()+arti_detune
+    
     LO= New_fxy+IF
     set_LO_frequency(QD_agent.quantum_device,q=q,module_type='drive',LO_frequency=LO)
     
@@ -26,6 +29,7 @@ def Ramsey(QD_agent:QDmanager,meas_ctrl:MeasurementControl,freeduration:float,ar
     Para_free_Du.batched = True
     gap = (freeduration)*1e9 // points + (((freeduration)*1e9 // points) %4) # multiple by 4 ns
     samples = arange(4e-9,freeduration,gap*1e-9)
+    
     sche_func= Ramsey_sche
     sched_kwargs = dict(
         q=q,
@@ -55,21 +59,25 @@ def Ramsey(QD_agent:QDmanager,meas_ctrl:MeasurementControl,freeduration:float,ar
         meas_ctrl.settables(Para_free_Du)
         meas_ctrl.setpoints(samples)
         
-        for i in range(times):
-            ramsey_ds = meas_ctrl.run('Ramsey')
-            print(f"the {i} time: ")
-            # Save the raw data into netCDF
-            Data_manager().save_raw_data(QD_agent=QD_agent,ds=ramsey_ds,label=i,qb=q,exp_type='T2')
 
-            I,Q= dataset_to_array(dataset=ramsey_ds,dims=1)
-            data= IQ_data_dis(I,Q,ref_I=ref_IQ[0],ref_Q=ref_IQ[1])
+        
+        ramsey_ds = meas_ctrl.run('Ramsey')
+
+        # Save the raw data into netCDF
+        Data_manager().save_raw_data(QD_agent=QD_agent,ds=ramsey_ds,label=exp_idx,qb=q,exp_type='T2',specific_dataFolder=data_folder)
+        
+        I,Q= dataset_to_array(dataset=ramsey_ds,dims=1)
+        data= IQ_data_dis(I,Q,ref_I=ref_IQ[0],ref_Q=ref_IQ[1])
+        try:
             data_fit= T2_fit_analysis(data=data,freeDu=samples,T2_guess=8e-6)
-            analysis_result.append(data_fit)
-            T2_us[q].append(data_fit.attrs['T2_fit']*1e6)
-            Real_detune[q].append(data_fit.attrs['f']-arti_detune)
-        
-        average_fit_detune= average(array(Real_detune[q]))
-        
+            T2_us[q] = data_fit.attrs['T2_fit']*1e6
+            Real_detune[q] = data_fit.attrs['f']
+        except:
+            data_fit=[]
+            T2_us[q] = 0
+            Real_detune[q] = 0
+
+        analysis_result[q] = data_fit
 
         show_args(exp_kwargs, title="Ramsey_kwargs: Meas.qubit="+q)
         if Experi_info != {}:
@@ -85,27 +93,35 @@ def Ramsey(QD_agent:QDmanager,meas_ctrl:MeasurementControl,freeduration:float,ar
         if Experi_info != {}:
             show_args(Experi_info(q))
         
-    return analysis_result, T2_us, average_fit_detune
+    return analysis_result, T2_us, Real_detune
 
 
-def ramsey_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,Fctrl:dict,specific_qubits:str,artificial_detune:float=0e6,freeDura:float=30e-6,histo_counts:int=1,run:bool=True):
-    init_system_atte(QD_agent.quantum_device,list([specific_qubits]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(specific_qubits,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(specific_qubits,'xy'))
-    linecut = 0
+def ramsey_executor(QD_agent:QDmanager,cluster:Cluster,meas_ctrl:MeasurementControl,Fctrl:dict,specific_qubits:str,artificial_detune:float=0e6,freeDura:float=30e-6,histo_counts:int=1,run:bool=True,plot:bool=True,specific_folder:str='',pts:int=100, avg_n:int=800):
     if run:
-        Fctrl[specific_qubits](float(QD_agent.Fluxmanager.get_sweetBiasFor(specific_qubits)))
-        Ramsey_results, T2_hist, average_actual_detune= Ramsey(QD_agent,meas_ctrl,arti_detune=artificial_detune,freeduration=freeDura,n_avg=1000,q=specific_qubits,times=histo_counts,ref_IQ=QD_agent.refIQ[specific_qubits],points=100,run=True)
-        Fctrl[specific_qubits](0.0)
+        T2_us_rec = []
+        detune_rec = []
+        for ith in range(histo_counts):
+            print(f"The {ith}-th T2:")
+            Fctrl[specific_qubits](float(QD_agent.Fluxmanager.get_sweetBiasFor(specific_qubits)))
+            Ramsey_results, T2_us, average_actual_detune= Ramsey(QD_agent,meas_ctrl,arti_detune=artificial_detune,freeduration=freeDura,n_avg=avg_n,q=specific_qubits,ref_IQ=QD_agent.refIQ[specific_qubits],points=pts,run=True,exp_idx=ith,data_folder=specific_folder)
+            Fctrl[specific_qubits](0.0)
+            cluster.reset()
+            if T2_us[specific_qubits] != 0: T2_us_rec.append(T2_us[specific_qubits]) 
+            if average_actual_detune[specific_qubits] != 0: detune_rec.append(average_actual_detune[specific_qubits])
+            Fit_analysis_plot(Ramsey_results[specific_qubits],P_rescale=False,Dis=None,save_path=os.path.join("Modularize/Meas_raw/2024_5_2/pic/T2",f"T2_({ith}).png"))
+        T2_us_rec = array(T2_us_rec)
         
-        Fit_analysis_plot(Ramsey_results[linecut],P_rescale=False,Dis=None)
+        if histo_counts == 1:
+            mean_T2_us = 0
+            if plot:
+                Fit_analysis_plot(Ramsey_results[specific_qubits],P_rescale=False,Dis=None)
         # set the histo save path
-        mean_T2_us = round(mean(array(T2_hist[specific_qubits])),1)
-        sd_T2_us = round(std(array(T2_hist[specific_qubits])),2)
-        print(f"avg T2 = {mean_T2_us} +/- {sd_T2_us} us")
-        Data_manager().save_histo_pic(QD_agent,T2_hist,specific_qubits,mode="t2",T1orT2=f"{mean_T2_us}+/-{sd_T2_us}")
-        
-    
+        else:
+            mean_T2_us = round(mean(T2_us_rec),1)
+            sd_T2_us = round(std(T2_us_rec),1)
+            Data_manager().save_histo_pic(QD_agent,{str(specific_qubits):T2_us_rec},specific_qubits,mode="t2",T1orT2=f"{mean_T2_us}+/-{sd_T2_us}_4.4G",pic_folder=specific_folder)
     else:
-        Ramsey_results, T2_hist, average_actual_detune= Ramsey(QD_agent,meas_ctrl,arti_detune=artificial_detune,freeduration=freeDura,n_avg=1000,q=specific_qubits,times=1,ref_IQ=QD_agent.refIQ[specific_qubits],points=100,run=False)
+        Ramsey_results, T2_hist, average_actual_detune= Ramsey(QD_agent,meas_ctrl,arti_detune=artificial_detune,freeduration=freeDura,n_avg=1000,q=specific_qubits,ref_IQ=QD_agent.refIQ[specific_qubits],points=100,run=False)
         mean_T2_us = 0
 
     return Ramsey_results, mean_T2_us, average_actual_detune
@@ -116,43 +132,67 @@ def ramsey_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,Fctrl:dict,s
 if __name__ == "__main__":
     
     """ Fill in """
-    execution = True
-    modify_xyf= 0
-    QD_path = r'Modularize/QD_backup/2024_4_24/DR1#11_SumInfo.pkl'
+    execution = 1
+    xyf_cali = 0
+    DRandIP = {"dr":"dr1","last_ip":"11"}
     ro_elements = {
-        "q0":{"detune":0e6,"evoT":20e-6,"histo_counts":1}
+        "q0":{"detune":0.1e6,"evoT":70e-6,"histo_counts":100}
     }
 
 
     """ Preparations """
-    QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
+    QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
+    QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l',vpn=True)
     
 
     """ Running """
+    Trustable = False # don't change
     ramsey_results = {}
     for qubit in ro_elements:
-        manual_detune = ro_elements[qubit]["detune"]
-        evo_time = ro_elements[qubit]["evoT"]
+        init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
+        freeTime = ro_elements[qubit]["evoT"]
         histo_total = ro_elements[qubit]["histo_counts"]
 
-        ramsey_results[qubit], mean_T2_us, average_actual_detune = ramsey_executor(QD_agent,meas_ctrl,Fctrl,qubit,artificial_detune=manual_detune,freeDura=evo_time,histo_counts=histo_total,run=execution)
-        cluster.reset()
-
-        if modify_xyf:
-            original_xyf = QD_agent.quantum_device.get_element(qubit).clock_freqs.f01()
-            QD_agent.quantum_device.get_element(qubit).clock_freqs.f01(original_xyf+average_actual_detune)
+        if xyf_cali:
+            manual_detune = [ro_elements[qubit]["detune"],-ro_elements[qubit]["detune"]]
+            plot_result = False
+            if histo_total != 1: raise ValueError("Histo_counts should be 1 in the XYF_calibration mode!") 
+        else:
+            manual_detune = [ro_elements[qubit]["detune"]]
+            plot_result = True
+            
+        all_ramsey_results = []
+        actual_detune = []
+        for detuning in manual_detune:
+            print(f"Ramsey with detuning = {round(detuning*1e-6,2)} MHz")
+            ramsey_results[qubit], mean_T2_us, average_actual_detune = ramsey_executor(QD_agent,cluster,meas_ctrl,Fctrl,qubit,artificial_detune=detuning,freeDura=freeTime,histo_counts=histo_total,run=execution,plot=plot_result)
+            actual_detune.append(average_actual_detune[qubit])
+            all_ramsey_results.append(ramsey_results[qubit][qubit])
+        if xyf_cali:
+            if average(array(actual_detune)) - abs(manual_detune[0]) > 1e4:
+                Trustable = True
+                if actual_detune[0] <= actual_detune[1]: # qb freq > clock.f01
+                    original_xyf = QD_agent.quantum_device.get_element(qubit).clock_freqs.f01()
+                    QD_agent.quantum_device.get_element(qubit).clock_freqs.f01(original_xyf+sign(manual_detune[0])*average(array(actual_detune)))
+                else:  # qb freq < clock.f01
+                    original_xyf = QD_agent.quantum_device.get_element(qubit).clock_freqs.f01()
+                    QD_agent.quantum_device.get_element(qubit).clock_freqs.f01(original_xyf-sign(manual_detune[0])*average(array(actual_detune)))
+                print("Calibrated!!")
+            else:
+                print("Warning: Please set a smaller detuning !")
+            Fit_T2_cali_analysis_plot(all_ramsey_results,P_rescale=False,Dis=None)
         
         if histo_total >= 10:
+            Trustable = True
             QD_agent.Notewriter.save_T2_for(mean_T2_us,qubit)
 
     
     """ Storing """
     if execution:
-        QD_agent.QD_keeper()
+        if Trustable:
+            QD_agent.QD_keeper()
         
-
-
-
+        
     """ Close """
     print('T2 done!')
     shut_down(cluster,Fctrl)

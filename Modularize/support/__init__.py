@@ -1,7 +1,7 @@
 import pickle
 from typing import Callable
-from Modularize.support.Experiment_setup import ip_register
 from Modularize.support.Experiment_setup import get_FluxController
+from Modularize.support.Experiment_setup import ip_register
 from qcodes.instrument import find_or_create_instrument
 from typing import Tuple
 import ipywidgets as widgets
@@ -50,9 +50,9 @@ def init_meas(QuantumDevice_path:str='',dr_loc:str='',cluster_ip:str='10',qubit_
         if dr_loc == '':
             raise ValueError ("arg 'dr_loc' should not be ''!")
     elif mode.lower() in ['load', 'l']:
-        
+        cluster_ip 
         cfg, pth = {}, QuantumDevice_path 
-        dr_loc = get_dr_loca(QuantumDevice_path).split("#")[0].split("/")[-1]
+        dr_loc = get_dr_loca(QuantumDevice_path)
         cluster_ip = ip_register[dr_loc.lower()]
     else:
         raise KeyError("The given mode can not be recognized!")
@@ -63,11 +63,11 @@ def init_meas(QuantumDevice_path:str='',dr_loc:str='',cluster_ip:str='10',qubit_
         # cluster = Cluster(name = "cluster0", identifier = ip.get(connect.value))
         ip, ser = connect_clusters_withinMulti(dr_loc,cluster_ip)
         cluster = Cluster(name = f"cluster{dr_loc.lower()}", identifier = ip)
-    else:
-        if cluster_ip == '11':
-            cluster = Cluster(name = f"cluster{dr_loc.lower()}",identifier = f"qum.phys.sinica.edu.tw", port=5025)
-        elif cluster_ip == '10':
-            cluster = Cluster(name = f"cluster{dr_loc.lower()}",identifier = f"qum.phys.sinica.edu.tw", port=5171)
+    else: # haven't done
+        if cluster_ip == '192.168.1.11':
+            cluster = Cluster(name = f"cluster{dr_loc.lower()}",identifier = f"qum.phys.sinica.edu.tw", port=5011)
+        elif cluster_ip == '192.168.1.10':
+            cluster = Cluster(name = f"cluster{dr_loc.lower()}",identifier = f"qum.phys.sinica.edu.tw", port=5010)
         else:
             raise KeyError("args 'cluster_ip' should be assigned with '170' or '171', check it!")
         ip = ip_register[dr_loc.lower()]
@@ -138,7 +138,7 @@ def configure_measurement_control_loop(
     ) ->Tuple[MeasurementControl,InstrumentCoordinator]:
     meas_ctrl = find_or_create_instrument(MeasurementControl, recreate=True, name="meas_ctrl")
     ic = find_or_create_instrument(InstrumentCoordinator, recreate=True, name="ic")
-
+    ic.timeout(60*60*120) # 120 hr maximum
     # Add cluster to instrument coordinator
     ic_cluster = ClusterComponent(cluster)
     ic.add_component(ic_cluster)
