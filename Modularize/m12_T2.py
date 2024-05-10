@@ -12,7 +12,7 @@ from Modularize.support import init_meas, init_system_atte, shut_down
 from Modularize.support.Pulse_schedule_library import Ramsey_sche, set_LO_frequency, pulse_preview, IQ_data_dis, dataset_to_array, T2_fit_analysis, Fit_analysis_plot, Fit_T2_cali_analysis_plot
 
 
-def Ramsey(QD_agent:QDmanager,meas_ctrl:MeasurementControl,freeduration:float,arti_detune:int=0,IF:int=150e6,n_avg:int=1000,points:int=101,run:bool=True,q='q1', ref_IQ:list=[0,0],Experi_info:dict={},exp_idx:int=0,data_folder:str=''):
+def Ramsey(QD_agent:QDmanager,meas_ctrl:MeasurementControl,freeduration:float,arti_detune:int=0,IF:int=150e6,n_avg:int=2000,points:int=101,run:bool=True,q='q1', ref_IQ:list=[0,0],Experi_info:dict={},exp_idx:int=0,data_folder:str=''):
     
     T2_us = {}
     analysis_result = {}
@@ -108,7 +108,6 @@ def ramsey_executor(QD_agent:QDmanager,cluster:Cluster,meas_ctrl:MeasurementCont
             cluster.reset()
             if T2_us[specific_qubits] != 0: T2_us_rec.append(T2_us[specific_qubits]) 
             if average_actual_detune[specific_qubits] != 0: detune_rec.append(average_actual_detune[specific_qubits])
-            Fit_analysis_plot(Ramsey_results[specific_qubits],P_rescale=False,Dis=None,save_path=os.path.join("Modularize/Meas_raw/2024_5_2/pic/T2",f"T2_({ith}).png"))
         T2_us_rec = array(T2_us_rec)
         
         if histo_counts == 1:
@@ -134,15 +133,16 @@ if __name__ == "__main__":
     """ Fill in """
     execution = 1
     xyf_cali = 0
-    DRandIP = {"dr":"dr1","last_ip":"11"}
+    DRandIP = {"dr":"drke","last_ip":"116"}
     ro_elements = {
-        "q0":{"detune":0.1e6,"evoT":70e-6,"histo_counts":100}
+        "q0":{"detune":0e6,"evoT":20e-6,"histo_counts":1},  #q4
+        # "q1":{"detune":0e6,"evoT":5e-6,"histo_counts":1}, #q2
     }
 
 
     """ Preparations """
     QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
-    QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l',vpn=True)
+    QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
     
 
     """ Running """

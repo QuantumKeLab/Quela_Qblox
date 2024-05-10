@@ -1,6 +1,7 @@
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 from numpy import NaN
+import matplotlib.pyplot as plt
 from numpy import array, linspace
 from utils.tutorial_utils import show_args
 from qcodes.parameters import ManualParameter
@@ -134,6 +135,7 @@ def fluxQubit_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,specific_
         Fctrl[specific_qubits](center)
         results, nc_path, trustable= Zgate_two_tone_spec(QD_agent,meas_ctrl,Z_amp_start=-partial_period+z_shifter,Z_points=zpts,f_points=fpts,Z_amp_end=partial_period+z_shifter,q=specific_qubits,run=True,get_data_path=True,xyf_span_Hz=f_sapn_Hz)
         reset_offset(Fctrl)
+        plt.show()
         if trustable:
             permission = input("Update the QD with this result ? [y/n]") 
             if permission.lower() in ['y','yes']:
@@ -144,6 +146,7 @@ def fluxQubit_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,specific_
             else:
                 trustable = False
         else:
+            print("##################",nc_path)
             plot_QbFlux(QD_agent,nc_path,specific_qubits)
             trustable = False
         return results[specific_qubits], trustable
@@ -156,7 +159,7 @@ if __name__ == "__main__":
     
     """ Fill in """
     execution = True
-    DRandIP = {"dr":"dr1","last_ip":"11"}
+    DRandIP = {"dr":"drke","last_ip":"116"}
     ro_elements = ['q0']
     z_shifter = 0 # V
 
@@ -172,7 +175,7 @@ if __name__ == "__main__":
     check_again =[]
     for qubit in ro_elements:
         init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
-        FQ_results[qubit], trustable = fluxQubit_executor(QD_agent,meas_ctrl,qubit,run=execution,z_shifter=z_shifter)
+        FQ_results[qubit], trustable = fluxQubit_executor(QD_agent,meas_ctrl,qubit,run=execution,z_shifter=z_shifter)#, zpts=50, fpts=50)
         cluster.reset()
 
         if not trustable:

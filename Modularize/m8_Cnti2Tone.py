@@ -114,7 +114,7 @@ def conti2tone_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,cluster:
             guess_fq = [advised_fq-500e6, advised_fq, advised_fq+500e6]
 
         if len(xyAmp_guess) == 0 or (len(xyAmp_guess) == 1 and xyAmp_guess[0] == 0):
-            xyAmp_guess = [0, 0.03, 0.07, 0.1]
+            xyAmp_guess = [0, 0.01, 0.02]
 
         else:
             xyAmp_guess = xyAmp_guess
@@ -128,7 +128,7 @@ def conti2tone_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,cluster:
                     QD_agent.quantum_device.get_element(specific_qubits).clock_freqs.readout(rof)
                     QD_agent.Fluxmanager.save_tuneawayBias_for('manual',specific_qubits,want_bias)
                 Fctrl[specific_qubits](want_bias) 
-                QS_results = Two_tone_spec(QD_agent,meas_ctrl,xyamp=XYL,IF=xy_if,f01_guess=XYF,q=specific_qubits,xyf_span_Hz=xyf_span,points=50,n_avg=500,run=True,ref_IQ=QD_agent.refIQ[specific_qubits]) # 
+                QS_results = Two_tone_spec(QD_agent,meas_ctrl,xyamp=XYL,IF=xy_if,f01_guess=XYF,q=specific_qubits,xyf_span_Hz=xyf_span,points=100,n_avg=1000,run=True,ref_IQ=QD_agent.refIQ[specific_qubits]) # 
 
                 Fctrl[specific_qubits](0.0)
                 cluster.reset() # *** important
@@ -142,7 +142,7 @@ def conti2tone_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,cluster:
                 
     else:
         qu = specific_qubits
-        QS_results = Two_tone_spec(QD_agent,meas_ctrl,xyamp=0.1,IF=xy_if,f01_guess=4e9,q=qu,xyf_span_Hz=xyf_span,points=100,n_avg=500,run=False,ref_IQ=QD_agent.refIQ[qu])
+        QS_results = Two_tone_spec(QD_agent,meas_ctrl,xyamp=0.1,IF=xy_if,f01_guess=4e9,q=qu,xyf_span_Hz=xyf_span,points=100,n_avg=1000,run=False,ref_IQ=QD_agent.refIQ[qu])
 
         return 0
    
@@ -156,11 +156,17 @@ if __name__ == "__main__":
     execution = True
     update = True
     #
-    DRandIP = {"dr":"dr1","last_ip":"11"}
+    DRandIP = {"dr":"drke","last_ip":"116"}
     #
     ro_elements = {
-        "q0":{"xyf_guess":[5.3e9],"xyl_guess":[0.02],"g_guess":0, "tune_bias":0} # g you can try a single value in  [42e6, 54e6, 62e6], higher g makes fq lower.
-    }                                                                            # tune_bias is the voltage away from sweet spot. If it was given, here will calculate a ROF according to that z-bias and store it in Notebook.
+        # "q1":{"xyf_guess":[5.2e9],"xyl_guess":[0.006],"g_guess":0e6, "tune_bias":0},   #is q2
+        # "q1":{"xyf_guess":[5.4e9],"xyl_guess":[0.1],"g_guess":0e6, "tune_bias":0},  #is q3
+        #"q0":{"xyf_guess":[5e9],"xyl_guess":[0.02],"g_guess":0e6, "tune_bias":0},   #is q4
+        "q0":{"xyf_guess":[4.8e9],"xyl_guess":[0.05],"g_guess":0e6, "tune_bias":0},   #is q4
+
+        # g you can try a single value in  [42e6, 54e6, 62e6], higher g makes fq lower.
+        # tune_bias is the voltage away from sweet spot. If it was given, here will calculate a ROF according to that z-bias and store it in Notebook.
+    }                                                                            
 
 
 
@@ -179,7 +185,7 @@ if __name__ == "__main__":
         for xyf in ro_elements[qubit]["xyf_guess"]:
             g = 48e6 if ro_elements[qubit]["g_guess"] == 0 else ro_elements[qubit]["g_guess"]
 
-            tt_results[qubit] = conti2tone_executor(QD_agent,meas_ctrl,cluster,specific_qubits=qubit,xyf_guess=xyf,xyAmp_guess=ro_elements[qubit]["xyl_guess"],run=execution,guess_g=g,xy_if=100e6,xyf_span=500e6,V_away_from=tune_bias)
+            tt_results[qubit] = conti2tone_executor(QD_agent,meas_ctrl,cluster,specific_qubits=qubit,xyf_guess=xyf,xyAmp_guess=ro_elements[qubit]["xyl_guess"],run=execution,guess_g=g,xy_if=100e6,xyf_span=200e6,V_away_from=tune_bias)
 
             if execution and ro_elements[qubit]["xyl_guess"][0] != 0:
                 print(f'update xyl={ro_elements[qubit]["xyl_guess"][0]}')

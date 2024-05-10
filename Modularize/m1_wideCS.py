@@ -149,7 +149,7 @@ if __name__ == "__main__":
     
     # Reload the QuantumDevice or build up a new one
 
-    QD_path, dr, ip, mode, vpn = '','dr2','192.168.1.10','n',True #init_meas_window()
+    QD_path, dr, ip, mode, vpn = '','drke','192.168.50.116','n',False #init_meas_window()
     QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,
                                                         dr_loc=dr,
                                                         cluster_ip=ip,
@@ -161,8 +161,8 @@ if __name__ == "__main__":
     init_system_atte(QD_agent.quantum_device,list(Fctrl.keys()),ro_out_att=0)
 
     # Initial value
-    lo_start_freq = 5.73e9
-    lo_stop_freq = 5.79e9
+    lo_start_freq = 6.05e9
+    lo_stop_freq = 6.15e9
     num_data = 100
     
     # Readout select

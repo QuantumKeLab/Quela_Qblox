@@ -102,10 +102,10 @@ if __name__ == "__main__":
     
     """ fill in """
     execution = True
-    sweetSpot_dispersive = True
-    DRandIP = {"dr":"dr1","last_ip":"11"}
+    sweetSpot_dispersive = False #True
+    DRandIP = {"dr":"drke","last_ip":"116"}
     ro_elements = {    # measurement target q from this dict 
-        "q0": {"ro_atte":50}
+        "q0": {"ro_atte":40}     #q0-->q4, q1-->q3
 
     }
 
@@ -118,7 +118,7 @@ if __name__ == "__main__":
         QD_agent.Notewriter.save_DigiAtte_For(ro_elements[qubit]["ro_atte"],qubit,'ro')
 
         init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
-        powerCavity_executor(QD_agent,meas_ctrl,Fctrl,specific_qubits=qubit,run=execution,sweet_spot=sweetSpot_dispersive)
+        powerCavity_executor(QD_agent,meas_ctrl,Fctrl,specific_qubits=qubit,ro_span_Hz=10e6,run=execution,sweet_spot=sweetSpot_dispersive)
 
         cluster.reset()
         if not execution:
