@@ -1,4 +1,3 @@
-
 import quantify_core.data.handling as dh
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
@@ -18,6 +17,7 @@ from quantify_scheduler.device_under_test.quantum_device import QuantumDevice
 from quantify_scheduler.operations.gate_library import Reset, Measure
 from quantify_scheduler.resources import ClockResource, BasebandClockResource
 from quantify_scheduler.helpers.collections import find_port_clock_path
+from typing import Union, Dict
 
 
 #%% IQ displacement
@@ -896,9 +896,24 @@ def X_pi_square(sche,pi_amp,q,pi_Du:float,ref_pulse_sche,freeDu):
     delay_c= -pi_Du-freeDu
     return sche.add(SquarePulse(amp=amp, duration= pi_Du, port=q+":mw", clock=q+".01"),rel_time=delay_c,ref_op=ref_pulse_sche,ref_pt="start",)
 
+def compensated_Z(sche,qz,Du,compensation_dict,ref_pulse_sche,freeDu,ref_position='start'):
+    if compensation_dict:
+        z_dict={}
+        for wanted_z in qz.keys():
+            for real_z in compensation_dict[wanted_z].keys():
+                z=z_dict.get(real_z, 0)
+                z+=qz[wanted_z]*compensation_dict[wanted_z][real_z]
+                z_dict[real_z]=z
+        for final_z in z_dict.keys():
+            Z(sche=sche,Z_amp=z_dict[final_z],Du=Du,q=final_z,ref_pulse_sche=ref_pulse_sche,freeDu=freeDu,ref_position=ref_position)
+    else:
+        for wanted_z in qz.keys():
+            Z(sche=sche,Z_amp=qz[wanted_z],Du=Du,q=wanted_z,ref_pulse_sche=ref_pulse_sche,freeDu=freeDu,ref_position=ref_position)
+
+
 def Zline_crosstalk_sche(
-    q:str,
-    z:str,
+    q: str,
+    z: str,
     pi_amp: dict,
     pi_dura: float,
     q_Z_amp:any,
@@ -908,6 +923,7 @@ def Zline_crosstalk_sche(
     R_integration:dict,
     R_inte_delay:float,
     repetitions:int=1,
+    compensation:dict={},
 ) -> Schedule:
 
     sched = Schedule("Zline_crosstalk", repetitions=repetitions)
@@ -918,8 +934,10 @@ def Zline_crosstalk_sche(
 
     spec_pulse = Readout(sched,q,R_amp,R_duration,powerDep=False)
 
-    Z(sched,q_Z_amp,Du=pi_dura,q=q,ref_pulse_sche=spec_pulse,freeDu=0e-9)
-    Z(sched,z_Z_amp,Du=pi_dura,q=z,ref_pulse_sche=spec_pulse,freeDu=0e-9)
+
+    q_z={q:q_Z_amp,z:z_Z_amp}
+    compensated_Z(sched,q_z,pi_dura,compensation,ref_pulse_sche=spec_pulse,freeDu=0e-9)
+
 
     X_pi_p(sched,pi_amp,q,pi_Du=pi_dura,ref_pulse_sche=spec_pulse,freeDu=0e-9)
     # X_pi_square(sched,pi_amp,q,pi_Du=pi_dura,ref_pulse_sche=spec_pulse,freeDu=0e-9)

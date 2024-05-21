@@ -1,4 +1,4 @@
-class Notebook():
+class  Notebook():
     def __init__(self,q_number:str):
         self.__InfoDict = {}
         self.q_num = q_number

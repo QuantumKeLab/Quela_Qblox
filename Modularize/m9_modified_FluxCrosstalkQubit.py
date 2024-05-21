@@ -11,7 +11,7 @@ from quantify_core.measurement.control import MeasurementControl
 from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
 from utils.tutorial_analysis_classes import QubitFluxSpectroscopyAnalysis
 from Modularize.support import init_meas, init_system_atte, shut_down, reset_offset
-from Modularize.support.ReadResults import plot_QbFlux, plot_Zline_Crosstalk
+from Modularize.support.ReadResults import plot_QbFlux, Zline_Crosstalk
 from Modularize.support.Pulse_schedule_library import Zline_crosstalk_sche, set_LO_frequency, pulse_preview
 import numpy as np
 import xarray as xr
@@ -22,11 +22,9 @@ def update_2Ddict(dict, key_a, key_b, val):
     else:
         dict.update({key_a:{key_b:val}})
 
-def ZlineCrosstalk_two_tone_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,Z_amp_start:float,Z_amp_end:float,IF:int=100e6,xyf:float=0e9,xyf_span_Hz:float=400e6,n_avg:int=1000,RO_z_amp:float=0,Z_points:int=40,f_points:int=60,run:bool=True,q:str='q1',z:str='q1',Experi_info={},get_data_path:bool=False,analysis:bool=True):
+def ZlineCrosstalk_two_tone_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,Z_amp_start:float,Z_amp_end:float,IF:int=100e6,n_avg:int=1000,crosstalk_Z_points:int=20,target_Z_points:int=20,run:bool=True,q:str='q1',z:str='q1',Experi_info={},get_data_path:bool=False,factor:float=0.02,compensated_dict:dict={}):
     print("ZlineCrosstalk 2tone start")
-    trustable = True
     sche_func = Zline_crosstalk_sche
-    analysis_result = {}
     qubit_info = QD_agent.quantum_device.get_element(q)
     original_f01 = qubit_info.clock_freqs.f01()
     print(original_f01)
@@ -55,8 +53,8 @@ def ZlineCrosstalk_two_tone_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl
     else:
         pass 
 
-    q_Z_samples = linspace(Z_amp_start/80,Z_amp_end/80,Z_points)
-    z_Z_samples = linspace(Z_amp_start,Z_amp_end,Z_points)
+    q_Z_samples = linspace(factor*Z_amp_start,factor*Z_amp_end,target_Z_points)
+    z_Z_samples = linspace(Z_amp_start,Z_amp_end,crosstalk_Z_points)
 
     sched_kwargs = dict(   
         q=q,
@@ -65,15 +63,16 @@ def ZlineCrosstalk_two_tone_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl
         # pi_amp={str(q):QD_agent.Notewriter.get_2tone_piampFor(q)},
         # pi_dura=48e-6,
 
-        pi_amp={str(q):qubit_info.rxy.amp180()},
-        pi_dura=qubit_info.rxy.duration(),
+        pi_amp={str(q):0.5*qubit_info.rxy.amp180()},
+        pi_dura=2*qubit_info.rxy.duration(),
 
         q_Z_amp=q_Z_bias,
         z_Z_amp=z_Z_bias,
-        R_amp={str(q):0.1*qubit_info.measure.pulse_amp()},
-        R_duration={str(q):10*qubit_info.measure.pulse_duration()},
+        R_amp={str(q):qubit_info.measure.pulse_amp()},
+        R_duration={str(q):qubit_info.measure.pulse_duration()},
         R_integration={str(q):qubit_info.measure.integration_time()},
         R_inte_delay=qubit_info.measure.acq_delay(),
+        compensation=compensated_dict
     )
     exp_kwargs= dict(q_Z_amp=['start '+'%E' %q_Z_samples[0],'end '+'%E' %q_Z_samples[-1]],
                      z_Z_amp=['start '+'%E' %z_Z_samples[0],'end '+'%E' %z_Z_samples[-1]],)
@@ -94,20 +93,11 @@ def ZlineCrosstalk_two_tone_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl
         
         # Save the raw data into netCDF
         if get_data_path:
-            path = Data_manager().save_raw_data(QD_agent=QD_agent,ds=qs_ds,qb=q,exp_type='F2tone',get_data_loc=get_data_path)
+            path = Data_manager().save_raw_data(QD_agent=QD_agent,ds=qs_ds,qb=q,exp_type='Z2tone',get_data_loc=get_data_path)
         else:
             path = ''
-            Data_manager().save_raw_data(QD_agent=QD_agent,ds=qs_ds,qb=q,exp_type='F2tone',get_data_loc=get_data_path)
-
-        # if analysis:
-        #     try:
-        #         analysis_result[q] = QubitFluxSpectroscopyAnalysis(tuid=qs_ds.attrs["tuid"], dataset=qs_ds).run()
-        #     except:
-        #         analysis_result[q] = {}
-        #         print("Qb vs Flux fitting failed! Raw data had been saved.")
-        #         trustable = False
-        
-        
+            Data_manager().save_raw_data(QD_agent=QD_agent,ds=qs_ds,qb=q,exp_type='Z2tone',get_data_loc=get_data_path)
+                
         show_args(exp_kwargs, title="ZlineCrosstalk_two_tone_kwargs: Meas.qubit="+q)
         if Experi_info != {}:
             show_args(Experi_info(q))
@@ -128,53 +118,43 @@ def ZlineCrosstalk_two_tone_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl
 
     qubit_info.clock_freqs.f01(original_f01)
 
-    return analysis_result, path, trustable
+    return path
 
 
-def fluxcrosstalkQubit_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,specific_qubits:str,specific_zlines:str,run:bool=True,z_shifter:float=0,zpts:int=20,fpts:int=30,span_priod_factor:int=12,f_sapn_Hz=400e6):
-    center = QD_agent.Fluxmanager.get_sweetBiasFor(target_q=specific_qubits)#-QD_agent.Fluxmanager.get_PeriodFor(target_q=specific_qubits)/4
-    partial_period = QD_agent.Fluxmanager.get_PeriodFor(target_q=specific_qubits)/span_priod_factor
-    temp_results={}
-    results={}
+def fluxcrosstalkQubit_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,specific_qubits:str,specific_zlines:str,run:bool=True,z_shifter:float=0,crosstalk_zpts:int=20,target_zpts:int=20,z_span=0.4,crosstalk_factor:float=0.02,Compensation_dict:dict={}):
+    center = QD_agent.Fluxmanager.get_sweetBiasFor(target_q=specific_qubits)
     if run:
         Fctrl[specific_qubits](center)
         Fctrl[specific_zlines](0.)
-        temp_results, nc_path, trustable= ZlineCrosstalk_two_tone_spec(QD_agent,meas_ctrl,Z_amp_start=-partial_period+z_shifter,Z_points=zpts,f_points=fpts,Z_amp_end=partial_period+z_shifter,q=specific_qubits,z=specific_zlines,run=True,get_data_path=True,xyf_span_Hz=f_sapn_Hz)
-        update_2Ddict(results, specific_qubits, specific_zlines, temp_results)
-
+        nc_path = ZlineCrosstalk_two_tone_spec(QD_agent,meas_ctrl,Z_amp_start=-z_span+z_shifter,crosstalk_Z_points=crosstalk_zpts,target_Z__points=target_zpts,Z_amp_end=z_span+z_shifter,q=specific_qubits,z=specific_zlines,run=True,get_data_path=True,factor=crosstalk_factor,compensated_dict=Compensation_dict)
+        crosstalk = Zline_Crosstalk(QD_agent,nc_path,specific_qubits)
         reset_offset(Fctrl)
-        plt.show()
-
-        trustable = False
-
-        if trustable:
-            permission = input("Update the QD with this result ? [y/n]") 
+        if not Compensation_dict:
+            permission = input("Does it look good ? [y/n]") 
             if permission.lower() in ['y','yes']:
-                qubit = QD_agent.quantum_device.get_element(specific_qubits)
-                qubit.clock_freqs.f01(results[specific_qubits].quantities_of_interest["freq_0"].nominal_value)
-                QD_agent.Fluxmanager.check_offset_and_correctFor(target_q=specific_qubits,new_offset=results[specific_qubits].quantities_of_interest["offset_0"].nominal_value+center)
-                QD_agent.Fluxmanager.save_sweetspotBias_for(target_q=specific_qubits,bias=results[specific_qubits].quantities_of_interest["offset_0"].nominal_value+center)
+                print("##################",nc_path)
+                return crosstalk
             else:
-                trustable = False
+                print("bad")
+                qubit = QD_agent.quantum_device.get_element(specific_qubits)
+                check_again.append(qubit)
+                return 0
         else:
-            print("##################",nc_path)
-            plot_QbFlux(QD_agent,nc_path,specific_qubits)
-            # plot_Zline_Crosstalk(QD_agent,nc_path,specific_qubits)
-            trustable = False
-        return results[specific_qubits][specific_zlines], trustable
+            print("has been compensated")
     else:
-        results, _, trustable= ZlineCrosstalk_two_tone_spec(QD_agent,meas_ctrl,Z_amp_start=center-partial_period+z_shifter,Z_points=10,Z_amp_end=center+partial_period+z_shifter,q=specific_qubits,z=specific_zlines,run=False)
-        return 0, 0
+        _= ZlineCrosstalk_two_tone_spec(QD_agent,meas_ctrl,Z_amp_start=-z_span+z_shifter,crosstalk_Z_points=crosstalk_zpts,target_Z__points=target_zpts,Z_amp_end=z_span+z_shifter,q=specific_qubits,z=specific_zlines,run=False,get_data_path=True,factor=crosstalk_factor,compensated_dict=Compensation_dict)
+        return 0
 
 
 if __name__ == "__main__":
     
     """ Fill in """
     execution = True
-    DRandIP = {"dr":"drke","last_ip":"116"}
-    ro_elements = ['q0','q1',]  #q0->q4, q1->q2
+    DRandIP = {"dr":"dr3","last_ip":"13"}
+    ro_elements = ['q0','q1',]
     Z_matrix = np.identity(len(ro_elements))
     z_shifter = 0 # V
+    compensation_dict = {}
 
     """ Preparations """
     QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
@@ -184,34 +164,56 @@ if __name__ == "__main__":
 
     
     """ Running """
-    FCQ_results = {}
     check_again =[]
     for i, qubit in enumerate(ro_elements):
         for j, zline in enumerate(ro_elements):
             if (qubit==zline):
                 continue
             else:
-                temp_FCQ_results = {}
                 init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
-                temp_FCQ_results, trustable = fluxcrosstalkQubit_executor(QD_agent,meas_ctrl,qubit,zline,run=execution,z_shifter=z_shifter,zpts = 15 
-                                                                          0, fpts=40, span_priod_factor=2)
-                update_2Ddict(FCQ_results, qubit, zline, temp_FCQ_results)
-                Z_matrix[i,j]=8787
+                Z_matrix[i,j] = fluxcrosstalkQubit_executor(QD_agent,meas_ctrl,qubit,zline,run=execution,z_shifter=z_shifter,crosstalk_zpts = 20, target_zpts=20, z_span=0.4, crosstalk_factor=0.02, Compensation_dict=compensation_dict)
                 cluster.reset()
+    if not check_again:
+        print("Z_matrix is")
+        print(Z_matrix)
+        print("\n")
+        compensation_matrix = np.linalg.inv(Z_matrix)
+        print("compensation_matrix is")
+        print(compensation_matrix)
+        print("\n")
+        for i, qubit in enumerate(ro_elements):
+            for j, zline in enumerate(ro_elements):
+                update_2Ddict(compensation_dict, qubit, zline, compensation_matrix[j,i])
+        for i, qubit in enumerate(ro_elements):
+            for j, zline in enumerate(ro_elements):
+                if (qubit==zline):
+                    continue
+                else:
+                    init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
+                    fluxcrosstalkQubit_executor(QD_agent,meas_ctrl,qubit,zline,run=execution,z_shifter=z_shifter,crosstalk_zpts = 20, target_zpts=20, z_span=0.4, crosstalk_factor=0.02, Compensation_dict=compensation_dict)
+                    cluster.reset()
+        permission = input("Do you want to save the result ? [y/n]") 
+        if permission.lower() in ['y','yes']:
+            QD_agent.Fluxmanager.巴拉巴拉(target_q=qubit,compensation=compensation_dict)
+        else:
+            print("Why not ?")
 
-            if not trustable:
-                check_again.append(qubit)
+
         
-        
+    else:
+        print(f"qubits to check again: {check_again}")
+        compensation_dict={}
+
+
+
     """ Storing """
-    # if  execution:
-    #     QD_agent.QD_keeper()
+    if  execution:
+        QD_agent.QD_keeper()
     
 
 
     """ Close """
     print('Flux qubit done!')
-    print(f"qubits to check again: {check_again}")
     shut_down(cluster,Fctrl)
     
 
