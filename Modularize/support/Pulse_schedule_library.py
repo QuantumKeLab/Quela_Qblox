@@ -891,6 +891,43 @@ def Trace_sche(
 
     return sched
 
+def X_pi_square(sche,pi_amp,q,pi_Du:float,ref_pulse_sche,freeDu):
+    amp= pi_amp[q]
+    delay_c= -pi_Du-freeDu
+    return sche.add(SquarePulse(amp=amp, duration= pi_Du, port=q+":mw", clock=q+".01"),rel_time=delay_c,ref_op=ref_pulse_sche,ref_pt="start",)
+
+def Zline_crosstalk_sche(
+    q:str,
+    z:str,
+    pi_amp: dict,
+    pi_dura: float,
+    q_Z_amp:any,
+    z_Z_amp:any,
+    R_amp: dict,
+    R_duration: dict,
+    R_integration:dict,
+    R_inte_delay:float,
+    repetitions:int=1,
+) -> Schedule:
+
+    sched = Schedule("Zline_crosstalk", repetitions=repetitions)
+    
+    sched.add(Reset(q))
+        
+    sched.add(IdlePulse(duration=50e-6))
+
+    spec_pulse = Readout(sched,q,R_amp,R_duration,powerDep=False)
+
+    Z(sched,q_Z_amp,Du=pi_dura,q=q,ref_pulse_sche=spec_pulse,freeDu=0e-9)
+    Z(sched,z_Z_amp,Du=pi_dura,q=z,ref_pulse_sche=spec_pulse,freeDu=0e-9)
+
+    X_pi_p(sched,pi_amp,q,pi_Du=pi_dura,ref_pulse_sche=spec_pulse,freeDu=0e-9)
+    # X_pi_square(sched,pi_amp,q,pi_Du=pi_dura,ref_pulse_sche=spec_pulse,freeDu=0e-9)
+         
+    Integration(sched,q,R_inte_delay,R_integration,spec_pulse,acq_index=0,single_shot=False,get_trace=False,trace_recordlength=0)
+        
+    return sched
+
 #%% plot
 
 def Readout_F_opt_Plot(quantum_device:QuantumDevice, results:dict):

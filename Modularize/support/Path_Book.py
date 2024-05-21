@@ -2,11 +2,10 @@
     Path_book keeps the path indecated to the directories, and the object will be saved in the folder named by date.
 """
 import os, datetime
-from Modularize.support.UserFriend import eyeson_print
 # The directory for measurement raw data
-meas_raw_dir = 'Modularize/Meas_raw'
+meas_raw_dir = 'Modularize\Meas_raw'
 # The directory for qauntum device
-qdevice_backup_dir = 'Modularize/QD_backup'
+qdevice_backup_dir = 'Modularize\QD_backup'
 
 def decode_datetime_2_foldername(date:datetime):
     latest = date.strftime("%Y%m%d")
@@ -41,7 +40,7 @@ def find_latest_QD_pkl_for_dr(which_dr:str,ip_label:str=''):
                 for name in target_file_list:
                     if name.split("#")[-1].split("_")[0] == ip_label and name.split("_")[-1].split(".")[0]=="SumInfo":
                         wanted_QD_pkl_path = os.path.join(date_folder_path,name)
-                        eyeson_print(f"now use QD_file in {date_folder_path.split('/')[-1]}")
+                        print(f"now use QD_file in {date_folder_path.split('/')[-1]}")
                         button = 0
                         break
                 if button:
@@ -49,11 +48,11 @@ def find_latest_QD_pkl_for_dr(which_dr:str,ip_label:str=''):
         elif len(target_file_list) == 1:
             if ip_label == '' :
                 wanted_QD_pkl_path = os.path.join(date_folder_path,target_file_list[0])
-                eyeson_print(f"now use QD_file in {date_folder_path.split('/')[-1]}")
+                print(f"now use QD_file in {date_folder_path.split('/')[-1]}")
                 break
             else:
                 if target_file_list[0].split("#")[-1].split("_")[0] == ip_label:
-                    eyeson_print(f"now use QD_file in {date_folder_path.split('/')[-1]}")
+                    print(f"now use QD_file in {date_folder_path.split('/')[-1]}")
                     wanted_QD_pkl_path = os.path.join(date_folder_path,target_file_list[0])
                     break
                 else:

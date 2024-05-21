@@ -3,6 +3,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 from Modularize.support import QDmanager
 from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
 
+
 def fillin_PDans(QD_path:str,ans:dict):
     """
     Fill in the power dep answer to the quantum_device.\n
@@ -23,15 +24,22 @@ def fillin_PDans(QD_path:str,ans:dict):
 
 
 if __name__ == "__main__":
+
     """ Fill in """
-    DRandIP = {"dr":"dr1","last_ip":"11"}
+    DRandIP = {"dr":"drke","last_ip":"116"}
     PDans = {
-        "q0":{"dressF_Hz":5.76761e9,"dressP":0.2,"bareF_Hz":5.76e9,"ro_atte":50},
+        "q0":{"dressF_Hz":6.11077e9,"dressP":0.7,"bareF_Hz":6.100552e9,"ro_atte":50}, #q4
+        # "q1":{"dressF_Hz":5.934e9,"dressP":0.3,"bareF_Hz":5.9206e9,"ro_atte":40},   #q3
+        # "q1":{"dressF_Hz":6.0775e9,"dressP":0.6,"bareF_Hz":6.070e9,"ro_atte":50},   #q2
+        # "q1":{"dressP":0.2,"ro_atte":40},   #q2
+
+
     }
     
-    
+
     """ Storing """
     QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
     fillin_PDans(QD_path, PDans)
+
     
     

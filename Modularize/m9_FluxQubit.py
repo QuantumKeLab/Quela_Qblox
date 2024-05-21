@@ -1,10 +1,10 @@
 import os, sys
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 from numpy import NaN
+import matplotlib.pyplot as plt
 from numpy import array, linspace
 from utils.tutorial_utils import show_args
 from qcodes.parameters import ManualParameter
-from Modularize.support.UserFriend import *
 from Modularize.support import QDmanager, Data_manager
 from quantify_scheduler.gettables import ScheduleGettable
 from quantify_core.measurement.control import MeasurementControl
@@ -25,7 +25,7 @@ def Zgate_two_tone_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,Z_amp_st
     analysis_result = {}
     qubit_info = QD_agent.quantum_device.get_element(q)
     original_f01 = qubit_info.clock_freqs.f01()
-    
+    print(original_f01)
 
     if xyf == 0:
         xyf_highest = original_f01+IF
@@ -127,17 +127,6 @@ def Zgate_two_tone_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,Z_amp_st
     return analysis_result, path, trustable
 
 
-def update_by_fluxQubit(QD_agent:QDmanager,correct_results:dict,target_q:str):
-    """
-    correct_results dict in the form: {"xyf":float,"sweet_bias":float}
-    """
-    qubit = QD_agent.quantum_device.get_element(target_q)
-    qubit.clock_freqs.f01(correct_results["xyf"])
-    QD_agent.Fluxmanager.check_offset_and_correctFor(target_q=target_q,new_offset=correct_results["sweet_bias"])
-    QD_agent.Fluxmanager.save_sweetspotBias_for(target_q=target_q,bias=correct_results["sweet_bias"])
-
-
-
 def fluxQubit_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,specific_qubits:str,run:bool=True,z_shifter:float=0,zpts:int=20,fpts:int=30,span_priod_factor:int=12,f_sapn_Hz=400e6):
     center = QD_agent.Fluxmanager.get_sweetBiasFor(target_q=specific_qubits)
     partial_period = QD_agent.Fluxmanager.get_PeriodFor(target_q=specific_qubits)/span_priod_factor
@@ -146,27 +135,31 @@ def fluxQubit_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,specific_
         Fctrl[specific_qubits](center)
         results, nc_path, trustable= Zgate_two_tone_spec(QD_agent,meas_ctrl,Z_amp_start=-partial_period+z_shifter,Z_points=zpts,f_points=fpts,Z_amp_end=partial_period+z_shifter,q=specific_qubits,run=True,get_data_path=True,xyf_span_Hz=f_sapn_Hz)
         reset_offset(Fctrl)
+        plt.show()
         if trustable:
-            permission = mark_input("Update the QD with this result ? [y/n]") 
+            permission = input("Update the QD with this result ? [y/n]") 
             if permission.lower() in ['y','yes']:
-                return trustable, {"xyf":results[specific_qubits].quantities_of_interest["freq_0"].nominal_value,"sweet_bias":results[specific_qubits].quantities_of_interest["offset_0"].nominal_value+center}
+                qubit = QD_agent.quantum_device.get_element(specific_qubits)
+                qubit.clock_freqs.f01(results[specific_qubits].quantities_of_interest["freq_0"].nominal_value)
+                QD_agent.Fluxmanager.check_offset_and_correctFor(target_q=specific_qubits,new_offset=results[specific_qubits].quantities_of_interest["offset_0"].nominal_value+center)
+                QD_agent.Fluxmanager.save_sweetspotBias_for(target_q=specific_qubits,bias=results[specific_qubits].quantities_of_interest["offset_0"].nominal_value+center)
             else:
-                return False, {}
+                trustable = False
         else:
+            print("##################",nc_path)
             plot_QbFlux(QD_agent,nc_path,specific_qubits)
             trustable = False
-            return False, {}
-
+        return results[specific_qubits], trustable
     else:
         results, _, trustable= Zgate_two_tone_spec(QD_agent,meas_ctrl,Z_amp_start=center-partial_period+z_shifter,Z_points=10,Z_amp_end=center+partial_period+z_shifter,q=specific_qubits,run=False)
-        return False, {}
+        return 0, 0
 
 
 if __name__ == "__main__":
     
     """ Fill in """
     execution = True
-    DRandIP = {"dr":"dr1","last_ip":"11"}
+    DRandIP = {"dr":"drke","last_ip":"116"}
     ro_elements = ['q0']
     z_shifter = 0 # V
 
@@ -176,27 +169,27 @@ if __name__ == "__main__":
     if ro_elements == 'all':
         ro_elements = list(Fctrl.keys())
 
-
+    
     """ Running """
     FQ_results = {}
     check_again =[]
     for qubit in ro_elements:
-        if not QD_agent.Fluxmanager.get_offsweetspot_button(qubit):
-            init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
-            trustable, new_ans = fluxQubit_executor(QD_agent,meas_ctrl,qubit,run=execution,z_shifter=z_shifter)
-            cluster.reset()
+        init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
+        FQ_results[qubit], trustable = fluxQubit_executor(QD_agent,meas_ctrl,qubit,run=execution,z_shifter=z_shifter)#, zpts=50, fpts=50)
+        cluster.reset()
 
-            """ Storing """
-            if  trustable:
-                update_by_fluxQubit(QD_agent,new_ans,qubit)
-                QD_agent.QD_keeper()
-            else:
-                check_again.append(qubit)
+        if not trustable:
+            check_again.append(qubit)
+        
+        
+    """ Storing """
+    if  execution:
+        QD_agent.QD_keeper()
     
 
     """ Close """
     print('Flux qubit done!')
-    warning_print(f"qubits to check again: {check_again}")
+    print(f"qubits to check again: {check_again}")
     shut_down(cluster,Fctrl)
     
 
