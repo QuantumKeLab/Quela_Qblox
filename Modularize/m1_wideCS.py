@@ -172,4 +172,3 @@ if __name__ == "__main__":
 
     shut_down(cluster,Fctrl)
     
-# Test
