@@ -31,12 +31,13 @@ if __name__ == "__main__":
 
     """ Fill in """
     execution = True
+
     sweetSpot = True
-    DRandIP = {"dr":"dr1","last_ip":"11"}
+    DRandIP = {"dr":"drke","last_ip":"116"}
     ro_elements = {
-        "q0":{"ro_amp":0.2,"ro_atte":50}
+        "q0":{"ro_amp":0.7,"ro_atte":50}
     }
-    freq_shift = 0
+    freq_shift = 10e6
 
 
     """ Preparations """ 

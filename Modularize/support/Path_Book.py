@@ -4,9 +4,9 @@
 import os, datetime
 from Modularize.support.UserFriend import eyeson_print
 # The directory for measurement raw data
-meas_raw_dir = 'Modularize/Meas_raw'
+meas_raw_dir = 'Modularize\Meas_raw'
 # The directory for qauntum device
-qdevice_backup_dir = 'Modularize/QD_backup'
+qdevice_backup_dir = 'Modularize\QD_backup'
 
 def decode_datetime_2_foldername(date:datetime):
     latest = date.strftime("%Y%m%d")
