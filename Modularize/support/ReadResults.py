@@ -1,9 +1,17 @@
+import os, sys
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..\..'))
 import xarray as xr
 import quantify_core.data.handling as dh
 from Modularize.support.QDmanager import QDmanager
 from Modularize.support.QuFluxFit import convert_netCDF_2_arrays
 from numpy import sqrt, array
 import matplotlib.pyplot as plt
+from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
+from Modularize.support import init_meas
+from qcat.zline_crosstalk.ramsey_2dfft import analysis_crosstalk_value
+from qcat.visualization.zline_crosstalk import plot_analysis
+
+
 # from quantify_core.analysis.spectroscopy_analysis import ResonatorSpectroscopyAnalysis
 # from quantify_core.analysis.base_analysis import Basic2DAnalysis
 
@@ -18,6 +26,18 @@ def plot_QbFlux(Qmanager:QDmanager, nc_path:str, target_q:str):
     c = ax.pcolormesh(z, f, amp, cmap='RdBu')
     fig.colorbar(c, ax=ax)
     plt.show()
+
+
+def Zline_Crosstalk(Qmanager: QDmanager, nc_path: str, target_q: str):
+    ref = Qmanager.refIQ[target_q]
+    # plot flux-qubit 
+    d_z_target_amp, d_z_crosstalk_amp, i, q = convert_netCDF_2_arrays(nc_path)
+    data = sqrt((i - array(ref)[0])**2 + (q - array(ref)[1])**2).transpose()
+    crosstalk, f_axes, magnitude_spectrum = analysis_crosstalk_value(d_z_crosstalk_amp, d_z_target_amp, data.transpose())
+    plot_analysis(d_z_crosstalk_amp, d_z_target_amp, data.transpose())
+    return crosstalk
+
+
 
 
 # from quantify_scheduler.helpers.collections import find_port_clock_path
@@ -71,6 +91,15 @@ def plot_QbFlux(Qmanager:QDmanager, nc_path:str, target_q:str):
 # print("aprx fq=",aprx_fq(x,bare))
 
 if __name__ == '__main__':
-    QD_agent = QDmanager('Modularize/QD_backup/2024_5_2/DR1#11_SumInfo.pkl')
-    QD_agent.QD_loader()
-    print(QD_agent.quantum_device.get_element("q0").clock_freqs.f01())
+    DRandIP = {"dr":"drke","last_ip":"116"}
+    QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
+    QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
+
+    # QD_agent = QDmanager('Modularize/QD_backup/2024_5_2/DR1#11_SumInfo.pkl')
+    # QD_agent.QD_loader()
+    # print(QD_agent.quantum_device.get_element("q0").clock_freqs.f01())
+
+    qb=''
+    qubit = QD_agent.quantum_device.get_element(qb)
+    qubit.clock_freqs.readout(FD_results[qb].quantities_of_interest["freq_0"])
+    QD_agent.Fluxmanager.save_sweetspotBias_for(target_q=qb,bias=FD_results[qb].quantities_of_interest["offset_0"].nominal_value)

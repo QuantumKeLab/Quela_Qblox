@@ -71,7 +71,7 @@ class QDmanager():
         Save the merged dictionary to a json file with the given path. \n
         Ex. merged_file = {"QD":self.quantum_device,"Flux":self.Fluxmanager.get_bias_dict(),"Hcfg":Hcfg,"refIQ":self.refIQ,"Log":self.Log}
         """
-        if self.path == '' or self.path.split("/")[-2].split("_")[-1] != datetime.datetime.now().day:
+        if self.path == '' or self.path.split("\\")[-2].split("_")[-1] != datetime.datetime.now().day:
             db = Data_manager()
             db.build_folder_today()
             self.path = os.path.join(db.raw_folder,f"{self.Identity}_SumInfo.pkl")
