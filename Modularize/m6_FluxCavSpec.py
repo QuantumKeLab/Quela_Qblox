@@ -3,7 +3,6 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 from numpy import array, linspace, pi
 from utils.tutorial_utils import show_args
 from qcodes.parameters import ManualParameter
-from Modularize.support.UserFriend import *
 from Modularize.support import QDmanager, Data_manager
 from quantify_scheduler.gettables import ScheduleGettable
 from quantify_core.measurement.control import MeasurementControl
@@ -81,28 +80,30 @@ def FluxCav_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,flux_ctrl:dict,
 
 def update_flux_info_in_results_for(QD_agent:QDmanager,qb:str,FD_results:dict):
     qubit = QD_agent.quantum_device.get_element(qb)
-    qubit.clock_freqs.readout(FD_results[qb].quantities_of_interest["freq_0"])
-    QD_agent.Fluxmanager.save_sweetspotBias_for(target_q=qb,bias=FD_results[qb].quantities_of_interest["offset_0"].nominal_value)
+    qubit.clock_freqs.readout(FD_results[qb].quantities_of_interest["freq_0"])#-FD_results[qb].quantities_of_interest["amplitude"].nominal_value)
+    QD_agent.Fluxmanager.save_sweetspotBias_for(target_q=qb,bias=FD_results[qb].quantities_of_interest["offset_0"].nominal_value)#+pi/2/FD_results[qb].quantities_of_interest["frequency"].nominal_value)
     QD_agent.Fluxmanager.save_period_for(target_q=qb, period=2*pi/FD_results[qb].quantities_of_interest["frequency"].nominal_value)
     QD_agent.Fluxmanager.save_tuneawayBias_for(target_q=qb,mode='auto')
     QD_agent.Fluxmanager.save_cavFittingParas_for(target_q=qb,
-        f=FD_results[qb].quantities_of_interest["frequency"].nominal_value,
+        f=FD_results[qb].quantities_of_interest["frequency"].nominal_value, #+ 0.001e9,
         amp=FD_results[qb].quantities_of_interest["amplitude"].nominal_value,
         phi=FD_results[qb].quantities_of_interest["shift"].nominal_value,
         offset=FD_results[qb].quantities_of_interest["offset"].nominal_value
     )
 
 
+
 def fluxCavity_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,specific_qubits:str,run:bool=True,flux_span:float=0.4,ro_span_Hz=3e6,zpts=20,fpts=30):
     
     if run:
         print(f"{specific_qubits} are under the measurement ...")
-        FD_results = FluxCav_spec(QD_agent,meas_ctrl,Fctrl,ro_span_Hz=ro_span_Hz,q=specific_qubits,flux_span=flux_span,flux_points=zpts,f_points=fpts)[specific_qubits]
+        FD_results = FluxCav_spec(QD_agent,meas_ctrl,Fctrl,ro_span_Hz=ro_span_Hz,q=specific_qubits,flux_span=flux_span,n_avg=600,flux_points=zpts,f_points=fpts)[specific_qubits]
         if FD_results == {}:
             print(f"Flux dependence error qubit: {specific_qubits}")
         
     else:
         FD_results = FluxCav_spec(QD_agent,meas_ctrl,Fctrl,ro_span_Hz=ro_span_Hz,q=specific_qubits,flux_span=flux_span,run=False,flux_points=zpts,f_points=fpts)
+
 
     return FD_results
 
@@ -110,13 +111,15 @@ if __name__ == "__main__":
     
     """ Fill in """
     execution = True
-    DRandIP = {"dr":"dr1","last_ip":"11"}
+
+    DRandIP = {"dr":"drke","last_ip":"116"}
     ro_elements = ['q0']
-    
+    #q0:0.0022G, q1:0.001G
 
     """ Preparations """
     QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
     QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
+    print(Fctrl)
     if ro_elements == 'all':
         ro_elements = list(Fctrl.keys())
 
@@ -124,11 +127,12 @@ if __name__ == "__main__":
     update = False
     FD_results = {}
     for qubit in ro_elements:
+
         init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
-        FD_results[qubit] = fluxCavity_executor(QD_agent,meas_ctrl,qubit,run=execution,flux_span=0.05,ro_span_Hz=6e6, zpts=30)
+        FD_results[qubit] = fluxCavity_executor(QD_agent,meas_ctrl,qubit,run=execution,flux_span=0.4,ro_span_Hz=8e6, zpts=20)
         cluster.reset()
         if execution:
-            permission = mark_input("Update the QD with this result ? [y/n]") 
+            permission = input("Update the QD with this result ? [y/n]") 
             if permission.lower() in ['y','yes']:
                 update_flux_info_in_results_for(QD_agent,qubit,FD_results)
                 update = True
@@ -136,11 +140,10 @@ if __name__ == "__main__":
             break
 
     
-        """ Storing """
-        if update and execution:
-            QD_agent.refresh_log("after FluxDep")
-            QD_agent.QD_keeper()
-            update = False
+    """ Storing """
+    if update and execution:
+        QD_agent.refresh_log("after FluxDep")
+        QD_agent.QD_keeper()
 
 
     """ Close """

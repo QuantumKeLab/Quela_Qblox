@@ -3,7 +3,6 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 from qblox_instruments import Cluster
 from numpy import mean, array, arange, std
 from utils.tutorial_utils import show_args
-from Modularize.support.UserFriend import *
 from qcodes.parameters import ManualParameter
 from Modularize.support import QDmanager, Data_manager
 from quantify_scheduler.gettables import ScheduleGettable
@@ -50,7 +49,7 @@ def T1(QD_agent:QDmanager,meas_ctrl:MeasurementControl,freeduration:float=80e-6,
         meas_ctrl.gettables(gettable)
         meas_ctrl.settables(Para_free_Du)
         meas_ctrl.setpoints(samples)
-        
+
         T1_ds = meas_ctrl.run('T1')
         # Save the raw data into netCDF
         Data_manager().save_raw_data(QD_agent=QD_agent,ds=T1_ds,label=exp_idx,qb=q,exp_type='T1',specific_dataFolder=data_folder)
@@ -64,10 +63,8 @@ def T1(QD_agent:QDmanager,meas_ctrl:MeasurementControl,freeduration:float=80e-6,
             data_fit=[]
             T1_us[q] = 0
         analysis_result[q] = data_fit
-        
-            
+    
         show_args(exp_kwargs, title="T1_kwargs: Meas.qubit="+q)
-  
 
         if Experi_info != {}:
             show_args(Experi_info(q))
@@ -93,8 +90,8 @@ def T1_executor(QD_agent:QDmanager,cluster:Cluster,meas_ctrl:MeasurementControl,
     if run:
         T1_us = []
         for ith in range(histo_counts):
-            slightly_print(f"The {ith}-th T1:")
-            Fctrl[specific_qubits](float(QD_agent.Fluxmanager.get_proper_zbiasFor(specific_qubits)))
+            print(f"The {ith}-th T1:")
+            Fctrl[specific_qubits](float(QD_agent.Fluxmanager.get_sweetBiasFor(specific_qubits)))
             T1_results, T1_hist = T1(QD_agent,meas_ctrl,q=specific_qubits,freeduration=freeDura,ref_IQ=QD_agent.refIQ[specific_qubits],run=True,exp_idx=ith,data_folder=specific_folder,points=pts)
             Fctrl[specific_qubits](0.0)
             cluster.reset()
@@ -117,13 +114,13 @@ def T1_executor(QD_agent:QDmanager,cluster:Cluster,meas_ctrl:MeasurementControl,
     return T1_results, mean_T1_us, sd_T1_us
 
 if __name__ == "__main__":
-    
 
     """ Fill in """
     execution = True
-    DRandIP = {"dr":"dr1","last_ip":"11"}
+    DRandIP = {"dr":"drke","last_ip":"116"}
     ro_elements = {
-        "q0":{"evoT":100e-6,"histo_counts":1}
+        "q0":{"evoT":30e-6,"histo_counts":1},
+        # "q1":{"evoT":30e-6,"histo_counts":1},
     }
 
 
@@ -141,14 +138,16 @@ if __name__ == "__main__":
         histo_total = ro_elements[qubit]["histo_counts"]
 
         T1_results[qubit], mean_T1_us, std_T1_us = T1_executor(QD_agent,cluster,meas_ctrl,Fctrl,qubit,freeDura=evoT,histo_counts=histo_total,run=execution)
-        highlight_print(f"{qubit}: mean T1 = {mean_T1_us} 土 {std_T1_us} µs")
-        
-        
-        """ Storing """
-        if execution:
-            if histo_total >= 50:
-                QD_agent.Notewriter.save_T1_for(mean_T1_us,qubit)
-                QD_agent.QD_keeper()
+        print(f"{qubit}: mean T1 = {mean_T1_us} 土 {std_T1_us} µs")
+
+        if histo_total >= 10:
+            QD_agent.Notewriter.save_T1_for(mean_T1_us,qubit)
+    
+
+
+    """ Storing (Future) """
+    if execution:
+        QD_agent.QD_keeper()
 
 
     """ Close """
