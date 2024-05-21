@@ -193,8 +193,7 @@ if __name__ == "__main__":
             else:
                 temp_FCQ_results = {}
                 init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
-                temp_FCQ_results, trustable = fluxcrosstalkQubit_executor(QD_agent,meas_ctrl,qubit,zline,run=execution,z_shifter=z_shifter,zpts = 15 
-                                                                          0, fpts=40, span_priod_factor=2)
+                temp_FCQ_results, trustable = fluxcrosstalkQubit_executor(QD_agent,meas_ctrl,qubit,zline,run=execution,z_shifter=z_shifter,zpts = 150, fpts=40, span_priod_factor=2)
                 update_2Ddict(FCQ_results, qubit, zline, temp_FCQ_results)
                 Z_matrix[i,j]=8787
                 cluster.reset()
