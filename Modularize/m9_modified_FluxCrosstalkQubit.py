@@ -200,8 +200,7 @@ if __name__ == "__main__":
 
             if not trustable:
                 check_again.append(qubit)
-        
-        
+
     """ Storing """
     # if  execution:
     #     QD_agent.QD_keeper()
@@ -214,4 +213,4 @@ if __name__ == "__main__":
     shut_down(cluster,Fctrl)
     
 
-
+# Test
