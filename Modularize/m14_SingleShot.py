@@ -12,7 +12,7 @@ from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
 from Modularize.support.Pulse_schedule_library import Qubit_state_single_shot_plot
 from Modularize.support import QDmanager, Data_manager,init_system_atte, init_meas, shut_down
 from Modularize.support.Pulse_schedule_library import Qubit_SS_sche, set_LO_frequency, pulse_preview, Qubit_state_single_shot_fit_analysis
-
+from Modularize.support.Experiment_setup import get_coupler_fctrl
 
 try:
     from qcat.state_discrimination.discriminator import train_GMModel # type: ignore
@@ -123,7 +123,7 @@ if __name__ == '__main__':
     """ Fill in """
     execute = True
     repaet = 1
-    DRandIP = {"dr":"dr1","last_ip":"11"}
+    DRandIP = {"dr":"dr3","last_ip":"13"}
     ro_elements = {'q0':{"roAmp_factor":1}}
     
 
@@ -134,7 +134,9 @@ if __name__ == '__main__':
         QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
         QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
         # QD_agent.Notewriter.modify_DigiAtte_For(-4,'q0','ro')
+        c_Fctrl = get_coupler_fctrl(cluster)
         """ Running """
+        c_Fctrl["c1"](0.1)
         for qubit in ro_elements:
             if i == 0:
                 snr_rec[qubit], effT_rec[qubit] = [], []
@@ -154,7 +156,7 @@ if __name__ == '__main__':
                 if keep.lower() in ['y', 'yes']:
                     QD_agent.QD_keeper() 
                     
-                
+        c_Fctrl["c1"](0.0)        
         """ Close """    
         shut_down(cluster,Fctrl)
 

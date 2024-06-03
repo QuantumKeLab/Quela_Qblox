@@ -10,6 +10,7 @@ from Modularize.support import QDmanager, Data_manager, init_system_atte, reset_
 from quantify_core.measurement.control import MeasurementControl
 from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
 from Modularize.support.QuFluxFit import calc_fq_g_excluded, convert_netCDF_2_arrays, data2plot, fq_fit
+from Modularize.support.Experiment_setup import get_coupler_fctrl
 
 def sweepZ_arranger(QD_agent:QDmanager,qb:str,Z_guard:float=0.4):
     """
@@ -181,7 +182,7 @@ if __name__ == "__main__":
    
     """ Fill in """
     execution = True
-    DRandIP = {"dr":"dr1","last_ip":"11"}
+    DRandIP = {"dr":"dr3","last_ip":"11"}
     ro_elements = ['q0']
 
 
@@ -191,9 +192,10 @@ if __name__ == "__main__":
     QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
     if ro_elements == 'all':
         ro_elements = list(Fctrl.keys())
-   
+    c_Fctrl = get_coupler_fctrl(cluster)
     
     """ Running """
+    c_Fctrl["c1"](0.1)
     fit_error = []
     for qubit in ro_elements:
         if QD_agent.Fluxmanager.get_offsweetspot_button(qubit): raise ValueError("m10 should be performed at sweet spot, now is deteced in off-sweetspot mode!")
@@ -209,7 +211,7 @@ if __name__ == "__main__":
     if execution:
         QD_agent.QD_keeper()
 
-
+    c_Fctrl["c1"](0.0)
     """ Close """
     print('done!')
     print(f"fitting error occured at {fit_error}")

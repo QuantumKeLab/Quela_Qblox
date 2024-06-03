@@ -13,8 +13,9 @@ from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
 from Modularize.support.QuFluxFit import calc_Gcoef_inFbFqFd, calc_g
 from Modularize.support import init_meas, shut_down,  advise_where_fq, init_system_atte
 from Modularize.support.Pulse_schedule_library import Two_tone_sche, set_LO_frequency, pulse_preview, IQ_data_dis, QS_fit_analysis, dataset_to_array, twotone_comp_plot
+from Modularize.support.Experiment_setup import get_coupler_fctrl
 
-def Two_tone_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,IF:float=100e6,f01_guess:int=0,xyf_span_Hz:int=400e6,xyamp:float=0.02,n_avg:int=500,points:int=200,run:bool=True,q:str='q1',Experi_info:dict={},ref_IQ:list=[0,0]):
+def Two_tone_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,IF:float=100e6,f01_guess:int=0,xyf_span_Hz:int=400e6,xyamp:float=0.02,n_avg:int=500,points:int=200,run:bool=True,q:str='q0',Experi_info:dict={},ref_IQ:list=[0,0]):
     
     sche_func = Two_tone_sche   
     analysis_result = {}
@@ -104,7 +105,7 @@ def update_2toneResults_for(QD_agent:QDmanager,qb:str,QS_results:dict,XYL:float)
 
 
 
-def conti2tone_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,cluster:Cluster,specific_qubits:str,xyf_guess:float=0,guess_g:float=48e6,xyAmp_guess:list=[],xyf_span:float=500e6,xy_if:float=100e6,run:bool=True,V_away_from:float=0):
+def conti2tone_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,cluster:Cluster,specific_qubits:str,xyf_guess:float=0,guess_g:float=48e6,xyAmp_guess:list=[],xyf_span:float=300e6,xy_if:float=100e6,run:bool=True,V_away_from:float=0):
     
     if run:
         advised_fq = advise_where_fq(QD_agent,specific_qubits,guess_g)
@@ -113,7 +114,7 @@ def conti2tone_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,cluster:
             guess_fq = [xyf_guess]
         else:
             guess_fq = [advised_fq-500e6, advised_fq, advised_fq+500e6]
-
+     
         if len(xyAmp_guess) == 0 or (len(xyAmp_guess) == 1 and xyAmp_guess[0] == 0):
             xyAmp_guess = [0, 0.03, 0.07, 0.1]
         else:
@@ -157,19 +158,21 @@ if __name__ == "__main__":
     execution = True
     update = 0
     #
-    DRandIP = {"dr":"dr1","last_ip":"11"}
+    DRandIP = {"dr":"dr3","last_ip":"13"}
     #
     ro_elements = {
-        "q0":{"xyf_guess":[4.4e9],"xyl_guess":[0.07],"g_guess":0, "tune_bias":0} # g you can try a single value in  [42e6, 54e6, 62e6], higher g makes fq lower.
+        "q2":{"xyf_guess":[0],"xyl_guess":[0],"g_guess":80e6, "tune_bias":0} # g you can try a single value in  [42e6, 54e6, 62e6], higher g makes fq lower.
     }                                                                            # tune_bias is the voltage away from sweet spot. If it was given, here will calculate a ROF according to that z-bias and store it in Notebook.
 
     #0.03332
 
     """ Preparations """
     QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
-    QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
-
+    QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')    
+    c_Fctrl = get_coupler_fctrl(cluster)
     """ Running """
+    c_Fctrl["c1"](0.1)
+    c_Fctrl["c2"](0.0)
     tt_results = {}
     for qubit in ro_elements:
         QD_agent.Notewriter.save_DigiAtte_For(0,qubit,'xy')
@@ -178,18 +181,19 @@ if __name__ == "__main__":
         for xyf in ro_elements[qubit]["xyf_guess"]:
             g = 48e6 if ro_elements[qubit]["g_guess"] == 0 else ro_elements[qubit]["g_guess"]
 
-            tt_results[qubit] = conti2tone_executor(QD_agent,meas_ctrl,cluster,specific_qubits=qubit,xyf_guess=xyf,xyAmp_guess=ro_elements[qubit]["xyl_guess"],run=execution,guess_g=g,xy_if=100e6,xyf_span=500e6,V_away_from=tune_bias)
+            tt_results[qubit] = conti2tone_executor(QD_agent,meas_ctrl,cluster,specific_qubits=qubit,xyf_guess=xyf,xyAmp_guess=ro_elements[qubit]["xyl_guess"],run=execution,guess_g=g,xy_if=100e6,xyf_span=300e6,V_away_from=tune_bias)
 
             if execution and ro_elements[qubit]["xyl_guess"][0] != 0:
                 print(f'update xyl={ro_elements[qubit]["xyl_guess"][0]}')
                 update_2toneResults_for(QD_agent,qubit,tt_results,ro_elements[qubit]["xyl_guess"][0])
-            
+
     """ Storing """
     if update :
         QD_agent.refresh_log("After continuous 2-tone!")
         QD_agent.QD_keeper()
 
-
+    c_Fctrl["c1"](0.0)
+    c_Fctrl["c2"](0.0)
     """ Close """
     print('2-tone done!')
     shut_down(cluster,Fctrl)

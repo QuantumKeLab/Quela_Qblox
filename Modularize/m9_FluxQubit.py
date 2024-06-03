@@ -13,7 +13,7 @@ from utils.tutorial_analysis_classes import QubitFluxSpectroscopyAnalysis
 from Modularize.support import init_meas, init_system_atte, shut_down, reset_offset
 from Modularize.support.ReadResults import plot_QbFlux
 from Modularize.support.Pulse_schedule_library import Z_gate_two_tone_sche, set_LO_frequency, pulse_preview
-
+from Modularize.support.Experiment_setup import get_coupler_fctrl
 
 
 
@@ -166,7 +166,7 @@ if __name__ == "__main__":
     
     """ Fill in """
     execution = True
-    DRandIP = {"dr":"dr1","last_ip":"11"}
+    DRandIP = {"dr":"dr3","last_ip":"13"}
     ro_elements = ['q0']
     z_shifter = 0 # V
 
@@ -175,9 +175,10 @@ if __name__ == "__main__":
     QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
     if ro_elements == 'all':
         ro_elements = list(Fctrl.keys())
-
+    c_Fctrl = get_coupler_fctrl(cluster)
 
     """ Running """
+    c_Fctrl["c1"](0.1)
     FQ_results = {}
     check_again =[]
     for qubit in ro_elements:
@@ -193,7 +194,7 @@ if __name__ == "__main__":
             else:
                 check_again.append(qubit)
     
-
+    c_Fctrl["c1"](0.0)
     """ Close """
     print('Flux qubit done!')
     warning_print(f"qubits to check again: {check_again}")

@@ -18,6 +18,7 @@ def PowerDep_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,ro_span_Hz:int
     analysis_result = {}
     qubit_info = QD_agent.quantum_device.get_element(q)
     ro_f_center = qubit_info.clock_freqs.readout()
+    print(ro_f_center)
     # avoid frequency conflicts 
     from numpy import NaN
     qubit_info.clock_freqs.readout(NaN)
@@ -102,10 +103,10 @@ if __name__ == "__main__":
     
     """ fill in """
     execution = True
-    sweetSpot_dispersive = True
-    DRandIP = {"dr":"dr1","last_ip":"11"}
+    sweetSpot_dispersive = False
+    DRandIP = {"dr":"dr3","last_ip":"13"}
     ro_elements = {    # measurement target q from this dict 
-        "q0": {"ro_atte":50}
+        "q2": {"ro_atte":46}
     }
 
     """ preparations """
@@ -116,7 +117,7 @@ if __name__ == "__main__":
     for qubit in ro_elements:
         QD_agent.Notewriter.save_DigiAtte_For(ro_elements[qubit]["ro_atte"],qubit,'ro')
         init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
-        powerCavity_executor(QD_agent,meas_ctrl,Fctrl,specific_qubits=qubit,run=execution,sweet_spot=sweetSpot_dispersive)
+        powerCavity_executor(QD_agent,meas_ctrl,Fctrl,specific_qubits=qubit,run=execution,sweet_spot=sweetSpot_dispersive, ro_span_Hz=9e6)
         cluster.reset()
         if not execution:
             break

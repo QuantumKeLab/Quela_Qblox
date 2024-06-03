@@ -5,6 +5,7 @@ from utils.tutorial_utils import show_args
 from qcodes.parameters import ManualParameter
 from Modularize.support.UserFriend import *
 from Modularize.support import QDmanager, Data_manager
+from Modularize.support.Experiment_setup import get_coupler_fctrl
 from quantify_scheduler.gettables import ScheduleGettable
 from quantify_core.measurement.control import MeasurementControl
 from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
@@ -110,8 +111,8 @@ if __name__ == "__main__":
     
     """ Fill in """
     execution = True
-    DRandIP = {"dr":"dr1","last_ip":"11"}
-    ro_elements = ['q0']
+    DRandIP = {"dr":"dr3","last_ip":"13"}
+    ro_elements = ['q2']
     
 
     """ Preparations """
@@ -119,13 +120,15 @@ if __name__ == "__main__":
     QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
     if ro_elements == 'all':
         ro_elements = list(Fctrl.keys())
-
+    c_Fctrl = get_coupler_fctrl(cluster)
     """ Running """
+    c_Fctrl["c1"](0.1)
+    c_Fctrl["c2"](0.0)
     update = False
     FD_results = {}
     for qubit in ro_elements:
         init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
-        FD_results[qubit] = fluxCavity_executor(QD_agent,meas_ctrl,qubit,run=execution,flux_span=0.05,ro_span_Hz=6e6, zpts=30)
+        FD_results[qubit] = fluxCavity_executor(QD_agent,meas_ctrl,qubit,run=execution,flux_span=0.3,ro_span_Hz=6e6, zpts=30)
         cluster.reset()
         if execution:
             permission = mark_input("Update the QD with this result ? [y/n]") 
@@ -142,7 +145,8 @@ if __name__ == "__main__":
             QD_agent.QD_keeper()
             update = False
 
-
+    c_Fctrl["c1"](0.0)
+    c_Fctrl["c2"](0.0)
     """ Close """
     print('Flux dependence done!')
     shut_down(cluster,Fctrl)

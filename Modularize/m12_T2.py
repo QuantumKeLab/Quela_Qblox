@@ -11,7 +11,7 @@ from quantify_core.measurement.control import MeasurementControl
 from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
 from Modularize.support import init_meas, init_system_atte, shut_down
 from Modularize.support.Pulse_schedule_library import Ramsey_sche, set_LO_frequency, pulse_preview, IQ_data_dis, dataset_to_array, T2_fit_analysis, Fit_analysis_plot, Fit_T2_cali_analysis_plot
-
+from Modularize.support.Experiment_setup import get_coupler_fctrl
 
 def Ramsey(QD_agent:QDmanager,meas_ctrl:MeasurementControl,freeduration:float,arti_detune:int=0,IF:int=150e6,n_avg:int=1000,points:int=101,run:bool=True,q='q1', ref_IQ:list=[0,0],Experi_info:dict={},exp_idx:int=0,data_folder:str=''):
     
@@ -133,7 +133,7 @@ if __name__ == "__main__":
     
     """ Fill in """
     execution = 1
-    DRandIP = {"dr":"dr1","last_ip":"11"}
+    DRandIP = {"dr":"dr3","last_ip":"13"}
     ro_elements = {
         "q0":{"detune":0e6,"evoT":30e-6,"histo_counts":1}
     }
@@ -141,10 +141,11 @@ if __name__ == "__main__":
 
     """ Preparations """
     QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
-    QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l',vpn=True)
-    
+    QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l',vpn=False)
+    c_Fctrl = get_coupler_fctrl(cluster)
 
     """ Running """
+    c_Fctrl["c1"](0.1)
     ramsey_results = {}
     for qubit in ro_elements:
         init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
@@ -165,7 +166,7 @@ if __name__ == "__main__":
                 QD_agent.Notewriter.save_T2_for(mean_T2_us,qubit)
                 QD_agent.QD_keeper()
         
-        
+    c_Fctrl["c1"](0.0)    
     """ Close """
     print('T2 done!')
     shut_down(cluster,Fctrl)

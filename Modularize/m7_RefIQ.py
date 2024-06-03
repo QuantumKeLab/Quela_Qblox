@@ -8,6 +8,7 @@ from quantify_scheduler.gettables import ScheduleGettable
 from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
 from Modularize.support import init_meas, init_system_atte, shut_down
 from Modularize.support.Pulse_schedule_library import Qubit_SS_sche, Single_shot_ref_fit_analysis, pulse_preview, Single_shot_fit_plot
+from Modularize.support.Experiment_setup import get_coupler_fctrl
 
 def Single_shot_ref_spec(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:str='q1',Experi_info:dict={},want_state:str='g',ro_amp_scaling:float=1):
     print("Single shot start")
@@ -86,8 +87,8 @@ if __name__ == "__main__":
     
     """ Fill in """
     execution = True
-    DRandIP = {"dr":"dr1","last_ip":"11"}
-    ro_elements = {'q0':{"ro_amp_factor":1}}
+    DRandIP = {"dr":"dr3","last_ip":"13"}
+    ro_elements = {'q2':{"ro_amp_factor":1.6}}
 
 
     """ Preparations """
@@ -95,9 +96,11 @@ if __name__ == "__main__":
     QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
     if ro_elements == 'all':
         ro_elements = list(Fctrl.keys())
-
+    c_Fctrl = get_coupler_fctrl(cluster)
 
     """ Running """
+    c_Fctrl["c1"](0.1)
+    c_Fctrl["c2"](0.0)
     for qubit in ro_elements:
         init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
         refIQ_executor(QD_agent,cluster,Fctrl,specific_qubits=qubit,run=execution,ro_amp_adj=ro_elements[qubit]["ro_amp_factor"])
@@ -114,7 +117,8 @@ if __name__ == "__main__":
                 QD_agent.QD_keeper()
 
 
-
+    c_Fctrl["c1"](0.0)
+    c_Fctrl["c2"](0.0)
     """ Close """
     print('IQ ref checking done!')
     shut_down(cluster,Fctrl)
