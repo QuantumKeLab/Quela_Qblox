@@ -1,8 +1,9 @@
+import os, sys 
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', ".."))
 from qcat.state_discrimination.discriminator import train_GMModel # type: ignore
 from qcat.visualization.readout_fidelity import plot_readout_fidelity
 from xarray import Dataset, open_dataset
-from Modularize.analysis.RadiatorSetAna import OSdata_arranger
-import os
+from Modularize.analysis.Radiator.RadiatorSetAna import OSdata_arranger
 from Modularize.support.UserFriend import *
 from Modularize.support.QDmanager import QDmanager
 from numpy import array, moveaxis, mean, std, median
@@ -28,7 +29,7 @@ def a_OSdata_analPlot(QD_agent:QDmanager,target_q:str,nc_path:str, plot:bool=Tru
     # train GMM
     dist_model = train_GMModel(tarin_data[0])
     dist_model.relabel_model(array([QD_agent.refIQ[target_q]]).transpose())
-    transi_freq = 4.4e9#QD_agent.quantum_device.get_element(target_q).clock_freqs.f01()
+    transi_freq = QD_agent.quantum_device.get_element(target_q).clock_freqs.f01()
     
     # predict all collection to calculate eff_T for every exp_idx
     
@@ -46,9 +47,9 @@ def a_OSdata_analPlot(QD_agent:QDmanager,target_q:str,nc_path:str, plot:bool=Tru
     return effT_mK, snr_dB
 
 if __name__ == "__main__":
-    folder = 'Modularize/Meas_raw/Radiator_WS/10mK/effT'
+    folder = 'Modularize/Meas_raw/2024_5_16'
     files = [os.path.join(folder,name) for name in os.listdir(folder) if (os.path.isfile(os.path.join(folder,name)) and name.split("_")[1].split("(")[0]=="SingleShot")]
-    QD_path = "Modularize/QD_backup/2024_5_9/DR1#11_SumInfo.pkl"
+    QD_path = "Modularize/QD_backup/2024_5_16/DR1#11_SumInfo.pkl"
     QD_agent = QDmanager(QD_path)
     QD_agent.QD_loader()
 
