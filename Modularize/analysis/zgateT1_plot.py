@@ -4,14 +4,14 @@ import xarray as xr
 import matplotlib.pyplot as plt 
 from matplotlib.ticker import FuncFormatter
 from Modularize.support.QDmanager import QDmanager
-from Modularize.support.Pulse_schedule_library import IQ_data_dis, T1_fit_analysis, Fit_analysis_plot
+from Modularize.support.Pulse_schedule_library import IQ_data_dis, T1_fit_analysis, Fit_analysis_plot, dataset_to_array
 from numpy import array, std, average, round, max, min, transpose, abs, sqrt, cos, sin, pi, linspace, arange,ndarray, log10, ndarray, asarray
 
 #//================= Fill in here ========================
 target_q = 'q0'
-background_dir_path = "" # This folder contains all the ZgateT1 BACKGROUND nc files
-dir_path = "Modularize/Meas_raw/z_gate_T1_test/z_gate_T1_pi_True/ToQM" # This folder contains all the ZgateT1 nc files
-QD_file = "Modularize/QD_backup/2024_8_15/DRKE#242_SumInfo.pkl"
+background_dir_path = r"Modularize\Meas_raw\z_gate_T1_pi_True" # This folder contains all the ZgateT1 BACKGROUND nc files
+dir_path = r"Modularize\Meas_raw\z_gate_T1_pi_True6" # This folder contains all the ZgateT1 nc files
+QD_file = "Modularize/QD_backup/2024_8_14/DRKE#242_SumInfo.pkl"
 QD_agent = QDmanager(QD_file)
 QD_agent.QD_loader()
 z_fq_map = {"sweet":{"fq_GHz":QD_agent.quantum_device.get_element(target_q).clock_freqs.f01()*1e-9,"Z_v":QD_agent.Fluxmanager.get_sweetBiasFor(target_q)}}
@@ -29,11 +29,11 @@ def set_fit_paras(): # **** manually set
 #//===================================================================================
 
 ref_IQ = QD_agent.refIQ[target_q]
-# z_period = QD_agent.Fluxmanager.get_PeriodFor(target_q)
-# f_bare_MHz = QD_agent.Notewriter.get_bareFreqFor(target_q)*1e-6
-# g_rq_MHz = QD_agent.Notewriter.get_sweetGFor(target_q)*1e-6
-# detuning = f_bare_MHz-z_fq_map["sweet"]["fq_GHz"]*1e3
-# kappa = ((38)**(-1))*((g_rq_MHz/detuning)**(-2))
+z_period = QD_agent.Fluxmanager.get_PeriodFor(target_q)
+f_bare_MHz = QD_agent.Notewriter.get_bareFreqFor(target_q)*1e-6
+g_rq_MHz = QD_agent.Notewriter.get_sweetGFor(target_q)*1e-6
+detuning = f_bare_MHz-z_fq_map["sweet"]["fq_GHz"]*1e3
+kappa = ((38)**(-1))*((g_rq_MHz/detuning)**(-2))
 
 def FqEqn(x,Ec,coefA,d):
     """
@@ -50,34 +50,35 @@ def find_nearest_idx(array, value):
     return idx
 
 def build_result_pic_path(dir_path:str,folder_name:str="")->str:
-    parent = os.path.split(dir_path)[0]
-    new_path = os.path.join(parent,"ZgateT1_pic" if folder_name == "" else folder_name)
+    
+    new_path = os.path.join(dir_path,"ZgateT1_pic" if folder_name == "" else folder_name)
     if not os.path.exists(new_path):
         os.mkdir(new_path)
     return new_path
 
-def zgate_T1_fitting(dataset:xr.Dataset, ref_IQ:list, fit:bool=True):
+def zgate_T1_fitting(dataset:xr.Dataset):
     
-    time = dataset.coords["time"].values
-    flux = dataset.coords["z_voltage"].values
-
+    
+    
     T1s = []
     signals = []
+    I, Q = dataset_to_array(dataset,2)
+    I = I.transpose() # shape in [flux, free-evo time]
+    Q = Q.transpose()
+    flux = array(dataset.x1).reshape(I.shape[0],I.shape[1]).transpose()[0]
+    time = array(dataset.x0).reshape(I.shape[0],I.shape[1])[0]
+
+    for z_idx in range(I.shape[0]):
     
-    for ro_name, data in dataset.data_vars.items():
-        I = data.values[0]
-        Q = data.values[1]
-        
-        for z_idx in range(array(data.values[0]).shape[0]):
-            data = IQ_data_dis(I[z_idx],Q[z_idx],ref_I=ref_IQ[0],ref_Q=ref_IQ[-1])
-            signals.append(data)
-            if fit:
-                try:
-                    data_fit = T1_fit_analysis(data=data,freeDu=array(time),T1_guess=14e-6)
-                    # Fit_analysis_plot(data_fit,P_rescale=False,Dis=None)
-                    T1s.append(data_fit.attrs['T1_fit']*1e6)
-                except:
-                    T1s.append(0e-6)
+        data = IQ_data_dis(I[z_idx],Q[z_idx],ref_I=ref_IQ[0],ref_Q=ref_IQ[-1])
+        signals.append(data)
+        try:
+            data_fit = T1_fit_analysis(data=data,freeDu=time,T1_guess=20e-6)
+            # Fit_analysis_plot(data_fit,P_rescale=False,Dis=None)
+            T1s.append(data_fit.attrs['T1_fit']*1e6)
+        except:
+            T1s.append(1e-6)
+
 
     return time*1e6, flux, T1s, signals
 
@@ -85,7 +86,7 @@ def inver(lis:list):
     return 1/array(lis)
 
 
-def plot_background(dir_path:str, ref_IQ:list, sweet_bias:float=0):
+def plot_background(dir_path:str, sweet_bias:float):
     pic_save_path = build_result_pic_path(dir_path, "Zgate_Background")
     res = []
     # Iterate directory
@@ -98,38 +99,34 @@ def plot_background(dir_path:str, ref_IQ:list, sweet_bias:float=0):
     for file in res:
         sets.append(xr.open_dataset(file))
 
-    
+    T1 = []
     I_chennel = []
     for dataset in sets:
         
         # for dataset in sub_set:
-        time, biass, _, Isignal = zgate_T1_fitting(dataset,ref_IQ,fit=False)
-        
+        time, biass, T1s, Isignal = zgate_T1_fitting(dataset)
+        T1.append(T1s)
         I_chennel.append(Isignal)
         
     avg_I_data = average(array(I_chennel),axis=0)
     z = biass+sweet_bias
-    
-    fig, ax = plt.subplots()
+
+    fig, ax = plt.subplots(figsize=(12.5,22))
     ax:plt.Axes
-    im = ax.pcolormesh(z,time,transpose(avg_I_data),cmap='RdBu',shading='nearest') 
-    fig.colorbar(im, ax=ax, label="Contrast (V)")
-    ax.set_xlabel("bias (V)",fontsize=18)
-    ax.set_ylabel("Free Evolution time(µs)",fontsize=18) 
-    ax.set_title(f"Background contrast = {round(average(avg_I_data)*1e3,2)}$\pm${round(std(avg_I_data)*1e3,2)} mV, in {len(sets)} average")
-    ax.xaxis.set_tick_params(labelsize=18)
-    ax.yaxis.set_tick_params(labelsize=18)
-    ax.xaxis.minorticks_on()
-    ax.yaxis.minorticks_on()
-    
+    im = ax.pcolormesh(z,time,transpose(avg_I_data),cmap='RdBu') 
+    ax.set_xlabel("bias (V)")
+    ax.set_ylabel("Free Evolution time(µs)") 
+    ax.set_title("No pi-pulse background, in 10 average")
+    ax.legend(loc='lower left')
+    fig.colorbar(im, ax)
+    # ax.set_xlim()
+    # ax.set_ylim()
     plt.tight_layout()
     pic_path = os.path.join(pic_save_path,"BG.png")
     plt.savefig(pic_path)
-    
-    return average(avg_I_data), std(avg_I_data)
 
 
-def plot_z_gateT1_poster(dir_path:str,sweet_bias:float,ref_IQ:list,other_bias:list=None, other_bias_label:str=None, flux_cav_nc_path:str=None):
+def plot_z_gateT1_poster(dir_path:str,sweet_bias:float,other_bias:list=None, other_bias_label:str=None, flux_cav_nc_path:str=None):
     
     
     # ============================ keep below 
@@ -146,8 +143,7 @@ def plot_z_gateT1_poster(dir_path:str,sweet_bias:float,ref_IQ:list,other_bias:li
 
     sets = []
     for file in res:
-        if file.split(".")[-1] == 'nc':
-            sets.append(xr.open_dataset(file))
+        sets.append(xr.open_dataset(file))
 
 
     T1 = []
@@ -155,7 +151,7 @@ def plot_z_gateT1_poster(dir_path:str,sweet_bias:float,ref_IQ:list,other_bias:li
     for dataset in sets:
         
         # for dataset in sub_set:
-        time, bias, T1s, Isignal = zgate_T1_fitting(dataset,ref_IQ)
+        time, bias, T1s, Isignal = zgate_T1_fitting(dataset)
         T1.append(T1s)
         I_chennel.append(Isignal)
 
@@ -165,10 +161,10 @@ def plot_z_gateT1_poster(dir_path:str,sweet_bias:float,ref_IQ:list,other_bias:li
     z = bias+sweet_bias
 
     # Fit t1 with the whole averaging I signal
-    T1_1 = []
-    for zDepData in avg_I_data:
-        data_fit = T1_fit_analysis(data=zDepData,freeDu=array(time),T1_guess=14e-6)
-        T1_1.append(data_fit.attrs['T1_fit']*1e6)
+    # T1_1 = []
+    # for zDepData in avg_I_data:
+    #     data_fit = T1_fit_analysis(data=zDepData,freeDu=array(time),T1_guess=14e-6)
+    #     T1_1.append(data_fit.attrs['T1_fit']*1e6)
 
 
     avg_T1 = average(array(T1),axis=0)
@@ -209,8 +205,7 @@ def plot_z_gateT1_poster(dir_path:str,sweet_bias:float,ref_IQ:list,other_bias:li
     ax[0].set_title(f"$T_{1}$ vs Z-bias, in {len(sets)} average")
     ax[0].legend(loc='lower left')
     fig.colorbar(im, ax=ax[0])
-    ax[0].xaxis.minorticks_on()
-    ax[0].yaxis.minorticks_on()
+
     # # plot gamma_1 in flux
     rate = inver(avg_T1)
     ax[1].scatter(z,rate,s=3)
@@ -411,6 +406,5 @@ def give_Z_plotT1(z:list,flux_ary:ndarray,time:ndarray,Isignals:ndarray):
 
 
 if __name__ == "__main__":
-    fq, p, z, rate, std_T1_percent = plot_z_gateT1_poster(dir_path,z_fq_map["sweet"]["Z_v"],ref_IQ)
-    plot_background("Modularize/Meas_raw/z_gate_T1_test/z_gate_T1_pi_False/ToQM",ref_IQ,0)
+    fq, p, z, rate, std_T1_percent = plot_z_gateT1_poster(dir_path,z_fq_map["sweet"]["Z_v"])
     # plot_purcell_compa(fq, p, z, z_fq_map["sweet"]["Z_v"], rate, std_T1_percent, kappa)

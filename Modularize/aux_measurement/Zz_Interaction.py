@@ -1,5 +1,5 @@
 import os, sys, time
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..','..'))
 from qblox_instruments import Cluster
 from utils.tutorial_utils import show_args
 from qcodes.parameters import ManualParameter
@@ -144,11 +144,11 @@ if __name__ == "__main__":
     
     """ Fill in """
     execution = 1
-    DRandIP = {"dr":"dr3","last_ip":"13"}
+    DRandIP = {"dr":"drke","last_ip":"242"}
     ro_elements = {
-        "q1":{"detune":0e6,"evoT":50e-6,"histo_counts":1, "excite_qubit": "q0"}
+        "q4":{"detune":0e6,"evoT":100e-6,"histo_counts":1, "excite_qubit": "q3"}
     }
-    couplers = ['c0','c1', 'c2', 'c3']
+    couplers = ['c3']
     # 1 = Store
     # 0 = not store
     chip_info_restore = 1

@@ -534,7 +534,7 @@ def Z_gate_two_tone_sche(
         sched.add(Reset(q))
         sched.add(IdlePulse(duration=5000*1e-9), label=f"buffer {acq_idx}")
         spec_pulse = Readout(sched,q,R_amp,R_duration,powerDep=False)
-        Spec_pulse(sched,spec_amp,spec_Du,q,spec_pulse,electrical_delay)
+        Spec_pulse(sched,spec_amp,10e-6,q,spec_pulse,electrical_delay)
         Z(sched,Z_amp,spec_Du,q,spec_pulse,electrical_delay)
         if Z_ro_amp != 0:
             Z(sched,Z_ro_amp,R_integration[q],q,spec_pulse,0,'end')
