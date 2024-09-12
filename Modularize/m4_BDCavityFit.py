@@ -30,15 +30,15 @@ def fillin_PDans(QD_agent:QDmanager,ans:dict):
     `ans = {"q0":{"dressF_Hz":,"dressP":,"bareF_Hz":},...}`
     """
     for q in ans:
-        qubit = QD_agent.quantum_device.get_element("q0")
-        # if ans[q]["dressP"] != "": qubit.measure.pulse_amp(ans[q]["dressP"]) 
-        # if ans[q]["dressF_Hz"] != "": qubit.clock_freqs.readout(ans[q]["dressF_Hz"])
-        # if ans[q]["bareF_Hz"] != "": QD_agent.Notewriter.save_bareFreq_for(target_q=q,bare_freq=ans[q]["bareF_Hz"])
-        # if ans[q]["ro_atte"] != "": QD_agent.Notewriter.save_DigiAtte_For(atte_dB=ans[q]["ro_atte"],target_q=q,mode='ro')
-        qubit.measure.pulse_amp(0.2) # dress ro amp
-        qubit.clock_freqs.readout(4.4989e9) # dress freq
-        QD_agent.Notewriter.save_bareFreq_for(4.4999e9) # bare freq
-        QD_agent.Notewriter.save_DigiAtte_For(40) # dress atte.
+        qubit = QD_agent.quantum_device.get_element(q)#
+        if ans[q]["dressP"] != "": qubit.measure.pulse_amp(ans[q]["dressP"]) 
+        if ans[q]["dressF_Hz"] != "": qubit.clock_freqs.readout(ans[q]["dressF_Hz"])
+        if ans[q]["bareF_Hz"] != "": QD_agent.Notewriter.save_bareFreq_for(target_q=q,bare_freq=ans[q]["bareF_Hz"])
+        if ans[q]["ro_atte"] != "": QD_agent.Notewriter.save_DigiAtte_For(atte_dB=ans[q]["ro_atte"],target_q=q,mode='ro')
+        # qubit.measure.pulse_amp(0.3) # dress ro amp
+        # qubit.clock_freqs.readout(5.6898e9) # dress freq
+        # QD_agent.Notewriter.save_bareFreq_for(5.6899e9) # bare freq
+        # QD_agent.Notewriter.save_DigiAtte_For(20,mode='ro') # dress atte.
 
     QD_agent.refresh_log("PD answer stored!")
     QD_agent.QD_keeper()
@@ -65,25 +65,25 @@ if __name__ == "__main__":
 
     """ Fill in """
     execution:bool = True 
-    sweetSpot:bool = 0     # If true, only support one one qubit
+    sweetSpot:bool = 1     # If true, only support one one qubit
     chip_info_restore:bool = 0
-    DRandIP = {"dr":"drke","last_ip":"242"}
+    DRandIP = {"dr":"dr4","last_ip":"81"}
     ro_element = {
-        # "q0":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
-        #         "dress":{"ro_amp":0.3,"window_shift":0.3e6}},
-        "q0":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
-                "dress":{"ro_amp":0.2,"window_shift":1e6}},
+        # "q0":{  "bare" :{"ro_amp":0.2,"window_shift":0e6},
+        #         "dress":{"ro_amp":0.1,"window_shift":1.1e6}},
+        "q1":{  "bare" :{"ro_amp":0.2,"window_shift":0e6},
+                "dress":{"ro_amp":0.05,"window_shift":1.15e6}},
         # "q2":{  "bare" :{"ro_amp":0.2,"window_shift":0e6},
-        #         "dress":{"ro_amp":0.1,"window_shift":13e6}},
+        #         "dress":{"ro_amp":0.4,"window_shift":0e6}},
         # "q3":{  "bare" :{"ro_amp":0.2,"window_shift":0e6},
-        #         "dress":{"ro_amp":0.1,"window_shift":5e6}},
-        # "q4":{  "bare" :{"ro_amp":0.2,"window_shift":0e6},
-        #         "dress":{"ro_amp":0.1,"window_shift":6e6}}
+        #         "dress":{"ro_amp":0.07,"window_shift":0e6}},
+        "q4":{  "bare" :{"ro_amp":0.2,"window_shift":0e6},
+                "dress":{"ro_amp":0.05,"window_shift":1.9e6}}
     }
-    ro_attes = {"dress":40, "bare":20} # all ro_elements shared
+    ro_attes = {"dress":30, "bare":20} # all ro_elements shared
 
     """ Optional paras"""
-    half_ro_freq_window_Hz = 10e6
+    half_ro_freq_window_Hz = 5.5e6
     freq_data_points = 300
 
 
@@ -113,11 +113,21 @@ if __name__ == "__main__":
         
         for qubit in CS_results[state]:
             if state == "bare":
-                PD_ans[qubit]["bareF_Hz"] = CS_results[state][qubit]['fr']
+                PD_ans[qubit]["bareF_Hz"] = CS_results["bare"][qubit]['fr']
+                print(f"{qubit} Bare frequency: ",float(CS_results["bare"][qubit]['fr'])*1e-9)
+                items = ["Qi_dia_corr",'Qc_dia_corr',"Ql"]
+                error = ["Qi_dia_corr_err","absQc_err","Ql_err"]
+                for idx, item in enumerate(items):
+                    print(f"{item}: {round(CS_results['bare'][qubit][item])} 土 {round(CS_results['bare'][qubit][error[idx]])}") 
             else:
-                PD_ans[qubit]["dressF_Hz"] = CS_results[state][qubit]['fr']
+                PD_ans[qubit]["dressF_Hz"] = CS_results["dress"][qubit]['fr']
                 PD_ans[qubit]["dressP"] = ro_element[qubit][state]["ro_amp"]
                 PD_ans[qubit]["ro_atte"] = ro_attes[state]
+                print(f"{qubit} Dress frequency: ",float(CS_results["dress"][qubit]['fr'])*1e-9)
+                items = ["Qi_dia_corr",'Qc_dia_corr',"Ql"]
+                error = ["Qi_dia_corr_err","absQc_err","Ql_err"]
+                for idx, item in enumerate(items):
+                    print(f"{item}: {round(CS_results['dress'][qubit][item])} 土 {round(CS_results['dress'][qubit][error[idx]])}") 
 
 
         """ Storing """
