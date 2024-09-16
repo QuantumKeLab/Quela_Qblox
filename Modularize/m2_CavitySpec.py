@@ -176,7 +176,7 @@ if __name__ == "__main__":
     """ fill in part """
     # Basic info of measuring instrument, chip
     # e.g. QD_path, dr, ip, mode, chip_name, chip_type = '', 'dr3', '13', 'n','20240430_8_5Q4C', '5Q4C'
-    QD_path, dr, mode, chip_name, chip_type = '', 'dr4', 'n','20240911_bandage5Q4C', '5Q4C'
+    QD_path, dr, mode, chip_name, chip_type = '', 'dr1', 'n','20240911_bandage5Q4C', '5Q4C'
     execution:bool = 1
     chip_info_restore:bool = 0
     # RO attenuation

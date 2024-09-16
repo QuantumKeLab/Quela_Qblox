@@ -67,7 +67,7 @@ if __name__ == "__main__":
     execution:bool = True 
     sweetSpot:bool = 1     # If true, only support one one qubit
     chip_info_restore:bool = 0
-    DRandIP = {"dr":"dr4","last_ip":"81"}
+    DRandIP = {"dr":"dr1","last_ip":"11"}
     ro_element = {
         # "q0":{  "bare" :{"ro_amp":0.2,"window_shift":0e6},
         #         "dress":{"ro_amp":0.1,"window_shift":1.1e6}},
