@@ -144,8 +144,8 @@ if __name__ == '__main__':
 
     """ Fill in """
     execute:bool = True
-    DRandIP = {"dr":"dr1","last_ip":"11"}
-    ro_elements = {'q4':{"span_Hz":6e6}}
+    DRandIP = {"dr":"dr4","last_ip":"81"}
+    ro_elements = {'q0':{"span_Hz":8e6}}
     couplers = []
 
 
@@ -165,9 +165,21 @@ if __name__ == '__main__':
 
         optimal_rof = rofCali_executor(QD_agent,cluster,meas_ctrl,Fctrl,qubit,execution=execute,ro_f_span=ro_span)
         if execute:
-            if mark_input(f"Update the optimal ROF for {qubit}?[y/n]").lower() in ['y', 'yes']:
-                QD_agent.quantum_device.get_element(qubit).clock_freqs.readout(optimal_rof)
-                keep = True
+            permission = mark_input(f"Update the optimal ROF for {qubit}?[y/n] or assign a RO freq in Hz directly: ")
+            try:
+                permission = float(permission)
+                aa = mark_input(f"Check Assigned RO freq = {permission} Hz, 'n' to cancel! ")
+                if aa.lower() not in ['n', 'no']:
+                    QD_agent.quantum_device.get_element(qubit).clock_freqs.readout(permission)
+                    keep = True  
+                else:
+                    keep = False
+            except:
+                if permission.lower() in ['y', 'yes']:
+                    QD_agent.quantum_device.get_element(qubit).clock_freqs.readout(optimal_rof)
+                    keep = True
+                else:
+                    keep = False
 
         """ Storing """ 
         if execute:
@@ -181,10 +193,11 @@ if __name__ == '__main__':
     for qubit in re_find_ground:
         QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
         QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
+        orginal_inte = QD_agent.quantum_device.get_element[qubit].measure.integration_time()
         Cctrl = coupler_zctrl(DRandIP["dr"],cluster,QD_agent.Fluxmanager.build_Cctrl_instructions(couplers,'i'))
         init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
         refIQ_executor(QD_agent,cluster,Fctrl,qubit,want_see_p01=True)
-
+        QD_agent.quantum_device.get_element[qubit].measure.integration_time(orginal_inte)
         """ Close """ 
         QD_agent.QD_keeper()   
         shut_down(cluster,Fctrl,Cctrl)

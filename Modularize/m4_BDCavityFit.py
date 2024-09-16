@@ -12,10 +12,14 @@ from quantify_core.measurement.control import MeasurementControl
 from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
 from Modularize.support import init_meas, init_system_atte, shut_down
 from numpy import linspace
+
+Quality_values = ["Qi_dia_corr", "Qc_dia_corr", "Ql"]
+Quality_errors = ["Qi_dia_corr_err", "absQc_err", "Ql_err"]
+
 def preciseCavity_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,ro_elements:dict,run:bool=True, ro_amps:dict={})->dict:
     
     if run:
-        cs_ds = Cavity_spec(QD_agent,meas_ctrl,ro_elements,run=True,ro_amps=ro_amps)
+        cs_ds = Cavity_spec(QD_agent,meas_ctrl,ro_elements,run=True,ro_amps=ro_amps,n_avg=100)
         CS_results = multiplexing_CS_ana(QD_agent, cs_ds, ro_elements)
     else:
         _ = Cavity_spec(QD_agent,meas_ctrl,ro_elements,run=False,ro_amps=ro_amps)
@@ -30,15 +34,11 @@ def fillin_PDans(QD_agent:QDmanager,ans:dict):
     `ans = {"q0":{"dressF_Hz":,"dressP":,"bareF_Hz":},...}`
     """
     for q in ans:
-        qubit = QD_agent.quantum_device.get_element(q)#
+        qubit = QD_agent.quantum_device.get_element(q)
         if ans[q]["dressP"] != "": qubit.measure.pulse_amp(ans[q]["dressP"]) 
         if ans[q]["dressF_Hz"] != "": qubit.clock_freqs.readout(ans[q]["dressF_Hz"])
         if ans[q]["bareF_Hz"] != "": QD_agent.Notewriter.save_bareFreq_for(target_q=q,bare_freq=ans[q]["bareF_Hz"])
         if ans[q]["ro_atte"] != "": QD_agent.Notewriter.save_DigiAtte_For(atte_dB=ans[q]["ro_atte"],target_q=q,mode='ro')
-        # qubit.measure.pulse_amp(0.3) # dress ro amp
-        # qubit.clock_freqs.readout(5.6898e9) # dress freq
-        # QD_agent.Notewriter.save_bareFreq_for(5.6899e9) # bare freq
-        # QD_agent.Notewriter.save_DigiAtte_For(20,mode='ro') # dress atte.
 
     QD_agent.refresh_log("PD answer stored!")
     QD_agent.QD_keeper()
@@ -65,26 +65,18 @@ if __name__ == "__main__":
 
     """ Fill in """
     execution:bool = True 
-    sweetSpot:bool = 1     # If true, only support one one qubit
+    sweetSpot:bool = 0     # If true, only support one one qubit
     chip_info_restore:bool = 0
-    DRandIP = {"dr":"dr1","last_ip":"11"}
+    DRandIP = {"dr":"dr4","last_ip":"81"}
     ro_element = {
-        # "q0":{  "bare" :{"ro_amp":0.2,"window_shift":0e6},
-        #         "dress":{"ro_amp":0.1,"window_shift":1.1e6}},
-        "q1":{  "bare" :{"ro_amp":0.2,"window_shift":0e6},
-                "dress":{"ro_amp":0.05,"window_shift":1.15e6}},
-        # "q2":{  "bare" :{"ro_amp":0.2,"window_shift":0e6},
-        #         "dress":{"ro_amp":0.4,"window_shift":0e6}},
-        # "q3":{  "bare" :{"ro_amp":0.2,"window_shift":0e6},
-        #         "dress":{"ro_amp":0.07,"window_shift":0e6}},
-        "q4":{  "bare" :{"ro_amp":0.2,"window_shift":0e6},
-                "dress":{"ro_amp":0.05,"window_shift":1.9e6}}
+        "q4":{  "bare" :{"ro_amp":0.1,"window_shift":0e6},
+                "dress":{"ro_amp":0.15,"window_shift":0.3e6}},
     }
     ro_attes = {"dress":30, "bare":20} # all ro_elements shared
 
     """ Optional paras"""
-    half_ro_freq_window_Hz = 5.5e6
-    freq_data_points = 300
+    half_ro_freq_window_Hz = 4e6
+    freq_data_points = 200
 
 
     
@@ -112,22 +104,16 @@ if __name__ == "__main__":
             QD_agent.quantum_device.get_element(q).clock_freqs.readout(original_rof[q])
         
         for qubit in CS_results[state]:
+            print(f"{qubit} @ {state} cavity: ")
             if state == "bare":
-                PD_ans[qubit]["bareF_Hz"] = CS_results["bare"][qubit]['fr']
-                print(f"{qubit} Bare frequency: ",float(CS_results["bare"][qubit]['fr'])*1e-9)
-                items = ["Qi_dia_corr",'Qc_dia_corr',"Ql"]
-                error = ["Qi_dia_corr_err","absQc_err","Ql_err"]
-                for idx, item in enumerate(items):
-                    print(f"{item}: {round(CS_results['bare'][qubit][item])} 土 {round(CS_results['bare'][qubit][error[idx]])}") 
+                PD_ans[qubit]["bareF_Hz"] = CS_results[state][qubit]['fr']
             else:
-                PD_ans[qubit]["dressF_Hz"] = CS_results["dress"][qubit]['fr']
+                PD_ans[qubit]["dressF_Hz"] = CS_results[state][qubit]['fr']
                 PD_ans[qubit]["dressP"] = ro_element[qubit][state]["ro_amp"]
                 PD_ans[qubit]["ro_atte"] = ro_attes[state]
-                print(f"{qubit} Dress frequency: ",float(CS_results["dress"][qubit]['fr'])*1e-9)
-                items = ["Qi_dia_corr",'Qc_dia_corr',"Ql"]
-                error = ["Qi_dia_corr_err","absQc_err","Ql_err"]
-                for idx, item in enumerate(items):
-                    print(f"{item}: {round(CS_results['dress'][qubit][item])} 土 {round(CS_results['dress'][qubit][error[idx]])}") 
+            for Qua_idx, Qua in enumerate(Quality_values):
+                print(f"{Qua[:2]} = {round(float(CS_results[state][qubit][Qua])/1000,2)} 土 {round(float(CS_results[state][qubit][Quality_errors[Qua_idx]])/1000,2)} k")
+            
 
 
         """ Storing """
