@@ -33,7 +33,7 @@ Hcfg_dr1 = {
         "ref": "internal",  # Use shared clock reference of the cluster
         "instrument_type": "Cluster",
         # ============ DRIVE ============#
-        f"clusterdr1_module4": {
+        f"clusterdr1_module14": {
             "instrument_type": "QCM_RF",
             "complex_output_0": {
                 "output_att": 0,
@@ -64,7 +64,7 @@ Hcfg_dr1 = {
                 ],
             }
         },
-        f"clusterdr1_module8": {
+        f"clusterdr1_module16": {
             "instrument_type": "QCM_RF",
             "complex_output_0": {
                 "output_att": 0,
@@ -95,7 +95,7 @@ Hcfg_dr1 = {
                 ],
             }
         },
-        f"clusterdr1_module10": {
+        f"clusterdr1_module18": {
             "instrument_type": "QCM_RF",
             "complex_output_0": {
                 "output_att": 0,
@@ -127,11 +127,16 @@ Hcfg_dr1 = {
             }
         },
         # ============ FLUX ============#
-        f"clusterdr1_module2": {
+        f"clusterdr1_module8": {
             "instrument_type": "QCM",
-            "real_output_0": {"portclock_configs": [{"port": "q2:fl", "clock": "cl0.baseband"}]},
-            "real_output_1": {"portclock_configs": [{"port": "q3:fl", "clock": "cl0.baseband"}]},
-            "real_output_2": {"portclock_configs": [{"port": "q4:fl", "clock": "cl0.baseband"}]},
+            "real_output_0": {"portclock_configs": [{"port": "q0:fl", "clock": "cl0.baseband"}]},
+            "real_output_1": {"portclock_configs": [{"port": "q1:fl", "clock": "cl0.baseband"}]},
+            "real_output_2": {"portclock_configs": [{"port": "q2:fl", "clock": "cl0.baseband"}]},
+            "real_output_3": {"portclock_configs": [{"port": "q3:fl", "clock": "cl0.baseband"}]},
+        },
+        f"clusterdr1_module10": {
+            "instrument_type": "QCM",
+            "real_output_4": {"portclock_configs": [{"port": "q4:fl", "clock": "cl0.baseband"}]}
         },
         # ============ READOUT ============#
         f"clusterdr1_module6": {
@@ -741,9 +746,11 @@ def get_FluxController(cluster, ip:str)->dict:
         }   
     elif which_dr.lower() == 'dr1':
         Fctrl: callable = {
-            "q2":cluster.module2.out0_offset,
-            "q3":cluster.module2.out1_offset,
-            "q4":cluster.module2.out2_offset,
+            "q0":cluster.module8.out0_offset,
+            "q1":cluster.module8.out1_offset,
+            "q2":cluster.module8.out2_offset,
+            "q3":cluster.module8.out3_offset,
+            "q4":cluster.module10.out0_offset,
         }
     elif which_dr.lower() == 'dr4':
         Fctrl: callable = {
@@ -772,12 +779,12 @@ def get_CouplerController(cluster, ip:str)->dict:
         raise ValueError("Please register the dr location with it's cluster ip in Experiment_setup.py in support folder! Or check the given ip_label is correct!")
     
     Cctrl = {}
-    if which_dr.lower() == 'dr3':
+    if which_dr.lower() == 'dr1':
         Cctrl = {
-            "c0":cluster.module6.out0_offset,
-            "c1":cluster.module6.out1_offset,
-            "c2":cluster.module6.out2_offset,
-            "c3":cluster.module6.out3_offset
+            "c0":cluster.module10.out1_offset,
+            "c1":cluster.module10.out2_offset,
+            "c2":cluster.module10.out3_offset,
+            # "c3":cluster.module10.out3_offset
         }
     elif which_dr.lower() == 'dr4':
         Cctrl = {
