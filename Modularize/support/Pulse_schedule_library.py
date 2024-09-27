@@ -1065,6 +1065,37 @@ def Qubit_SS_sche(
 
     return sched
 
+def Qubit_SS_Correlation_sche(
+    q:str,
+    ini_state:str,
+    pi_amp: dict,
+    pi_dura:dict,
+    R_amp: dict,
+    R_duration: dict,
+    R_integration:dict,
+    R_inte_delay:float,
+    repetitions:int=1,
+) -> Schedule:
+
+    sched = Schedule("Single shot", repetitions=repetitions)
+    
+    sched.add(Reset(q))
+    
+    sched.add(IdlePulse(duration=5000*1e-9))
+    
+    spec_pulse = Readout(sched,q,R_amp,R_duration,powerDep=False)
+    spec_pulse_2 = Readout(sched,q,R_amp,R_duration,powerDep=False)
+    
+    if ini_state=='e': 
+        X_pi_p(sched,pi_amp,q,pi_dura[q],spec_pulse,freeDu=electrical_delay)
+        
+    else: None
+    
+    Integration(sched,q,R_inte_delay,R_integration,spec_pulse,0,single_shot=True,get_trace=False,trace_recordlength=0)
+    Integration(sched,q,R_inte_delay,R_integration,spec_pulse,0,single_shot=True,get_trace=False,trace_recordlength=0)
+
+    return sched
+
 #? Calibrations :
 def ROF_Cali_sche(
     q:str,

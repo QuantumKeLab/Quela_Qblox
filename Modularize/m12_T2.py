@@ -184,9 +184,9 @@ if __name__ == "__main__":
     """ Fill in """
     execution:bool = 1
     chip_info_restore:bool = 1
-    DRandIP = {"dr":"dr1","last_ip":"11"}
+    DRandIP = {"dr":"dr4","last_ip":"81"}
     ro_elements = {
-        "q0":{"detune":0e6,"evoT":5e-6,"histo_counts":100},#-0.174e6
+        "q1":{"detune":0e6,"evoT":70e-6,"histo_counts":10},#-0.174e6
     }
     couplers = []
 
@@ -209,10 +209,14 @@ if __name__ == "__main__":
             
             """ Running """
             Cctrl = coupler_zctrl(DRandIP["dr"],cluster,QD_agent.Fluxmanager.build_Cctrl_instructions(couplers,'i'))
+            # Cctrl['c3'](0.1)
+            # Cctrl['c2'](-0.1)
             init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
             slightly_print(f"Ramsey with detuning = {round(ro_elements[qubit]['detune']*1e-6,2)} MHz")
             ramsey_results, this_t2_us, average_actual_detune = ramsey_executor(QD_agent,cluster,meas_ctrl,Fctrl,qubit,artificial_detune=ro_elements[qubit]["detune"],freeDura=ro_elements[qubit]["evoT"],ith=ith_histo,run=execution,pts=time_data_points,spin_echo=spin_echo_pi_num,avg_n=avg_n,IF=xy_IF)
-            highlight_print(f"{qubit} XYF = {round(QD_agent.quantum_device.get_element(qubit).clock_freqs.f01()*1e-9,5)} GHz")
+            # Cctrl['c3'](0)
+            # Cctrl['c2'](0)
+            highlight_print(f"{qubit} detune = {round(average_actual_detune[qubit]*1e-6,3)} MHz")
             if this_t2_us > 0:
                 t2_us_rec.append(this_t2_us)
             else:

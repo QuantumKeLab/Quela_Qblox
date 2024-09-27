@@ -16,7 +16,7 @@ def Single_shot_ref_spec(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:str='
     qubit_info = QD_agent.quantum_device.get_element(q)
     if thermal_pop_mode:
         qubit_info.measure.pulse_duration(2e-6)
-        qubit_info.measure.integration_time(1.5e-6)
+        qubit_info.measure.integration_time(1.5e-6)#1.5e-6
         qubit_info.reset.duration(250e-6)
     else:
         qubit_info.measure.pulse_duration(100e-6)
@@ -96,7 +96,7 @@ if __name__ == "__main__":
     """ Fill in """
     execution = True
     DRandIP = {"dr":"dr4","last_ip":"81"}
-    ro_elements = {'q0':{"ro_amp_factor":1.2},}
+    ro_elements = {'q1':{"ro_amp_factor":0.6},}
                 
     couplers = []
 
@@ -111,6 +111,8 @@ if __name__ == "__main__":
         Cctrl = coupler_zctrl(DRandIP["dr"],cluster,QD_agent.Fluxmanager.build_Cctrl_instructions(couplers,'i'))
     
         init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
+        # Cctrl['c2'](0.15)
+        # Cctrl['c3'](0.02)
         refIQ_executor(QD_agent,cluster,Fctrl,specific_qubits=qubit,run=execution,ro_amp_adj=ro_elements[qubit]["ro_amp_factor"])
         
         if ro_elements[qubit]["ro_amp_factor"] !=1:

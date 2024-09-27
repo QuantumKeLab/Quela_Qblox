@@ -120,8 +120,8 @@ def multiplexing_CS_ana(QD_agent:QDmanager, ds:Dataset, ro_elements:dict, save_p
         S21 = ds[f"y{2*idx}"] * cos(
                 deg2rad(ds[f"y{2*idx+1}"])
             ) + 1j * ds[f"y{2*idx}"] * sin(deg2rad(ds[f"y{2*idx+1}"]))
-        freq = array(ro_elements[q])
-        res_er = ResonatorData(freq=array(ro_elements[q]),zdata=array(S21))
+        freq = array(ro_elements[q])[1:]
+        res_er = ResonatorData(freq=freq,zdata=array(S21)[1:])
         result, data2plot, fit2plot = res_er.fit()
         fig, ax = plt.subplots(1,2,figsize=(9,6))
         ax0:plt.Axes = ax[0]        
@@ -177,26 +177,25 @@ if __name__ == "__main__":
     """ fill in part """
     # Basic info of measuring instrument, chip
     # e.g. QD_path, dr, ip, mode, chip_name, chip_type = '', 'dr3', '13', 'n','20240430_8_5Q4C', '5Q4C'
-    QD_path, dr, mode, chip_name, chip_type = 'Modularize/QD_backup/2024_9_16/DR4#81_SumInfo.pkl', 'dr4', 'l','20240916_TL3FQ3CQ', '5Q4C'
+    QD_path, dr, mode, chip_name, chip_type = '', 'dr4', 'n','20240923_5Q4C', '5Q4C'
     execution:bool = 1
     chip_info_restore:bool = 0
     # RO attenuation
-    init_RO_DigiAtte = 20 # multiple of 2, 10 ~ 16 recommended
+    init_RO_DigiAtte = 12 # multiple of 2, 10 ~ 16 recommended
 
     ro_bare=dict(
-        # q0=5.342e9,
-        # q1=5.874e9,
-        # q2=5.92e9,
-        # q3=5.78e9,
-        # q4=5.737e9,
-        q5=5.825e9
+        q2=5.9532e9,
+        q0=6.0012e9,
+        q4=6.0525e9,
+        q1=6.1024e9,
+        q3=6.1538e9
     )
 
     """ Optional paras """ 
-    coupler_number:int = 0
-    qubit_num:int = 6
+    coupler_number:int = 4
+    qubit_num:int = 5
     freq_data_points = 201
-    half_freq_window_Hz = 10e6
+    half_freq_window_Hz = 13e6
     n_avg: int = 100
 
 

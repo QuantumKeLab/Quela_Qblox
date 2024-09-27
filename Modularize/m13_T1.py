@@ -121,15 +121,15 @@ if __name__ == "__main__":
     """ Fill in """
     execution:bool = 1
     chip_info_restore:bool = 1
-    DRandIP = {"dr":"dr1","last_ip":"11"}
+    DRandIP = {"dr":"dr4","last_ip":"81"}
     ro_elements = {
-        "q0":{"evoT":5e-6,"histo_counts":1},
+        "q1":{"evoT":100e-6,"histo_counts":1},
     }
     couplers = []
 
     """ Optional paras """
     time_data_points = 100
-    avg_n = 1000
+    avg_n = 500#300
     xy_IF = 250e6
   
 
@@ -148,10 +148,12 @@ if __name__ == "__main__":
             Cctrl = coupler_zctrl(DRandIP["dr"],cluster,QD_agent.Fluxmanager.build_Cctrl_instructions(couplers,'i'))
             init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
             evoT = ro_elements[qubit]["evoT"]
-
-            T1_results, this_t1_us = T1_executor(QD_agent,cluster,meas_ctrl,Fctrl,qubit,freeDura=evoT,run=execution,ith=ith_histo,avg_times=avg_n,pts=time_data_points,IF=xy_IF)
+            # Cctrl['c3'](0.1)
+            # Cctrl['c1'](-0.1)
+            T1_results, this_t1_us = T1_executor(QD_agent,cluster,meas_ctrl,Fctrl,qubit,freeDura=evoT,run=execution,ith=ith_histo,avg_times=avg_n,pts=time_data_points,IF=xy_IF)#specific_folder=r"Modularize\Meas_raw\T1_timeDep"
             t1_us_rec.append(this_t1_us)
-
+            # Cctrl['c3'](0)
+            # Cctrl['c1'](0)
 
             """ Storing """
             if ith_histo == int(ro_elements[qubit]["histo_counts"])-1:

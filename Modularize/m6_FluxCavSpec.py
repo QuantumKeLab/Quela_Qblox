@@ -129,13 +129,13 @@ if __name__ == "__main__":
     """ Fill in """
     execution:bool = True
     chip_info_restore:bool = 0
-    DRandIP = {"dr":"dr1","last_ip":"11"}
-    ro_elements = ['q4']
-    cp_ctrl = {}
+    DRandIP = {"dr":"dr4","last_ip":"81"}
+    ro_elements = ['q1']
+    cp_ctrl = {'c0':0.1}#'c2':0.1,'c3':0.01
 
     """ Optional paras """
-    freq_half_window_Hz = 5e6
-    flux_half_window_V  = 0.4
+    freq_half_window_Hz = 3e6
+    flux_half_window_V  = 0.25
     freq_data_points = 40
     flux_data_points = 40
     freq_center_shift = 0e6 # freq axis shift

@@ -19,7 +19,7 @@ Quality_errors = ["Qi_dia_corr_err", "absQc_err", "Ql_err"]
 def preciseCavity_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,ro_elements:dict,run:bool=True, ro_amps:dict={})->dict:
     
     if run:
-        cs_ds = Cavity_spec(QD_agent,meas_ctrl,ro_elements,run=True,ro_amps=ro_amps,n_avg=100)
+        cs_ds = Cavity_spec(QD_agent,meas_ctrl,ro_elements,run=True,ro_amps=ro_amps,n_avg=600)
         CS_results = multiplexing_CS_ana(QD_agent, cs_ds, ro_elements)
     else:
         _ = Cavity_spec(QD_agent,meas_ctrl,ro_elements,run=False,ro_amps=ro_amps)
@@ -69,14 +69,22 @@ if __name__ == "__main__":
     chip_info_restore:bool = 0
     DRandIP = {"dr":"dr4","last_ip":"81"}
     ro_element = {
-        "q4":{  "bare" :{"ro_amp":0.1,"window_shift":0e6},
-                "dress":{"ro_amp":0.15,"window_shift":0.3e6}},
+        # "q0":{  "bare" :{"ro_amp":0.188,"window_shift":0e6},
+        #         "dress":{"ro_amp":0.003,"window_shift":0.8e6}},
+        "q1":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
+                "dress":{"ro_amp":0.1,"window_shift":2.1e6}},
+        "q2":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
+                "dress":{"ro_amp":0.1,"window_shift":2.3e6}},                
+        "q3":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
+                "dress":{"ro_amp":0.1,"window_shift":2.2e6}},
+        "q4":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
+                "dress":{"ro_amp":0.1,"window_shift":3.4e6}},
     }
-    ro_attes = {"dress":30, "bare":20} # all ro_elements shared
+    ro_attes = {"dress":34, "bare":30} # all ro_elements shared
 
     """ Optional paras"""
-    half_ro_freq_window_Hz = 4e6
-    freq_data_points = 200
+    half_ro_freq_window_Hz = 11e6
+    freq_data_points = 500
 
 
     
