@@ -371,7 +371,20 @@ def Readout(sche,q,R_amp,R_duration,powerDep=False):
 
     # tim_sample, env_sample = FlatTopGaussianPulse(Du,amp)
     # return sche.add(NumericalPulse(samples=env_sample,t_samples=tim_sample,port="q:res",clock=q+".ro",t0=0e-9),)
-    return sche.add(SquarePulse(duration=Du,amp=amp,port="q:res",clock=q+".ro",t0=4e-9))
+    return sche.add(SquarePulse(duration=Du,amp=amp,port="q:res",clock=q+".ro"))
+
+def Readout_2(sche,q,ref_pulse_sche,R_amp,R_duration,powerDep=False,correlate_delay:float=0e-9):
+    if powerDep is True:
+        amp= R_amp
+        Du= R_duration[q]
+    else:    
+        amp= R_amp[q]
+        Du= R_duration[q]
+
+    # tim_sample, env_sample = FlatTopGaussianPulse(Du,amp)
+    # return sche.add(NumericalPulse(samples=env_sample,t_samples=tim_sample,port="q:res",clock=q+".ro",t0=0e-9),)
+    return sche.add(SquarePulse(duration=Du,amp=amp,port="q:res",clock=q+".ro"),ref_op=ref_pulse_sche,ref_pt="start",rel_time=correlate_delay)
+
 
 def Multi_Readout(sche,q,ref_pulse_sche,R_amp,R_duration,powerDep=False,):
     if powerDep is True:
@@ -1074,7 +1087,8 @@ def Qubit_SS_Correlation_sche(
     R_duration: dict,
     R_integration:dict,
     R_inte_delay:float,
-    repetitions:int=1,
+    correlate_delay:any=0e-9,
+    repetitions:int=1    
 ) -> Schedule:
 
     sched = Schedule("Single shot", repetitions=repetitions)
@@ -1083,16 +1097,16 @@ def Qubit_SS_Correlation_sche(
     
     sched.add(IdlePulse(duration=5000*1e-9))
     
-    spec_pulse = Readout(sched,q,R_amp,R_duration,powerDep=False)
-    spec_pulse_2 = Readout(sched,q,R_amp,R_duration,powerDep=False)
+    spec_pulse = Readout(sched,q,R_amp,R_duration=R_duration,powerDep=False)#{q:1.5*R_amp[q]}
+    spec_pulse_2 = Readout_2(sched,q,spec_pulse,R_amp,R_duration,powerDep=False,correlate_delay=-(correlate_delay+R_duration[q]))
     
-    if ini_state=='e': 
-        X_pi_p(sched,pi_amp,q,pi_dura[q],spec_pulse,freeDu=electrical_delay)
+    # if ini_state=='e': 
+    #     X_pi_p(sched,pi_amp,q,pi_dura[q],spec_pulse_2,freeDu=electrical_delay)
         
-    else: None
+    # else: None
     
     Integration(sched,q,R_inte_delay,R_integration,spec_pulse,0,single_shot=True,get_trace=False,trace_recordlength=0)
-    Integration(sched,q,R_inte_delay,R_integration,spec_pulse,0,single_shot=True,get_trace=False,trace_recordlength=0)
+    Integration(sched,q,R_inte_delay,R_integration,spec_pulse_2,1,single_shot=True,get_trace=False,trace_recordlength=0)
 
     return sched
 

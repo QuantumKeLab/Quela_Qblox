@@ -95,15 +95,15 @@ if __name__ == "__main__":
     
     """ Fill in """
     execution = True
-    DRandIP = {"dr":"dr4","last_ip":"81"}
-    ro_elements = {'q1':{"ro_amp_factor":0.6},}
+    DRandIP = {"dr":"drke","last_ip":"242"}
+    ro_elements = {'q0':{"ro_amp_factor":1},}
                 
     couplers = []
 
 
     for qubit in ro_elements:
         """ Preparations """
-        QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
+        QD_path = r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_9_30\DRKE#242_SumInfo.pkl"#find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
         QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
         
 

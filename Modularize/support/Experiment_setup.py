@@ -691,7 +691,7 @@ Hcfg_drke = {
                 "input_att": 0,
                 "dc_mixer_offset_I": 0.0,
                 "dc_mixer_offset_Q": 0.0,
-                "lo_freq":6.5e9,       # *** Should be set as a parameter later on
+                "lo_freq":6.1e9,       # *** Should be set as a parameter later on
                 "portclock_configs": [
                     {
                         "port": "q:res",
@@ -755,7 +755,7 @@ def get_FluxController(cluster, ip:str)->dict:
     elif which_dr.lower() == 'drke':
         Fctrl: callable = {
             "q0":cluster.module2.out0_offset,
-            "q1":cluster.module2.out1_offset,
+            # "q1":cluster.module2.out1_offset,
         }
 
     else:

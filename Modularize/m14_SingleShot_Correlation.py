@@ -11,13 +11,13 @@ from quantify_core.measurement.control import MeasurementControl
 from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
 from Modularize.support.Pulse_schedule_library import Qubit_state_single_shot_plot
 from Modularize.support import QDmanager, Data_manager,init_system_atte, init_meas, shut_down, coupler_zctrl
-from Modularize.support.Pulse_schedule_library import Qubit_SS_sche, set_LO_frequency, pulse_preview, Qubit_state_single_shot_fit_analysis
+from Modularize.support.Pulse_schedule_library import Qubit_SS_sche, Qubit_SS_Correlation_sche, set_LO_frequency, pulse_preview, Qubit_state_single_shot_fit_analysis
 
 
 try:
     from qcat.analysis.state_discrimination.discriminator import train_GMModel # type: ignore
     from qcat.visualization.readout_fidelity import plot_readout_fidelity
-    from Modularize.analysis.OneShotAna import a_OSdata_analPlot
+    from Modularize.analysis.OneShotAna import a_OSdata_analPlot, a_OSdata_correlation_analPlot
     mode = "AS"
 except:
     mode = "WeiEn"
@@ -27,16 +27,15 @@ def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:st
     qubit_info = QD_agent.quantum_device.get_element(q)
     print("Integration time ",qubit_info.measure.integration_time()*1e6, "µs")
     print("Reset time ", qubit_info.reset.duration()*1e6, "µs")
-    
     # qubit_info.reset.duration(250e-6)
     # qubit_info.clock_freqs.readout(5.863e9-0.4e6)
     print(qubit_info.clock_freqs.readout()*1e-9)
-    sche_func = Qubit_SS_sche  
+    sche_func = Qubit_SS_Correlation_sche
     LO= qubit_info.clock_freqs.f01()+IF
     if ro_amp_factor != 1:
         qubit_info.measure.pulse_amp(ro_amp_factor*qubit_info.measure.pulse_amp())
         eyeson_print(f"The new RO amp = {round(qubit_info.measure.pulse_amp(),2)}")
-    set_LO_frequency(QD_agent.quantum_device,q=q,module_type='drive',LO_frequency=LO)
+    # set_LO_frequency(QD_agent.quantum_device,q=q,module_type='drive',LO_frequency=LO)
     data = {}
     analysis_result = {}
     exp_kwargs= dict(shots=shots,
@@ -47,12 +46,13 @@ def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:st
         sched_kwargs = dict(   
             q=q,
             ini_state=ini_state,
-            pi_amp={str(q):qubit_info.rxy.amp180()*1},
+            pi_amp={str(q):qubit_info.rxy.amp180()},
             pi_dura={str(q):qubit_info.rxy.duration()},
             R_amp={str(q):qubit_info.measure.pulse_amp()},
             R_duration={str(q):qubit_info.measure.pulse_duration()},
             R_integration={str(q):qubit_info.measure.integration_time()},
             R_inte_delay=qubit_info.measure.acq_delay(),
+            correlate_delay=0e-6
         )
         
         if run:
@@ -65,7 +65,7 @@ def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:st
             )
             QD_agent.quantum_device.cfg_sched_repetitions(shots)
             ss_ds= gettable.get()
-            
+            print(array(ss_ds).shape)
             data[ini_state] = ss_ds
             show_args(exp_kwargs, title="Single_shot_kwargs: Meas.qubit="+q)
             if Experi_info != {}:
@@ -80,9 +80,9 @@ def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:st
             
     tau= qubit_info.measure.integration_time()        
     state_dep_sched('g')
-    state_dep_sched('e')
+    # state_dep_sched('e')
     SS_dict = {
-        "e":{"dims":("I","Q"),"data":array(data['e'])},
+        # "e":{"dims":("I","Q"),"data":array(data['e'])},
         "g":{"dims":("I","Q"),"data":array(data['g'])},
     }
     
@@ -112,7 +112,9 @@ def SS_executor(QD_agent:QDmanager,cluster:Cluster,Fctrl:dict,target_q:str,shots
     Fctrl[target_q](0.0)
     cluster.reset()
     
-    
+    # qu = QD_agent.quantum_device.get_element(qubit)
+    # qu.clock_freqs.readout(6e9)#float(CS_results[qubit]['fr']))
+
     if mode == "WeiEn":
         if plot:
             Qubit_state_single_shot_plot(SS_result[target_q],Plot_type='both',y_scale='log')
@@ -131,14 +133,14 @@ if __name__ == '__main__':
     """ Fill in """
     execute:bool = True
     repeat:int = 1
-    DRandIP = {"dr":"dr4","last_ip":"81"}
-    ro_elements = {'q3':{"roAmp_factor":1.4}}
+    DRandIP = {"dr":"drke","last_ip":"242"}
+    ro_elements = {'q0':{"roAmp_factor":1}}
     couplers = []
 
 
     """ Optional paras (don't use is better) """
     ro_atte_degrade_dB:int = 0 # multiple of 2 
-    shot_num:int = 10000
+    shot_num:int = 5
     xy_IF = 250e6
 
 
@@ -151,7 +153,7 @@ if __name__ == '__main__':
 
             """ Preparation """
             slightly_print(f"The {i}th OS:")
-            QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
+            QD_path = r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_9_30\DRKE#242_SumInfo.pkl"#find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
             QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
             QD_agent.Notewriter.modify_DigiAtte_For(-ro_atte_degrade_dB, qubit, 'ro')
 
@@ -160,7 +162,7 @@ if __name__ == '__main__':
             Cctrl = coupler_zctrl(DRandIP["dr"],cluster,QD_agent.Fluxmanager.build_Cctrl_instructions(couplers,'i'))
             if i == 0:
                 snr_rec[qubit], effT_rec[qubit], thermal_pop[qubit] = [], [], []
-            init_system_atte(QD_agent.quantum_device,list([qubit]),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
+            init_system_atte(QD_agent.quantum_device,list([qubit]),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'),ro_out_att=20)#ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
             ro_amp_scaling = ro_elements[qubit]["roAmp_factor"]
             if ro_amp_scaling != 1 and repeat > 1 : raise ValueError("Check the RO_amp_factor should be 1 when you want to repeat it!")
             info = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=ro_amp_scaling,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF)

@@ -17,6 +17,14 @@ time_cost = 40
 # ref_t1 = 29.8
 # ref_t1_err = 3.3
 
+# import os, datetime
+# def get_time_now():
+#     """
+#     Since we save the Xarray into netCDF, we use the current time to encode the file name.\n
+#     Ex: 19:23:34 return H19M23S34 
+#     """
+#     current_time = datetime.datetime.now()
+#     return f"H{current_time.hour}M{current_time.minute}S{current_time.second}"
 '''Time label sort'''
 ## files = sorted([name for name in os.listdir(folder) if (os.path.isfile(os.path.join(folder,name)) and name.split(".")[-1] == "nc")],key=lambda name:time_label_sort(name))
 '''Exp idx sort'''
