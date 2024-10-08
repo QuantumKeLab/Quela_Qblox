@@ -369,8 +369,6 @@ def Readout(sche,q,R_amp,R_duration,powerDep=False):
         amp= R_amp[q]
         Du= R_duration[q]
 
-    # tim_sample, env_sample = FlatTopGaussianPulse(Du,amp)
-    # return sche.add(NumericalPulse(samples=env_sample,t_samples=tim_sample,port="q:res",clock=q+".ro",t0=0e-9),)
     return sche.add(SquarePulse(duration=Du,amp=amp,port="q:res",clock=q+".ro"))
 
 def Readout_2(sche,q,ref_pulse_sche,R_amp,R_duration,powerDep=False,correlate_delay:float=0e-9):
@@ -381,8 +379,6 @@ def Readout_2(sche,q,ref_pulse_sche,R_amp,R_duration,powerDep=False,correlate_de
         amp= R_amp[q]
         Du= R_duration[q]
 
-    # tim_sample, env_sample = FlatTopGaussianPulse(Du,amp)
-    # return sche.add(NumericalPulse(samples=env_sample,t_samples=tim_sample,port="q:res",clock=q+".ro",t0=0e-9),)
     return sche.add(SquarePulse(duration=Du,amp=amp,port="q:res",clock=q+".ro"),ref_op=ref_pulse_sche,ref_pt="start",rel_time=correlate_delay)
 
 
@@ -394,9 +390,6 @@ def Multi_Readout(sche,q,ref_pulse_sche,R_amp,R_duration,powerDep=False,):
         amp= R_amp[q]
         Du= R_duration[q]
 
-    # tim_sample, env_sample = FlatTopGaussianPulse(Du,amp)
-
-    # return sche.add(NumericalPulse(samples=env_sample,t_samples=tim_sample,port="q:res",clock=q+".ro",t0=0),ref_pt="start",ref_op=ref_pulse_sche,)
     return sche.add(SquarePulse(duration=Du,amp=amp,port="q:res",clock=q+".ro",t0=4e-9),ref_pt="start",ref_op=ref_pulse_sche,)
 
     

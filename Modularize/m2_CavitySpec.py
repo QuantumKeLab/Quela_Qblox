@@ -76,7 +76,7 @@ def Cavity_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,ro_elements:dict
         meas_ctrl.setpoints(datapoint_idx)
         
         rs_ds = meas_ctrl.run("One-tone")
-        Data_manager().save_raw_data(QD_agent=QD_agent,ds=rs_ds,qb=q,exp_type='CS',specific_dataFolder=particular_folder)
+        # Data_manager().save_raw_data(QD_agent=QD_agent,ds=rs_ds,qb=q,exp_type='CS',specific_dataFolder=particular_folder)
         
         print(f"{q} Cavity:")
         if Experi_info != {}:
