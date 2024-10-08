@@ -296,16 +296,16 @@ Hcfg_dr2 = {
                 "input_att": 0,
                 "dc_mixer_offset_I": 0.0,
                 "dc_mixer_offset_Q": 0.0,
-                "lo_freq": 6.17e9,       # *** Should be set as a parameter later on
+                "lo_freq": 6.2e9,       # *** Should be set as a parameter later on
                 "portclock_configs": [
                     {
-                        "port": "q0:res",
+                        "port": "q:res",
                         "clock": "q0.ro",
                         "mixer_amp_ratio": 1.0,
                         "mixer_phase_error_deg": 0.0,
                     },
                     {
-                        "port": "q1:res",
+                        "port": "q:res",
                         "clock": "q1.ro",
                         "mixer_amp_ratio": 1.0,
                         "mixer_phase_error_deg": 0.0,
@@ -691,7 +691,7 @@ Hcfg_drke = {
                 "input_att": 0,
                 "dc_mixer_offset_I": 0.0,
                 "dc_mixer_offset_Q": 0.0,
-                "lo_freq":6.5e9,       # *** Should be set as a parameter later on
+                "lo_freq":6.1e9,       # *** Should be set as a parameter later on
                 "portclock_configs": [
                     {
                         "port": "q:res",
@@ -755,7 +755,7 @@ def get_FluxController(cluster, ip:str)->dict:
     elif which_dr.lower() == 'drke':
         Fctrl: callable = {
             "q0":cluster.module2.out0_offset,
-            "q1":cluster.module2.out1_offset,
+            # "q1":cluster.module2.out1_offset,
         }
 
     else:
@@ -771,11 +771,11 @@ def get_CouplerController(cluster, ip:str)->dict:
         raise ValueError("Please register the dr location with it's cluster ip in Experiment_setup.py in support folder! Or check the given ip_label is correct!")
     
     Cctrl = {}
-    if which_dr.lower() == 'dr1':
+    if which_dr.lower() == 'dr2':
         Cctrl = {
-            "c0":cluster.module10.out1_offset,
-            "c2":cluster.module10.out2_offset,
-            "c3":cluster.module10.out3_offset,
+            "c0":cluster.module2.out2_offset,
+            "c1":cluster.module2.out3_offset,
+            # "c3":cluster.module10.out3_offset,
             # "c3":cluster.module10.out3_offset
         }
     elif which_dr.lower() == 'dr4':
