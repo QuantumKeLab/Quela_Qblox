@@ -76,7 +76,7 @@ def Cavity_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,ro_elements:dict
         meas_ctrl.setpoints(datapoint_idx)
         
         rs_ds = meas_ctrl.run("One-tone")
-        # Data_manager().save_raw_data(QD_agent=QD_agent,ds=rs_ds,qb=q,exp_type='CS',specific_dataFolder=particular_folder)
+        Data_manager().save_raw_data(QD_agent=QD_agent,ds=rs_ds,qb=q,exp_type='CS',specific_dataFolder=particular_folder)
         
         print(f"{q} Cavity:")
         if Experi_info != {}:
@@ -156,7 +156,7 @@ def cavitySpectro_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,ro_ba
         CS_results = multiplexing_CS_ana(QD_agent, cs_ds, ro_elements)
         for qubit in CS_results:
             qu = QD_agent.quantum_device.get_element(qubit)
-            qu.clock_freqs.readout(6e9)#float(CS_results[qubit]['fr']))
+            qu.clock_freqs.readout(float(CS_results[qubit]['fr']))#
             print(f"{qubit}:")
             print("Res @ ",round(qu.clock_freqs.readout()*1e-9,4)," GHz")
             for Qua_idx, Qua in enumerate(Quality_values):
@@ -177,24 +177,30 @@ if __name__ == "__main__":
     """ fill in part """
     # Basic info of measuring instrument, chip
     # e.g. QD_path, dr, ip, mode, chip_name, chip_type = '', 'dr3', '13', 'n','20240430_8_5Q4C', '5Q4C'
-    QD_path, dr, mode, chip_name, chip_type = '', 'drke', 'n','20240923_5Q4C', '5Q4C'
+    QD_path, dr, mode, chip_name, chip_type = '', 'dr2', 'n','20240923_5Q4C', '5Q4C'
     execution:bool = 1
     chip_info_restore:bool = 0
     # RO attenuation
     init_RO_DigiAtte = 12 # multiple of 2, 10 ~ 16 recommended
 
     ro_bare=dict(
-        q0=6.0012e9
         # q2=5.9532e9,
         # q0=6.0012e9,
         # q4=6.0525e9,
         # q1=6.1024e9,
         # q3=6.1538e9
+
+        # q2=5.9283e9,
+        q0=5.9900e9,
+        # q4=6.0075e9,
+        q1=6.0736e9,
+        # q3=6.1060e9
+
     )
 
     """ Optional paras """ 
-    coupler_number:int = 0
-    qubit_num:int = 1
+    coupler_number:int = 2
+    qubit_num:int = 2
     freq_data_points = 201
     half_freq_window_Hz = 13e6
     n_avg: int = 100

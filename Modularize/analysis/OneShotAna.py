@@ -94,13 +94,13 @@ def a_OSdata_correlation_analPlot(nc_path:str, plot:bool=True, pic_path:str='', 
         plt.figure(figsize=(6, 6))
         
         'Plot the scatter points for two readouts'
-        # plt.scatter(I_readout_1, Q_readout_1, c='blue', label="Readout 1", alpha=0.5)
-        # plt.scatter(I_readout_2, Q_readout_2, c='red', label="Readout 2", alpha=0.5)
+        plt.scatter(I_readout_1, Q_readout_1, c='blue', label="Readout 1", alpha=0.5)
+        plt.scatter(I_readout_2, Q_readout_2, c='red', label="Readout 2", alpha=0.5)
         
-        # # Label axes
-        # plt.xlabel('I (mV)')
-        # plt.ylabel('Q (mV)')
-        # plt.title('IQ Plane - Two Readouts')
+        # Label axes
+        plt.xlabel('I (mV)')
+        plt.ylabel('Q (mV)')
+        plt.title('IQ Plane - Two Readouts')
 
         'Center=(0,0) and shows four quadrants'
         # # Set the axis limits symmetrically so that (0, 0) is at the center
@@ -127,12 +127,12 @@ def a_OSdata_correlation_analPlot(nc_path:str, plot:bool=True, pic_path:str='', 
         
         'Cycle'
         # 定義循環數
-        shots=5
+        # shots=10000
         # shots_per_cycle = 5
         # num_cycles = shots // shots_per_cycle  # 2000
 
         # 定義顏色列表，使用 5 種不同的顏色
-        colors = ['red','green', 'blue', 'orange' ,'purple']#,  
+        # colors = ['red','green', 'blue', 'orange' ,'purple']#,  
 
         # 創建一個圖形
         # plt.figure(figsize=(10, 6))
@@ -142,18 +142,18 @@ def a_OSdata_correlation_analPlot(nc_path:str, plot:bool=True, pic_path:str='', 
         #     for i in range(shots_per_cycle):
         #         idx = cycle * shots_per_cycle + i  # 計算出當前 shot 的索引
         #         plt.scatter(I_readout_1[idx], Q_readout_1[idx], color=colors[i], label=f'Shot {i+1}' if cycle == 0 else "")  # 只在第一個循環中顯示 label
-        for i in range(shots):
-            plt.scatter(I_readout_1[i],Q_readout_1[i],color=colors[i],label=f'Shot{i+1}')
+        # for i in range(shots):
+        #     plt.scatter(I_readout_1[i],Q_readout_1[i],color=colors[i],label=f'Shot{i+1}')
         
         # 添加標籤和標題
-        plt.xlim(106,108)
-        plt.ylim(-29,-25)
-        plt.xlabel('I Readout')
-        plt.ylabel('Q Readout')
-        plt.title('IQ Plane for Different Shots in a Cycle')
+        # plt.xlim(106,108)
+        # plt.ylim(-29,-25)
+        # plt.xlabel('I Readout')
+        # plt.ylabel('Q Readout')
+        # plt.title('IQ Plane for Different Shots in a Cycle')
 
-        # 添加圖例（僅顯示一次每個顏色的標籤）
-        plt.legend(loc='best')
+        # # 添加圖例（僅顯示一次每個顏色的標籤）
+        # plt.legend(loc='best')
 
         'Plot'
         # Add grid and legend
@@ -212,5 +212,7 @@ def share_model_OSana(QD_agent:QDmanager,target_q:str,folder_path:str,pic_save:b
 
 
 if __name__ == "__main__":
-    nc_path = r'C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_2\DRKEq0_SingleShot(0)_H19M2S17.nc'
-    a_OSdata_correlation_analPlot(nc_path)
+    # nc_path = r'C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_2\DRKEq0_SingleShot(0)_second.nc'
+    # a_OSdata_correlation_analPlot(nc_path)
+    nc_path=r'"C:\Users\admin\Downloads\SingleShot\DR1q1_SingleShot(0)_H19M1S59.nc"'
+    a_OSdata_analPlot(nc_path)

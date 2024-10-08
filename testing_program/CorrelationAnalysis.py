@@ -87,12 +87,14 @@ def Vk_0_and_Vk_tau(Vk_nc_file:str):
     return I_readout_2_list, I_readout_1_list, Q_readout_2_list, Q_readout_1_list
 
 """Get normalized_g_1, Pe and Teff"""
-def normalized_g_1():
+def g_1(I_readout_2_list, I_readout_1_list,Ve_mean_I, Vg_mean_I):
     # 假設 Vk_0 和 Vk_tau 是你從前面的數據中提取的兩個 list
+    I_readout_2_list, I_readout_1_list=Vk_0_and_Vk_tau(Vk_nc_file='')
     Vk_0 = I_readout_1_list  # 替換為你的實際 list
     Vk_tau = I_readout_2_list  # 替換為你的實際 list
 
     # 假設你已經有 V̄e 和 V̄g，這些是常數
+    Ve_mean_I, Vg_mean_I =ave_Vg_and_ave_Ve(ave_V_nc_path='')
     V_e_avg = Ve_mean_I  
     V_g_avg = Vg_mean_I  
 
@@ -120,9 +122,9 @@ def normalized_g_1():
     print("Normalized g^(1)= ", normalized_g_1)
     return normalized_g_1, Vk_0, Vk_tau, V_e_avg, V_g_avg
 
-""""""
+# """"""
 if __name__ == '__main__':
-    g_1= normalized_g_1
+    normalized_g_1= g_1(normalized_g_1)
     # N=shot_num
     f01=4e9
     # normalized_g_1=g_1/N  #??
