@@ -156,12 +156,12 @@ if __name__ == "__main__":
     execution:bool = 1
     chip_info_restore:bool = 1
     DRandIP = {"dr":"dr2","last_ip":"10"}
-    ro_elements = ['q1']
+    ro_elements = ['q0']
     couplers = []
 
 
     """ Optional paras """
-    pi_duration:float = 150e-9
+    pi_duration:float = 80e-9
     pi_amp_max:float = 0.4
     rabi_type:str = 'power'  # 'time' or 'power'
     data_pts = 100
@@ -174,7 +174,7 @@ if __name__ == "__main__":
 
         """ Preparations """
         start_time = time.time()
-        QD_path = r'Modularize\QD_backup\2024_9_24\DR4#81_SumInfo.pkl'#find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
+        QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
         QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
         chip_info = cds.Chip_file(QD_agent=QD_agent)
         print(QD_agent.refIQ)
@@ -200,7 +200,7 @@ if __name__ == "__main__":
                     QD_agent.QD_keeper()
             else:
                 pass
-                # QD_agent.QD_keeper()
+                QD_agent.QD_keeper()
             if chip_info_restore:
                 chip_info.update_RabiOsci(qb=qubit)
 

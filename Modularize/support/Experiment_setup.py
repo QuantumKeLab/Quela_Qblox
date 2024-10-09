@@ -755,7 +755,8 @@ def get_FluxController(cluster, ip:str)->dict:
     elif which_dr.lower() == 'drke':
         Fctrl: callable = {
             "q0":cluster.module2.out0_offset,
-            # "q1":cluster.module2.out1_offset,
+            "q1":cluster.module2.out1_offset,
+            
         }
 
     else:
@@ -784,6 +785,11 @@ def get_CouplerController(cluster, ip:str)->dict:
             "c2":cluster.module4.out2_offset,
             "c3":cluster.module4.out3_offset,
             
+        }
+    elif which_dr.lower() == 'drke':
+        Cctrl = {
+            # "c0":cluster.module2.out2_offset,
+            # "c1":cluster.module2.out3_offset,           
         }
     return Cctrl
 

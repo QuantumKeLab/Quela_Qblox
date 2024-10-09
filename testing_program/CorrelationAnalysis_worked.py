@@ -73,13 +73,13 @@ def g_1(I_readout_2_list, I_readout_1_list, Ve_mean_I, Vg_mean_I):
 
 if __name__ == '__main__':
     # Step 1: Get Ve_mean_I and Vg_mean_I
-    # ave_V_nc_path = r'C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_1\DRKEq0_SingleShot(0)_H22M15S28.nc'
-    # Ve_mean_I, Vg_mean_I = ave_Vg_and_ave_Ve(ave_V_nc_path)
-    Ve_mean_I=5e-5
-    Vg_mean_I=5.5e-5
+    ave_V_nc_path = r'C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_9\cor\DR2q0_SingleShot(0)_H10M18S59.nc'
+    Ve_mean_I, Vg_mean_I = ave_Vg_and_ave_Ve(ave_V_nc_path)
+    # Ve_mean_I=5e-5
+    # Vg_mean_I=5.5e-5
 
     # Step 2: Get I_readout_2_list and I_readout_1_list
-    Vk_nc_file = r'C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_1\DRKEq0_SingleShot(0)_half.nc'
+    Vk_nc_file = r'C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_9\cor\DR2q0_SingleShot(0)_H10M26S42.nc'
     I_readout_2_list, I_readout_1_list = Vk_0_and_Vk_tau(Vk_nc_file)
 
     # Step 3: Calculate normalized g^(1)

@@ -95,15 +95,15 @@ if __name__ == "__main__":
     
     """ Fill in """
     execution = True
-    DRandIP = {"dr":"drke","last_ip":"242"}
-    ro_elements = {'q0':{"ro_amp_factor":1},}
+    DRandIP = {"dr":"dr2","last_ip":"10"}
+    ro_elements = {'q0':{"ro_amp_factor":0.9},}
                 
     couplers = []
 
 
     for qubit in ro_elements:
         """ Preparations """
-        QD_path = r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_9_30\DRKE#242_SumInfo.pkl"#find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
+        QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"]) #r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_9_30\DRKE#242_SumInfo.pkl"
         QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
         
 
@@ -111,7 +111,7 @@ if __name__ == "__main__":
         Cctrl = coupler_zctrl(DRandIP["dr"],cluster,QD_agent.Fluxmanager.build_Cctrl_instructions(couplers,'i'))
     
         init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
-        # Cctrl['c2'](0.15)
+        # Cctrl['c0'](-0.3)
         # Cctrl['c3'](0.02)
         refIQ_executor(QD_agent,cluster,Fctrl,specific_qubits=qubit,run=execution,ro_amp_adj=ro_elements[qubit]["ro_amp_factor"])
         

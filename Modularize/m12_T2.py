@@ -188,7 +188,7 @@ if __name__ == "__main__":
     chip_info_restore:bool = 1
     DRandIP = {"dr":"dr2","last_ip":"10"}
     ro_elements = {
-        "q1":{"detune":0e6,"evoT":70e-6,"histo_counts":10},#-0.174e6
+        "q0":{"detune":0e6,"evoT":80e-6,"histo_counts":1},#-0.174e6
     }
     couplers = []
 

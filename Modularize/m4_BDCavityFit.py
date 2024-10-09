@@ -69,18 +69,18 @@ if __name__ == "__main__":
     chip_info_restore:bool = 0
     DRandIP = {"dr":"dr2","last_ip":"10"}
     ro_element = {
-        # "q0":{  "bare" :{"ro_amp":0.188,"window_shift":0e6},
-        #         "dress":{"ro_amp":0.003,"window_shift":0.8e6}},
-        "q1":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
-                "dress":{"ro_amp":0.1,"window_shift":2.1e6}},
-        "q2":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
-                "dress":{"ro_amp":0.1,"window_shift":2.3e6}},                
-        "q3":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
-                "dress":{"ro_amp":0.1,"window_shift":2.2e6}},
-        "q4":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
-                "dress":{"ro_amp":0.1,"window_shift":3.4e6}},
+        "q0":{  "bare" :{"ro_amp":0.4,"window_shift":0e6},
+                "dress":{"ro_amp":0.2,"window_shift":6e6}},
+        "q1":{  "bare" :{"ro_amp":0.4,"window_shift":0e6},
+                "dress":{"ro_amp":0.2,"window_shift":2.5e6}},
+        # "q2":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
+        #         "dress":{"ro_amp":0.1,"window_shift":2.3e6}},                
+        # "q3":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
+        #         "dress":{"ro_amp":0.1,"window_shift":2.2e6}},
+        # "q4":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
+        #         "dress":{"ro_amp":0.1,"window_shift":3.4e6}},
     }
-    ro_attes = {"dress":34, "bare":30} # all ro_elements shared
+    ro_attes = {"dress":40, "bare":30} # all ro_elements shared
 
     """ Optional paras"""
     half_ro_freq_window_Hz = 11e6

@@ -123,7 +123,7 @@ if __name__ == "__main__":
     chip_info_restore:bool = 1
     DRandIP = {"dr":"dr2","last_ip":"10"}
     ro_elements = {
-        "q1":{"evoT":100e-6,"histo_counts":1},
+        "q0":{"evoT":80e-6,"histo_counts":1},
     }
     couplers = []
 
@@ -170,7 +170,7 @@ if __name__ == "__main__":
                     if ro_elements[qubit]["histo_counts"] >= 50:
                         QD_agent.quantum_device.get_element(qubit).reset.duration(10*multiples_of_x(mean_T1_us*1e-6,4e-9))
                         QD_agent.Notewriter.save_T1_for(mean_T1_us,qubit)
-                        # QD_agent.QD_keeper()
+                        QD_agent.QD_keeper()
                         if chip_info_restore:
                             chip_info.update_T1(qb=qubit, T1=f"{mean_T1_us} +- {std_T1_us}")
                 
