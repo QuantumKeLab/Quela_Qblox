@@ -121,15 +121,15 @@ if __name__ == "__main__":
     """ Fill in """
     execution:bool = 1
     chip_info_restore:bool = 1
-    DRandIP = {"dr":"dr2","last_ip":"10"}
+    DRandIP = {"dr":"drke","last_ip":"242"}
     ro_elements = {
-        "q0":{"evoT":80e-6,"histo_counts":1},
+        "q1":{"evoT":40e-6,"histo_counts":100000},
     }
     couplers = []
 
     """ Optional paras """
     time_data_points = 100
-    avg_n = 500#300
+    avg_n = 300
     xy_IF = 250e6
   
 
@@ -150,7 +150,7 @@ if __name__ == "__main__":
             evoT = ro_elements[qubit]["evoT"]
             # Cctrl['c3'](0.1)
             # Cctrl['c1'](-0.1)
-            T1_results, this_t1_us = T1_executor(QD_agent,cluster,meas_ctrl,Fctrl,qubit,freeDura=evoT,run=execution,ith=ith_histo,avg_times=avg_n,pts=time_data_points,IF=xy_IF)#specific_folder=r"Modularize\Meas_raw\T1_timeDep"
+            T1_results, this_t1_us = T1_executor(QD_agent,cluster,meas_ctrl,Fctrl,qubit,freeDura=evoT,run=execution,ith=ith_histo,avg_times=avg_n,pts=time_data_points,IF=xy_IF, specific_folder=r"Modularize\Meas_raw\T1_timeDep")#specific_folder=r"Modularize\Meas_raw\T1_timeDep"
             t1_us_rec.append(this_t1_us)
             # Cctrl['c3'](0)
             # Cctrl['c1'](0)

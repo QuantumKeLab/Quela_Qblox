@@ -37,6 +37,8 @@ def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:st
     if ro_amp_factor != 1:
         qubit_info.measure.pulse_amp(ro_amp_factor*qubit_info.measure.pulse_amp())
         eyeson_print(f"The new RO amp = {round(qubit_info.measure.pulse_amp(),2)}")
+    else:
+        eyeson_print(f"RO amp = {qubit_info.measure.pulse_amp()}")
     set_LO_frequency(QD_agent.quantum_device,q=q,module_type='drive',LO_frequency=LO)
     data = {}
     analysis_result = {}
@@ -130,16 +132,16 @@ if __name__ == '__main__':
     
 
     """ Fill in """
-    execute:bool = True
+    execute:bool = 0
     repeat:int = 1
-    DRandIP = {"dr":"dr2","last_ip":"10"}
-    ro_elements = {'q0':{"roAmp_factor":1.2}}
+    DRandIP = {"dr":"drke","last_ip":"242"}
+    ro_elements = {'q1':{"roAmp_factor":0.8}}
     couplers = []
 
 
     """ Optional paras (don't use is better) """
     ro_atte_degrade_dB:int = 0 # multiple of 2 
-    shot_num:int = 10000
+    shot_num:int = 50000
     xy_IF = 250e6
 
 

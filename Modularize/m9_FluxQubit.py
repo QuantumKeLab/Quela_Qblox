@@ -169,9 +169,9 @@ if __name__ == "__main__":
     """ Fill in """
     execution:bool = True
     chip_info_restore:bool = 1
-    DRandIP = {"dr":"dr2","last_ip":"10"}
+    DRandIP = {"dr":"drke","last_ip":"242"}
     ro_elements = ['q0']
-    couplers = ['c3']
+    couplers = []
     z_shifter = 0.0 # V
 
     
@@ -201,11 +201,11 @@ if __name__ == "__main__":
     for qubit in ro_elements:
         if not QD_agent.Fluxmanager.get_offsweetspot_button(qubit):
             init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
-            Cctrl['c0'](0.1)
-            Cctrl['c1'](-0.1)
+            # Cctrl['c0'](0.1)
+            # Cctrl['c1'](-0.1)
             trustable, new_ans = fluxQubit_executor(QD_agent,meas_ctrl,qubit,run=execution,z_shifter=z_shifter,zpts=flux_pts,fpts=freq_pts,span_priod_factor=span_period_factor,f_sapn_Hz=freq_span_Hz,avg_times=avg_n,xy_IF=xy_IF)
-            Cctrl['c0'](0)
-            Cctrl['c1'](0)
+            # Cctrl['c0'](0)
+            # Cctrl['c1'](0)
             cluster.reset()
 
             """ Storing """

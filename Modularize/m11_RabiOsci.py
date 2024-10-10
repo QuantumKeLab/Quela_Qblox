@@ -20,7 +20,7 @@ def Rabi(QD_agent:QDmanager,meas_ctrl:MeasurementControl,XY_amp:float=0.5, XY_du
     
     LO= qubit_info.clock_freqs.f01()+IF
     qubit_info.measure.pulse_duration(2e-6)
-    qubit_info.measure.integration_time(1e-6)#
+    qubit_info.measure.integration_time(2e-6)#
     qubit_info.reset.duration(250e-6)
     print("Integration time ",qubit_info.measure.integration_time()*1e6, "µs")
     print("Reset time ", qubit_info.reset.duration()*1e6, "µs")
@@ -155,14 +155,14 @@ if __name__ == "__main__":
     """ Fill in """
     execution:bool = 1
     chip_info_restore:bool = 1
-    DRandIP = {"dr":"dr2","last_ip":"10"}
+    DRandIP = {"dr":"drke","last_ip":"242"}
     ro_elements = ['q0']
     couplers = []
 
 
     """ Optional paras """
-    pi_duration:float = 80e-9
-    pi_amp_max:float = 0.4
+    pi_duration:float = 200e-9
+    pi_amp_max:float = 0.6
     rabi_type:str = 'power'  # 'time' or 'power'
     data_pts = 100
     avg_n:int = 1000

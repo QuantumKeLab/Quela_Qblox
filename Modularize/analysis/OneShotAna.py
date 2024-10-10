@@ -70,20 +70,32 @@ def a_OSdata_correlation_analPlot(nc_path:str, plot:bool=True, pic_path:str='', 
     # 將數據轉換為 numpy array 以便進行索引操作
     pg_I = np.array(pg_I)
     pg_Q = np.array(pg_Q)
+    # dataset = nc.Dataset(ave_V_nc_path, 'r')
+    dataset = open_dataset(nc_path)
+    
+    # 列出文件中的所有變數
+    print(dataset.variables.keys())
 
+    # 取得變數 'e' 和 'g'
+    
+    g_var = dataset.variables['g'][:]
+
+    # 列出變數 'e' 和 'g' 的形狀以確認
+    
+    print(f"Shape of 'g': {g_var.shape}")
     # 確保數據總長度是偶數，以便進行分割
     assert len(pg_I) % 2 == 0, "數據總長度必須為偶數"
 
     # 使用 numpy 索引取奇數和偶數位置的數據
-    I_readout_2 = pg_I[0::2]  # 取奇數位 (第一次 readout)
-    I_readout_1 = pg_I[1::2] # 取偶數位 (第二次 readout)
+    I_readout_1 = pg_I[0::2]  # 從0開始每隔一個取一次
+    I_readout_2 = pg_I[1::2] 
     
-    Q_readout_2 = pg_Q[0::2]  # 取奇數位 (第一次 readout)
-    Q_readout_1 = pg_Q[1::2] # 取偶數位 (第二次 readout)
+    Q_readout_1 = pg_Q[0::2]  
+    Q_readout_2 = pg_Q[1::2] 
 
      # 將數據轉換為毫伏（選擇性）
-    I_readout_2, I_readout_1 = array(I_readout_2) * 1000, array(I_readout_1) * 1000
-    Q_readout_2, Q_readout_1 = array(Q_readout_2) * 1000, array(Q_readout_1) * 1000
+    I_readout_1, I_readout_2 = array(I_readout_1) * 1000, array(I_readout_2) * 1000
+    Q_readout_1, Q_readout_2 = array(Q_readout_1) * 1000, array(Q_readout_2) * 1000
     
     # I_readout_2_ave= np.mean(I_readout_2)
     # I_readout_1_ave= np.mean(I_readout_1)
@@ -212,7 +224,7 @@ def share_model_OSana(QD_agent:QDmanager,target_q:str,folder_path:str,pic_save:b
 
 
 if __name__ == "__main__":
-    # nc_path = r'C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_2\DRKEq0_SingleShot(0)_second.nc'
-    # a_OSdata_correlation_analPlot(nc_path)
-    nc_path=r'"C:\Users\admin\Downloads\SingleShot\DR1q1_SingleShot(0)_H19M1S59.nc"'
-    a_OSdata_analPlot(nc_path)
+    nc_path = r'C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_9\DRKEq1_SingleShot(0)_H22M20S23.nc'
+    a_OSdata_correlation_analPlot(nc_path)
+    # nc_path=r'"C:\Users\admin\Downloads\SingleShot\DR1q1_SingleShot(0)_H19M1S59.nc"'
+    # a_OSdata_analPlot(nc_path)

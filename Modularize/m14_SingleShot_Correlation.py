@@ -36,12 +36,16 @@ def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:st
     if ro_amp_factor != 1:
         qubit_info.measure.pulse_amp(ro_amp_factor*qubit_info.measure.pulse_amp())
         eyeson_print(f"The new RO amp = {round(qubit_info.measure.pulse_amp(),2)}")
+    else:
+        eyeson_print(f"RO amp = {qubit_info.measure.pulse_amp()}")
     # set_LO_frequency(QD_agent.quantum_device,q=q,module_type='drive',LO_frequency=LO)
+
     data = {}
     analysis_result = {}
     exp_kwargs= dict(shots=shots,
                      )
     print(qubit_info.rxy.amp180())
+    # eyeson_print(f"RO amp = {qubit_info.measure.pulse_amp()}")
     def state_dep_sched(ini_state:str):
         slightly_print(f"Shotting for |{ini_state}>")
         sched_kwargs = dict(   
@@ -53,7 +57,7 @@ def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:st
             R_duration={str(q):qubit_info.measure.pulse_duration()},
             R_integration={str(q):qubit_info.measure.integration_time()},
             R_inte_delay=qubit_info.measure.acq_delay(),
-            correlate_delay=50e-6
+            correlate_delay=0e-6
         )
         
         if run:
@@ -73,6 +77,7 @@ def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:st
                 show_args(Experi_info(q))
     
         else:
+            # sched_kwargs["correlate_delay"] = [1e-6, 2e-6]
             pulse_preview(QD_agent.quantum_device,sche_func,sched_kwargs)
             
             show_args(exp_kwargs, title="Single_shot_kwargs: Meas.qubit="+q)
@@ -132,16 +137,16 @@ if __name__ == '__main__':
     
 
     """ Fill in """
-    execute:bool = True
+    execute:bool = 1
     repeat:int = 1
-    DRandIP = {"dr":"dr2","last_ip":"10"}
-    ro_elements = {'q0':{"roAmp_factor":1}}
+    DRandIP = {"dr":"drke","last_ip":"242"}
+    ro_elements = {'q1':{"roAmp_factor":1}}
     couplers = []
 
 
     """ Optional paras (don't use is better) """
     ro_atte_degrade_dB:int = 0 # multiple of 2 
-    shot_num:int = 10000
+    shot_num:int = 50000
     xy_IF = 250e6
 
 

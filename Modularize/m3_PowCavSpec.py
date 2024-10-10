@@ -174,7 +174,7 @@ if __name__ == "__main__":
 
     """ Optional paras"""
     maxima_power = 0.6
-    half_ro_freq_window_Hz = 11e6
+    half_ro_freq_window_Hz = 5e6
     freq_data_points = 100
     power_data_points = 30
 

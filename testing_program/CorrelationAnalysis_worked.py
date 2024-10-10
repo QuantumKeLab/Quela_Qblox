@@ -1,15 +1,16 @@
 from xarray import open_dataset
 from xarray import Dataset
 from numpy import array
-import netCDF4 as nc
+# import netCDF4 as nc
 import numpy as np
 import xarray as xr
 import pandas as pd
 
 """Get ~Vg and ~Ve from RunI and RunII, respectively"""
 def ave_Vg_and_ave_Ve(ave_V_nc_path:str):
-    dataset = nc.Dataset(ave_V_nc_path, 'r')
-
+    # dataset = nc.Dataset(ave_V_nc_path, 'r')
+    dataset = open_dataset(ave_V_nc_path)
+    
     # 列出文件中的所有變數
     print(dataset.variables.keys())
 
@@ -46,14 +47,14 @@ def Vk_0_and_Vk_tau(Vk_nc_file:str):
     assert len(pg_I) % 2 == 0, "數據總長度必須為偶數"
 
     # 使用 numpy 索引取奇數和偶數位置的數據
-    I_readout_2 = pg_I[0::2]  # 取奇數位 (第一次 readout)
-    I_readout_1 = pg_I[1::2]  # 取偶數位 (第二次 readout)
+    I_readout_1 = pg_I[0::2]  # 取奇數位 (第一次 readout)
+    I_readout_2 = pg_I[1::2]  # 取偶數位 (第二次 readout)
 
     # 返回 list 格式
-    return I_readout_2.tolist(), I_readout_1.tolist()
+    return I_readout_1.tolist(), I_readout_2.tolist()
 
 """Get normalized_g_1, Pe and Teff"""
-def g_1(I_readout_2_list, I_readout_1_list, Ve_mean_I, Vg_mean_I):
+def g_1(I_readout_1_list, I_readout_2_list, Ve_mean_I, Vg_mean_I):
     Vk_0 = I_readout_1_list  # 使用前面的讀數
     Vk_tau = I_readout_2_list
 
@@ -80,10 +81,10 @@ if __name__ == '__main__':
 
     # Step 2: Get I_readout_2_list and I_readout_1_list
     Vk_nc_file = r'C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_9\cor\DR2q0_SingleShot(0)_H10M26S42.nc'
-    I_readout_2_list, I_readout_1_list = Vk_0_and_Vk_tau(Vk_nc_file)
+    I_readout_1_list, I_readout_2_list = Vk_0_and_Vk_tau(Vk_nc_file)
 
     # Step 3: Calculate normalized g^(1)
-    normalized_g_1 = g_1(I_readout_2_list, I_readout_1_list, Ve_mean_I, Vg_mean_I)
+    normalized_g_1 = g_1(I_readout_1_list, I_readout_2_list, Ve_mean_I, Vg_mean_I)
 
     # Step 4: Calculate P_e and T_eff
     f01 = 4e9  # qubit frequency

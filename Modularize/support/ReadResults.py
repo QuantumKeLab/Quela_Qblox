@@ -12,9 +12,11 @@ from Modularize.support.Pulse_schedule_library import dataset_to_array, IQ_data_
 
 if __name__ == '__main__':
     import os
-    
-    QD_agent = QDmanager('Modularize/QD_backup/2024_8_29/DR4#81_SumInfo.pkl')
-    QD_agent.QD_loader()
+    x = array([[0,2,4,6,8],[1,3,5,7,9]])
+    print(x.shape)
+    print(x[0][0])
+    # QD_agent = QDmanager('Modularize/QD_backup/2024_8_29/DR4#81_SumInfo.pkl')
+    # QD_agent.QD_loader()
     # qs = ['q1']
     # # for q in qs:
     # #     print(q,":")
