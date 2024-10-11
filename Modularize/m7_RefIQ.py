@@ -96,7 +96,7 @@ if __name__ == "__main__":
     """ Fill in """
     execution = True
     DRandIP = {"dr":"drke","last_ip":"242"}
-    ro_elements = {'q0':{"ro_amp_factor":0.9},}
+    ro_elements = {'q1':{"ro_amp_factor":0.7},}
                 
     couplers = []
 

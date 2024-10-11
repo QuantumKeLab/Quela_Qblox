@@ -74,20 +74,21 @@ def g_1(I_readout_1_list, I_readout_2_list, Ve_mean_I, Vg_mean_I):
 
 if __name__ == '__main__':
     # Step 1: Get Ve_mean_I and Vg_mean_I
-    ave_V_nc_path = r'C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_9\cor\DR2q0_SingleShot(0)_H10M18S59.nc'
+    ave_V_nc_path = r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_10\DRKEq1_cor\SS\DRKEq1_SingleShot(0)_H15M13S37.nc"
     Ve_mean_I, Vg_mean_I = ave_Vg_and_ave_Ve(ave_V_nc_path)
     # Ve_mean_I=5e-5
     # Vg_mean_I=5.5e-5
 
     # Step 2: Get I_readout_2_list and I_readout_1_list
-    Vk_nc_file = r'C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_9\cor\DR2q0_SingleShot(0)_H10M26S42.nc'
+    Vk_nc_file = r'C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_10\DRKEq1_cor\DRKEq1_SingleShot(0)_H15M14S41.nc'
     I_readout_1_list, I_readout_2_list = Vk_0_and_Vk_tau(Vk_nc_file)
 
     # Step 3: Calculate normalized g^(1)
     normalized_g_1 = g_1(I_readout_1_list, I_readout_2_list, Ve_mean_I, Vg_mean_I)
 
     # Step 4: Calculate P_e and T_eff
-    f01 = 4e9  # qubit frequency
+    f01 = 4.64e9  # qubit frequency
+    print("qubit frequency: ", f01)
     P_e = 1 / 2 - 1 / (2 * np.sqrt(1 + 4 * normalized_g_1))
 
     qubit_frequency = 2 * np.pi * f01

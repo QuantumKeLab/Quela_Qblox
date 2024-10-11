@@ -25,7 +25,8 @@ except:
 
 def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:str='q1',IF:float=250e6,Experi_info:dict={},ro_amp_factor:float=1,T1:float=15e-6,exp_idx:int=0,parent_datafolder:str='',plot:bool=False):
     qubit_info = QD_agent.quantum_device.get_element(q)
-    qubit_info.measure.integration_time(2e-6)
+    qubit_info.measure.integration_time(1.5e-6)
+    qubit_info.measure.pulse_duration(1.5e-6)
     print("Integration time ",qubit_info.measure.integration_time()*1e6, "µs")
     print("Reset time ", qubit_info.reset.duration()*1e6, "µs")
     
@@ -85,8 +86,8 @@ def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:st
     state_dep_sched('g')
     state_dep_sched('e')
     SS_dict = {
-        "e":{"dims":("I","Q"),"data":array(data['e'])},
         "g":{"dims":("I","Q"),"data":array(data['g'])},
+        "e":{"dims":("I","Q"),"data":array(data['e'])},
     }
     
     SS_ds = Dataset.from_dict(SS_dict)
@@ -132,10 +133,10 @@ if __name__ == '__main__':
     
 
     """ Fill in """
-    execute:bool = 0
+    execute:bool = 1
     repeat:int = 1
     DRandIP = {"dr":"drke","last_ip":"242"}
-    ro_elements = {'q1':{"roAmp_factor":0.8}}
+    ro_elements = {'q1':{"roAmp_factor":1}}
     couplers = []
 
 

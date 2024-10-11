@@ -34,12 +34,13 @@ def a_OSdata_analPlot(QD_agent:QDmanager, target_q:str, nc_path:str, plot:bool=T
     OS_data = 1000*array([[pgI_collection,peI_collection],[pgQ_collection,peQ_collection]]) # can train or predict 2*2*histo_counts*shot
     tarin_data, fit_arrays = OSdata_arranger(OS_data)
     # train GMM
+    # print(tarin_data)
     gmm2d_fidelity = GMMROFidelity()
     gmm2d_fidelity._import_data(tarin_data[0])
     gmm2d_fidelity._start_analysis()
     g1d_fidelity = gmm2d_fidelity.export_G1DROFidelity()
     transi_freq = QD_agent.quantum_device.get_element(target_q).clock_freqs.f01()
-    
+    print(gmm2d_fidelity.label_map.label_assign.result)
     p00 = g1d_fidelity.g1d_dist[0][0][0]
     p01 = g1d_fidelity.g1d_dist[0][0][1]
     p11 = g1d_fidelity.g1d_dist[1][0][1]
@@ -70,15 +71,12 @@ def a_OSdata_correlation_analPlot(nc_path:str, plot:bool=True, pic_path:str='', 
     # 將數據轉換為 numpy array 以便進行索引操作
     pg_I = np.array(pg_I)
     pg_Q = np.array(pg_Q)
-    # dataset = nc.Dataset(ave_V_nc_path, 'r')
-    dataset = open_dataset(nc_path)
-    
+        
     # 列出文件中的所有變數
-    print(dataset.variables.keys())
+    print(SS_ds.variables.keys())
 
     # 取得變數 'e' 和 'g'
-    
-    g_var = dataset.variables['g'][:]
+    g_var = SS_ds.variables['g'][:]
 
     # 列出變數 'e' 和 'g' 的形狀以確認
     
@@ -106,9 +104,10 @@ def a_OSdata_correlation_analPlot(nc_path:str, plot:bool=True, pic_path:str='', 
         plt.figure(figsize=(6, 6))
         
         'Plot the scatter points for two readouts'
-        plt.scatter(I_readout_1, Q_readout_1, c='blue', label="Readout 1", alpha=0.5)
-        plt.scatter(I_readout_2, Q_readout_2, c='red', label="Readout 2", alpha=0.5)
-        
+        plt.scatter(I_readout_1, Q_readout_1, c='blue', label="Readout 1", alpha=0.5, s=0.5)
+        # plt.scatter(I_readout_2, Q_readout_2, c='red', label="Readout 2", alpha=0.5)
+        plt.axis('equal')
+
         # Label axes
         plt.xlabel('I (mV)')
         plt.ylabel('Q (mV)')
@@ -171,6 +170,7 @@ def a_OSdata_correlation_analPlot(nc_path:str, plot:bool=True, pic_path:str='', 
         # Add grid and legend
         # plt.legend()
         plt.grid(True)
+        plt.legend()
         plt.tight_layout()
         plt.show()
 
@@ -224,7 +224,14 @@ def share_model_OSana(QD_agent:QDmanager,target_q:str,folder_path:str,pic_save:b
 
 
 if __name__ == "__main__":
-    nc_path = r'C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_9\DRKEq1_SingleShot(0)_H22M20S23.nc'
-    a_OSdata_correlation_analPlot(nc_path)
-    # nc_path=r'"C:\Users\admin\Downloads\SingleShot\DR1q1_SingleShot(0)_H19M1S59.nc"'
-    # a_OSdata_analPlot(nc_path)
+    # nc_path = r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_10\DRKEq1_cor_2\DRKEq1_SingleShot(0)_H21M14S14.nc"
+    # a_OSdata_correlation_analPlot(nc_path)
+    
+    QD_agent_path=r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_10_11\DRKE#242_SumInfo.pkl"
+    Qmanager = QDmanager(QD_agent_path)
+    Qmanager.QD_loader()
+
+    target_q='q1'
+    nc_path=r'C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_11\DRKEq1_SingleShot(0)_H11M44S1.nc'
+    
+    a_OSdata_analPlot(Qmanager,target_q, nc_path)

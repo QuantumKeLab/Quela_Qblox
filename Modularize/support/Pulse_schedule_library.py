@@ -1091,38 +1091,12 @@ def Qubit_SS_Correlation_sche(
     sched.add(IdlePulse(duration=5000*1e-9))
     
     spec_pulse = Readout(sched,q,R_amp,R_duration=R_duration,powerDep=False)#{q:1.5*R_amp[q]}
-    # spec_pulse_2 = Readout_2(sched,q,spec_pulse,R_amp,R_duration,powerDep=False,correlate_delay=-(correlate_delay+R_duration[q]))
+    spec_pulse_2 = Readout_2(sched,q,spec_pulse,R_amp,R_duration,powerDep=False,correlate_delay=-(correlate_delay+R_duration[q]))
 
-    # Integration(sched,q,R_inte_delay,R_integration,spec_pulse,1,single_shot=True,get_trace=False,trace_recordlength=0)
-    Integration(sched,q,R_inte_delay,R_integration,spec_pulse,0,single_shot=True,get_trace=False,trace_recordlength=0)
+    Integration(sched,q,R_inte_delay,R_integration,spec_pulse,1,single_shot=True,get_trace=False,trace_recordlength=0)
+    Integration(sched,q,R_inte_delay,R_integration,spec_pulse_2,0,single_shot=True,get_trace=False,trace_recordlength=0)
 
     return sched
-# def Qubit_SS_Correlation_sche(
-#     q:str,
-#     ini_state:str,
-#     pi_amp: dict,
-#     pi_dura:dict,
-#     R_amp: dict,
-#     R_duration: dict,
-#     R_integration:dict,
-#     R_inte_delay:float,
-#     correlate_delay:float=0e-9,
-#     repetitions:int=1    
-# ) -> Schedule:
-
-#     sched = Schedule("Single shot", repetitions=repetitions)
-    
-
-#     sched.add(Reset(q))
-#     sched.add(IdlePulse(duration=5000*1e-9))
-    
-#     spec_pulse = Readout(sched,q,R_amp,R_duration=R_duration,powerDep=False)#{q:1.5*R_amp[q]}
-#     spec_pulse_2 = Readout_2(sched,q,spec_pulse,R_amp,R_duration,powerDep=False,correlate_delay=-(correlate_delay+R_duration[q]))
-
-#     Integration(sched,q,R_inte_delay,R_integration,spec_pulse,1,single_shot=True,get_trace=False,trace_recordlength=0)
-#     Integration(sched,q,R_inte_delay,R_integration,spec_pulse_2,0,single_shot=True,get_trace=False,trace_recordlength=0)
-
-#     return sched
 
 #? Calibrations :
 def ROF_Cali_sche(

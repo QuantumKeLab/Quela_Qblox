@@ -25,33 +25,33 @@ except:
 
 def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:str='q1',IF:float=250e6,Experi_info:dict={},ro_amp_factor:float=1,T1:float=15e-6,exp_idx:int=0,parent_datafolder:str='',plot:bool=False):
     qubit_info = QD_agent.quantum_device.get_element(q)
-    qubit_info.measure.integration_time(2e-6)
+    qubit_info.measure.integration_time(1.2e-6)
+    qubit_info.measure.pulse_duration(1.2e-6)
     print("Integration time ",qubit_info.measure.integration_time()*1e6, "µs")
-    print("Reset time ", qubit_info.reset.duration()*1e6, "µs")
+    print("Reset time ", qubit_info.reset.duration()*1e6, "µs")    
     # qubit_info.reset.duration(250e-6)
     # qubit_info.clock_freqs.readout(5.863e9-0.4e6)
     print(qubit_info.clock_freqs.readout()*1e-9)
-    sche_func = Qubit_SS_Correlation_sche
+    print(qubit_info.clock_freqs.f01()/1e9,"GHz")
+    sche_func = Qubit_SS_Correlation_sche 
     LO= qubit_info.clock_freqs.f01()+IF
     if ro_amp_factor != 1:
         qubit_info.measure.pulse_amp(ro_amp_factor*qubit_info.measure.pulse_amp())
         eyeson_print(f"The new RO amp = {round(qubit_info.measure.pulse_amp(),2)}")
     else:
         eyeson_print(f"RO amp = {qubit_info.measure.pulse_amp()}")
-    # set_LO_frequency(QD_agent.quantum_device,q=q,module_type='drive',LO_frequency=LO)
-
+    set_LO_frequency(QD_agent.quantum_device,q=q,module_type='drive',LO_frequency=LO)
     data = {}
     analysis_result = {}
     exp_kwargs= dict(shots=shots,
                      )
     print(qubit_info.rxy.amp180())
-    # eyeson_print(f"RO amp = {qubit_info.measure.pulse_amp()}")
     def state_dep_sched(ini_state:str):
         slightly_print(f"Shotting for |{ini_state}>")
         sched_kwargs = dict(   
             q=q,
             ini_state=ini_state,
-            pi_amp={str(q):qubit_info.rxy.amp180()},
+            pi_amp={str(q):qubit_info.rxy.amp180()*1},
             pi_dura={str(q):qubit_info.rxy.duration()},
             R_amp={str(q):qubit_info.measure.pulse_amp()},
             R_duration={str(q):qubit_info.measure.pulse_duration()},
@@ -77,7 +77,6 @@ def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:st
                 show_args(Experi_info(q))
     
         else:
-            # sched_kwargs["correlate_delay"] = [1e-6, 2e-6]
             pulse_preview(QD_agent.quantum_device,sche_func,sched_kwargs)
             
             show_args(exp_kwargs, title="Single_shot_kwargs: Meas.qubit="+q)
@@ -118,26 +117,18 @@ def SS_executor(QD_agent:QDmanager,cluster:Cluster,Fctrl:dict,target_q:str,shots
     Fctrl[target_q](0.0)
     cluster.reset()
     
-    # qu = QD_agent.quantum_device.get_element(qubit)
-    # qu.clock_freqs.readout(6e9)#float(CS_results[qubit]['fr']))
-
-    if mode == "WeiEn":
-        if plot:
-            Qubit_state_single_shot_plot(SS_result[target_q],Plot_type='both',y_scale='log')
-            effT_mk, ro_fidelity, thermal_p = 0, 0, 0
-        else:
-            effT_mk, ro_fidelity, thermal_p = 0, 0, 0
-    else:
-        thermal_p, effT_mk, ro_fidelity = a_OSdata_analPlot(QD_agent,target_q,nc,plot,save_pic=save_every_pic)
+    
+    if plot:
+        a_OSdata_correlation_analPlot(nc,plot,save_pic=save_every_pic)
 
 
-    return thermal_p, effT_mk, ro_fidelity
+    return  
 
 if __name__ == '__main__':
     
 
     """ Fill in """
-    execute:bool = 1
+    execute:bool = False
     repeat:int = 1
     DRandIP = {"dr":"drke","last_ip":"242"}
     ro_elements = {'q1':{"roAmp_factor":1}}
@@ -159,22 +150,19 @@ if __name__ == '__main__':
 
             """ Preparation """
             slightly_print(f"The {i}th OS:")
-            QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"]) #r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_9_30\DRKE#242_SumInfo.pkl"
+            QD_path =find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
             QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
             QD_agent.Notewriter.modify_DigiAtte_For(-ro_atte_degrade_dB, qubit, 'ro')
 
 
             """ Running """
             Cctrl = coupler_zctrl(DRandIP["dr"],cluster,QD_agent.Fluxmanager.build_Cctrl_instructions(couplers,'i'))
-            if i == 0:
-                snr_rec[qubit], effT_rec[qubit], thermal_pop[qubit] = [], [], []
-            init_system_atte(QD_agent.quantum_device,list([qubit]),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'),ro_out_att=20)#ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
+            
+            init_system_atte(QD_agent.quantum_device,list([qubit]),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
             ro_amp_scaling = ro_elements[qubit]["roAmp_factor"]
             if ro_amp_scaling != 1 and repeat > 1 : raise ValueError("Check the RO_amp_factor should be 1 when you want to repeat it!")
             info = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=ro_amp_scaling,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF)
-            snr_rec[qubit].append(info[2])
-            effT_rec[qubit].append(info[1])
-            thermal_pop[qubit].append(info[0]*100)
+            
             if ro_amp_scaling !=1 or ro_atte_degrade_dB != 0:
                 keep = mark_input(f"Keep this RO amp for {qubit}?[y/n]")
             else:
