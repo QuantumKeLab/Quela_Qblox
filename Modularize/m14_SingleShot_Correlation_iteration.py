@@ -100,16 +100,16 @@ def SS_executor(QD_agent:QDmanager, cluster:Cluster, Fctrl:dict, target_q:str, s
 
     for i, correlate_delay in enumerate(range(0,31)):  # range(0, 11) is 0 to 10 µs
         plot = (i == 0)  # Only plot the first measurement with correlate_delay=0
-        SS_result, nc = Qubit_state_single_shot(QD_agent,
-                                                shots=shots,
-                                                run=execution,
-                                                q=target_q,
-                                                parent_datafolder=data_folder,
-                                                ro_amp_factor=roAmp_modifier,
-                                                exp_idx=i,
-                                                plot=plot,
-                                                IF=IF,
-                                                correlate_delay=correlate_delay)
+        nc = Qubit_state_single_shot(QD_agent,
+                                    shots=shots,
+                                    run=execution,
+                                    q=target_q,
+                                    parent_datafolder=data_folder,
+                                    ro_amp_factor=roAmp_modifier,
+                                    exp_idx=i,
+                                    plot=plot,
+                                    IF=IF,
+                                    correlate_delay=correlate_delay)
         
     Fctrl[target_q](0.0)
     cluster.reset()

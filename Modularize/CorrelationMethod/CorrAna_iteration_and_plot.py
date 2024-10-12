@@ -47,7 +47,7 @@ def calculate_g1_and_teff(Vk_nc_file, Vg_mean_I, Ve_mean_I, f01):
     T_eff = -h_bar * qubit_frequency / (k_B * np.log(P_e / (1 - P_e))) * 1000
     return normalized_g_1, T_eff
 
-def main():
+def correlation_method(ave_V_nc_file,Vk_directory,f01):
     # Step 1: Get Ve_mean_I
     ave_V_nc_file = r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_10\DRKEq1_cor_2\SS\DRKEq1_SingleShot(0)_H21M22S26.nc"
     Ve_mean_I = ave_Ve(ave_V_nc_file)
@@ -96,10 +96,6 @@ def main():
     # for delay, teff in zip(correlate_delays, teff_values):
     #     print(f"Delay {delay} µs: Effective Temperature = {teff:.2f} mK")
 
-delay_taus = [1]*10
-delay_taus = [2]*10
-
-delay_taus = [5]*60
 
 if __name__ == '__main__':
-    main()
+    correlation_method()

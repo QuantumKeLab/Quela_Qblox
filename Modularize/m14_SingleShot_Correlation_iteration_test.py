@@ -12,7 +12,8 @@ from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
 from Modularize.support.Pulse_schedule_library import Qubit_state_single_shot_plot
 from Modularize.support import QDmanager, Data_manager,init_system_atte, init_meas, shut_down, coupler_zctrl
 from Modularize.support.Pulse_schedule_library import Qubit_SS_sche, Qubit_SS_Correlation_sche, set_LO_frequency, pulse_preview, Qubit_state_single_shot_fit_analysis
-
+import numpy as np
+from numpy import array
 
 try:
     from qcat.analysis.state_discrimination.discriminator import train_GMModel # type: ignore
@@ -25,8 +26,8 @@ except:
 
 def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:str='q1',IF:float=250e6,Experi_info:dict={},ro_amp_factor:float=1,T1:float=15e-6,exp_idx:int=0,parent_datafolder:str='',plot:bool=False):
     qubit_info = QD_agent.quantum_device.get_element(q)
-    qubit_info.measure.integration_time(1.5e-6)
-    qubit_info.measure.pulse_duration(1.5e-6)
+    qubit_info.measure.integration_time(1.2e-6)
+    qubit_info.measure.pulse_duration(1.2e-6)
     print("Integration time ",qubit_info.measure.integration_time()*1e6, "µs")
     print("Reset time ", qubit_info.reset.duration()*1e6, "µs")    
     # qubit_info.reset.duration(250e-6)
@@ -101,46 +102,146 @@ def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:st
     return analysis_result, nc_path
 
 
-def SS_executor(QD_agent:QDmanager,cluster:Cluster,Fctrl:dict,target_q:str,shots:int=10000,execution:bool=True,data_folder='',plot:bool=True,roAmp_modifier:float=1,exp_label:int=0,save_every_pic:bool=False,IF:float=250e6):
+# def SS_executor(QD_agent:QDmanager,cluster:Cluster,Fctrl:dict,target_q:str,shots:int=10000,execution:bool=True,data_folder='',plot:bool=True,roAmp_modifier:float=1,exp_label:int=0,save_every_pic:bool=False,IF:float=250e6):
+
+#     Fctrl[target_q](float(QD_agent.Fluxmanager.get_proper_zbiasFor(target_q)))
+
+#     SS_result, nc= Qubit_state_single_shot(QD_agent,
+#                 shots=shots,
+#                 run=execution,
+#                 q=target_q,
+#                 parent_datafolder=data_folder,
+#                 ro_amp_factor=roAmp_modifier,
+#                 exp_idx=exp_label,
+#                 plot=plot,
+#                 IF=IF)
+#     Fctrl[target_q](0.0)
+#     cluster.reset()
+    
+    
+#     if plot:
+#         a_OSdata_correlation_analPlot(nc,plot,save_pic=save_every_pic)
+
+
+#     return  
+
+# def SS_executor(QD_agent: QDmanager, cluster: Cluster, Fctrl: dict, target_q: str, shots: int = 10000, execution: bool = True,
+#                 data_folder: str = '', plot: bool = True, roAmp_modifier: float = 1, exp_label: int = 0, save_every_pic: bool = False,
+#                 IF: float = 250e6, delay_taus: list = None):
+
+#     Fctrl[target_q](float(QD_agent.Fluxmanager.get_proper_zbiasFor(target_q)))
+
+#     if delay_taus is None:
+#         delay_taus = [1] * 10 + [2] * 10 + [5] * 5  # default delay_taus in microseconds
+#     all_delay_taus = array(delay_taus) * 1e-6  # convert to seconds
+#     pths = []
+
+#     for idx, delay_tau in enumerate(all_delay_taus):
+#         slightly_print(f"Running measurement with correlate_delay = {delay_tau*1e6} µs")
+
+#         # Update `correlate_delay` for each measurement
+#         SS_result, nc_path = Qubit_state_single_shot(QD_agent,
+#                                                      shots=shots,
+#                                                      run=execution,
+#                                                      q=target_q,
+#                                                      parent_datafolder=data_folder,
+#                                                      ro_amp_factor=roAmp_modifier,
+#                                                      exp_idx=exp_label + idx,
+#                                                      plot=plot if idx == 0 else False,
+#                                                      IF=IF)
+        
+#         pths.append(nc_path)
+
+#         # Close and reconnect instruments after each measurement
+#         """ Close """    
+#         shut_down(cluster,Fctrl,Cctrl)
+#         end_time = time.time()
+#         slightly_print(f"time cose: {round(end_time-start_time,1)} secs")
+
+#         time.sleep(1)  # slight delay to ensure the system is ready
+#         cluster.reset()
+        
+#         # Re-initialize the measurement instruments for the next measurement
+#         QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QD_agent=QD_agent, mode='l')
+
+#     return pths  # return list of paths for further analysis
+
+
+def SS_executor(QD_agent: QDmanager, cluster: Cluster, Fctrl: dict, target_q: str, shots: int = 10000, execution: bool = True, data_folder='', roAmp_modifier: float = 1, IF: float = 250e6):
+    # Set delay_taus sequence as required
+    delay_taus = [1]*10 + [2]*10 + [5]*5
+    all_delay_taus = array(delay_taus) * 1e-6  # convert µs to seconds
 
     Fctrl[target_q](float(QD_agent.Fluxmanager.get_proper_zbiasFor(target_q)))
+    pths = []
 
-    SS_result, nc= Qubit_state_single_shot(QD_agent,
-                shots=shots,
-                run=execution,
-                q=target_q,
-                parent_datafolder=data_folder,
-                ro_amp_factor=roAmp_modifier,
-                exp_idx=exp_label,
-                plot=plot,
-                IF=IF)
+    for i, correlate_delay in enumerate(all_delay_taus):
+        # Reconnect the measurement instrument at each iteration
+        QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path, mode='l')
+
+        plot = (i == 0)  # Only plot the first measurement with correlate_delay=0
+        SS_result, nc_path = Qubit_state_single_shot(
+            QD_agent,
+            shots=shots,
+            run=execution,
+            q=target_q,
+            parent_datafolder=data_folder,
+            ro_amp_factor=roAmp_modifier,
+            exp_idx=i,
+            plot=plot,
+            IF=IF,
+            correlate_delay=correlate_delay * 1e6  # Convert delay to µs
+        )
+
+        pths.append(nc_path)  # Collect the file paths for analysis
+
+        # Disconnect instruments if needed
+        shut_down(cluster, Fctrl, None)
+
     Fctrl[target_q](0.0)
     cluster.reset()
     
-    
-    if plot:
-        a_OSdata_correlation_analPlot(nc,plot,save_pic=save_every_pic)
+#     # Perform custom analysis on all paths
+#     total_g = []
+#     for pth in pths:
+#         total_g.append(ana(pth))  # Define the `ana` function for specific analysis
 
+#     # Plot analysis results if required
+#     if plot:
+#         a_OSdata_correlation_analPlot(pths[0], plot)
 
-    return  
+#     return total_g
+
+# # Define ana() to analyze each nc file
+# def ana(nc_path):
+#     # Perform desired analysis on each nc file
+#     pass
 
 if __name__ == '__main__':
     
 
     """ Fill in """
     execute:bool = True
-    repeat:int = 10
-    DRandIP = {"dr":"drke","last_ip":"242"}
-    ro_elements = {'q1':{"roAmp_factor":1}}
+    repeat:int = 1
+    DRandIP = {"dr":"dr2","last_ip":"10"}
+    ro_elements = {'q0':{"roAmp_factor":1}}
     couplers = []
-
-
+    delay_taus = [1] * 10 + [2] * 10 + [5] * 5
+    correlate_delays = np.cumsum(delay_taus)
+    data_folder=r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_12\DR2q0_corr"
     """ Optional paras (don't use is better) """
     ro_atte_degrade_dB:int = 0 # multiple of 2 
-    shot_num:int = 50000
+    shot_num:int = 10000
     xy_IF = 250e6
 
-
+    delay_taus = [1]*10
+    delay_taus += [2]*10
+    delay_taus += [5]*5
+    all_delay_taus=array(delay_taus)*1e-6
+    pths=[]
+    for delay_tau in all_delay_taus:
+    nc_path = Qubit_state_single_shot
+	pths.append(nc_path)
 
     """ Iteration """
     # snr_rec, effT_rec, thermal_pop = {}, {}, {}
@@ -161,8 +262,10 @@ if __name__ == '__main__':
             init_system_atte(QD_agent.quantum_device,list([qubit]),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
             ro_amp_scaling = ro_elements[qubit]["roAmp_factor"]
             if ro_amp_scaling != 1 and repeat > 1 : raise ValueError("Check the RO_amp_factor should be 1 when you want to repeat it!")
-            info = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=ro_amp_scaling,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF)
-            
+            # info = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=ro_amp_scaling,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF)
+            SS_executor(QD_agent, cluster, Fctrl, qubit, execution=execute, shots=shot_num, roAmp_modifier=ro_elements[qubit]["roAmp_factor"],
+                    exp_idx=i, delay_taus=delay_taus, data_folder=data_folder, plot=True if repeat == 1 else False)
+
             if ro_amp_scaling !=1 or ro_atte_degrade_dB != 0:
                 keep = mark_input(f"Keep this RO amp for {qubit}?[y/n]")
             else:

@@ -12,8 +12,9 @@ from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
 from Modularize.support.Pulse_schedule_library import Qubit_state_single_shot_plot
 from Modularize.support import QDmanager, Data_manager,init_system_atte, init_meas, shut_down, coupler_zctrl
 from Modularize.support.Pulse_schedule_library import Qubit_SS_sche, Qubit_SS_Correlation_sche, set_LO_frequency, pulse_preview, Qubit_state_single_shot_fit_analysis
+from Modularize.CorrelationMethod.CorrAna_iteration_and_plot import correlation_method
 
-
+from numpy import median, mean, std
 try:
     from qcat.analysis.state_discrimination.discriminator import train_GMModel # type: ignore
     from qcat.visualization.readout_fidelity import plot_readout_fidelity
@@ -23,10 +24,10 @@ except:
     mode = "WeiEn"
 
 
-def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:str='q1',IF:float=250e6,Experi_info:dict={},ro_amp_factor:float=1,T1:float=15e-6,exp_idx:int=0,parent_datafolder:str='',plot:bool=False):
+def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:str='q1',IF:float=250e6,Experi_info:dict={},ro_amp_factor:float=1,T1:float=15e-6,exp_idx:int=0,parent_datafolder:str='',plot:bool=False,correlate_delay:float=0.0):
     qubit_info = QD_agent.quantum_device.get_element(q)
-    qubit_info.measure.integration_time(1.5e-6)
-    qubit_info.measure.pulse_duration(1.5e-6)
+    qubit_info.measure.integration_time(1.2e-6)
+    qubit_info.measure.pulse_duration(1.2e-6)
     print("Integration time ",qubit_info.measure.integration_time()*1e6, "µs")
     print("Reset time ", qubit_info.reset.duration()*1e6, "µs")    
     # qubit_info.reset.duration(250e-6)
@@ -47,7 +48,7 @@ def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:st
                      )
     print(qubit_info.rxy.amp180())
     def state_dep_sched(ini_state:str):
-        slightly_print(f"Shotting for |{ini_state}>")
+        slightly_print(f"Shotting for |{ini_state}>with correlate_delay={correlate_delay} µs")
         sched_kwargs = dict(   
             q=q,
             ini_state=ini_state,
@@ -57,7 +58,7 @@ def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:st
             R_duration={str(q):qubit_info.measure.pulse_duration()},
             R_integration={str(q):qubit_info.measure.integration_time()},
             R_inte_delay=qubit_info.measure.acq_delay(),
-            correlate_delay=0e-6
+            correlate_delay= correlate_delay * 1e-6  # Set correlate_delay in seconds
         )
         
         if run:
@@ -101,7 +102,7 @@ def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:st
     return analysis_result, nc_path
 
 
-def SS_executor(QD_agent:QDmanager,cluster:Cluster,Fctrl:dict,target_q:str,shots:int=10000,execution:bool=True,data_folder='',plot:bool=True,roAmp_modifier:float=1,exp_label:int=0,save_every_pic:bool=False,IF:float=250e6):
+def SS_executor(QD_agent:QDmanager,cluster:Cluster,Fctrl:dict,target_q:str,shots:int=10000,execution:bool=True,data_folder='',plot:bool=True,roAmp_modifier:float=1,exp_label:int=0,save_every_pic:bool=False,IF:float=250e6,correlate_delay:float=0.0):
 
     Fctrl[target_q](float(QD_agent.Fluxmanager.get_proper_zbiasFor(target_q)))
 
@@ -113,7 +114,8 @@ def SS_executor(QD_agent:QDmanager,cluster:Cluster,Fctrl:dict,target_q:str,shots
                 ro_amp_factor=roAmp_modifier,
                 exp_idx=exp_label,
                 plot=plot,
-                IF=IF)
+                IF=IF,
+                correlate_delay=correlate_delay)
     Fctrl[target_q](0.0)
     cluster.reset()
     
@@ -129,12 +131,16 @@ if __name__ == '__main__':
 
     """ Fill in """
     execute:bool = True
-    repeat:int = 10
-    DRandIP = {"dr":"drke","last_ip":"242"}
-    ro_elements = {'q1':{"roAmp_factor":1}}
+    repeat:int = 1
+    DRandIP = {"dr":"dr2","last_ip":"10"}
+    ro_elements = {'q0':{"roAmp_factor":1}}
     couplers = []
-
-
+    delay_taus = [0,1,2,3,4,5,6,7,8,9,10,12,14,16,18,20,22,24,26,28,30,35,40,45,50] 
+    # delay_taus = [1]*10
+    # delay_taus += [2]*10
+    # delay_taus += [5]*5
+    # all_delay_taus=array(delay_taus)*1e-6
+    
     """ Optional paras (don't use is better) """
     ro_atte_degrade_dB:int = 0 # multiple of 2 
     shot_num:int = 50000
@@ -144,41 +150,45 @@ if __name__ == '__main__':
 
     """ Iteration """
     # snr_rec, effT_rec, thermal_pop = {}, {}, {}
+    pths =[]
     for qubit in ro_elements:
-        for i in range(repeat):
-            start_time = time.time()
+    
+        for correlate_delay in delay_taus :
+    
+            for i in range(repeat):
+                start_time = time.time()
 
-            """ Preparation """
-            slightly_print(f"The {i}th OS:")
-            QD_path =find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
-            QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
-            QD_agent.Notewriter.modify_DigiAtte_For(-ro_atte_degrade_dB, qubit, 'ro')
+                """ Preparation """
+                slightly_print(f"The {i}th OS:")
+                QD_path =find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
+                QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
+                QD_agent.Notewriter.modify_DigiAtte_For(-ro_atte_degrade_dB, qubit, 'ro')
 
 
-            """ Running """
-            Cctrl = coupler_zctrl(DRandIP["dr"],cluster,QD_agent.Fluxmanager.build_Cctrl_instructions(couplers,'i'))
-            
-            init_system_atte(QD_agent.quantum_device,list([qubit]),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
-            ro_amp_scaling = ro_elements[qubit]["roAmp_factor"]
-            if ro_amp_scaling != 1 and repeat > 1 : raise ValueError("Check the RO_amp_factor should be 1 when you want to repeat it!")
-            info = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=ro_amp_scaling,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF)
-            
-            if ro_amp_scaling !=1 or ro_atte_degrade_dB != 0:
-                keep = mark_input(f"Keep this RO amp for {qubit}?[y/n]")
-            else:
-                keep = 'y'
-
-            """ Storing """ 
-            if execute and repeat == 1:
-                if keep.lower() in ['y', 'yes']:
-                    QD_agent.QD_keeper() 
-                    
-                    
+                """ Running """
+                Cctrl = coupler_zctrl(DRandIP["dr"],cluster,QD_agent.Fluxmanager.build_Cctrl_instructions(couplers,'i'))
                 
-            """ Close """    
-            shut_down(cluster,Fctrl,Cctrl)
-            end_time = time.time()
-            slightly_print(f"time cose: {round(end_time-start_time,1)} secs")
+                init_system_atte(QD_agent.quantum_device,list([qubit]),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
+                ro_amp_scaling = ro_elements[qubit]["roAmp_factor"]
+                if ro_amp_scaling != 1 and repeat > 1 : raise ValueError("Check the RO_amp_factor should be 1 when you want to repeat it!")
+                nc_path = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=ro_amp_scaling,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF,correlate_delay=correlate_delay)
+                pths.append(nc_path)
+                if ro_amp_scaling !=1 or ro_atte_degrade_dB != 0:
+                    keep = mark_input(f"Keep this RO amp for {qubit}?[y/n]")
+                else:
+                    keep = 'y'
+
+                """ Storing """ 
+                if execute and repeat == 1:
+                    if keep.lower() in ['y', 'yes']:
+                        QD_agent.QD_keeper() 
+                        
+                        
+                    
+                """ Close """    
+                shut_down(cluster,Fctrl,Cctrl)
+                end_time = time.time()
+                slightly_print(f"time cose: {round(end_time-start_time,1)} secs")
 
     # for qubit in effT_rec:
     #     highlight_print(f"{qubit}: {round(median(array(effT_rec[qubit])),1)} +/- {round(std(array(effT_rec[qubit])),1)} mK")

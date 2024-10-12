@@ -134,7 +134,7 @@ if __name__ == '__main__':
 
     """ Fill in """
     execute:bool = 1
-    repeat:int = 1
+    repeat:int = 10
     DRandIP = {"dr":"drke","last_ip":"242"}
     ro_elements = {'q1':{"roAmp_factor":1}}
     couplers = []

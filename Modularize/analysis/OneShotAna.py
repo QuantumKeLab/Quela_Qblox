@@ -105,7 +105,7 @@ def a_OSdata_correlation_analPlot(nc_path:str, plot:bool=True, pic_path:str='', 
         
         'Plot the scatter points for two readouts'
         plt.scatter(I_readout_1, Q_readout_1, c='blue', label="Readout 1", alpha=0.5, s=0.5)
-        # plt.scatter(I_readout_2, Q_readout_2, c='red', label="Readout 2", alpha=0.5)
+        plt.scatter(I_readout_2, Q_readout_2, c='red', label="Readout 2", alpha=0.5)
         plt.axis('equal')
 
         # Label axes
