@@ -1,16 +1,34 @@
-import os, json
+import os, json, sys
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 import xarray as xr
 import quantify_core.data.handling as dh
 import matplotlib.pyplot as plt
 from typing import Callable
-from numpy import flip, pi, linspace, array, sqrt, std, mean, sort, diag
+from numpy import flip, pi, linspace, array, sqrt, std, mean, sort, diag, sign, absolute
 from Modularize.support import QDmanager, Data_manager
 from Modularize.support.Pulse_schedule_library import IQ_data_dis
 from numpy import ndarray, cos, sin, deg2rad, real, imag, transpose, abs
 from scipy.optimize import curve_fit
 
 
-
+def plot_QbFlux(Qmanager:QDmanager, nc_path:str, target_q:str):
+    if target_q in Qmanager.refIQ:
+        ref = Qmanager.refIQ[target_q]
+    else:
+        ref = [0,0]
+    # plot flux-qubit 
+    f,z,i,q = convert_netCDF_2_arrays(nc_path)
+    amp = array(sqrt((i-array(ref)[0])**2+(q-array(ref)[1])**2)).transpose()
+    fig, ax = plt.subplots(figsize=(12,8))
+    ax:plt.Axes
+    c = ax.pcolormesh(z, f*1e-9, amp, cmap='RdBu')
+    ax.set_xlabel("Flux Pulse amp (V)", fontsize=20)
+    ax.set_ylabel("Driving Frequency (GHz)", fontsize=20)
+    fig.colorbar(c, ax=ax, label='Contrast (V)')
+    ax.xaxis.set_tick_params(labelsize=18)
+    ax.yaxis.set_tick_params(labelsize=18)
+    plt.tight_layout()
+    plt.show()
 
 
 # Plotting
@@ -75,6 +93,7 @@ def sortAndDecora(raw_z:ndarray,raw_XYF:ndarray,raw_mag:ndarray,threshold:float=
     def takeLast(elem):
         return elem[-1]
 
+    # filter peaks idx by a threshold satisfies that peak > mean + threshold*std
     while True:
         f_idx, z_idx, XL_mag = filter_2D(raw_mag,threshold)
         if len(f_idx)==0 and len(z_idx)==0:
@@ -84,8 +103,9 @@ def sortAndDecora(raw_z:ndarray,raw_XYF:ndarray,raw_mag:ndarray,threshold:float=
                 print(f"This interval can't find the trend : XYF={raw_XYF[0]}~{raw_XYF[-1]}")
         else:
             break
-
-    extracted = []
+    
+    # extract the values by the filtered idx
+    extracted = [] # [z, xyf, mag]
     for i in range(len(f_idx)):
         extracted.append([raw_z[z_idx[i]],raw_XYF[f_idx[i]],XL_mag[i]])
     # filter out the freq when it's under the same bias
@@ -106,15 +126,12 @@ def sortAndDecora(raw_z:ndarray,raw_XYF:ndarray,raw_mag:ndarray,threshold:float=
 
     sort(array(filtered),axis=0)
 
-    # filtered = F_seperate_del(array(filtered))
-    # filtered = Z_sperate_del(array(filtered),0.04)
-    # filtered = F_seperate_del(array(filtered))
     return array(filtered)
 
 def convert_netCDF_2_arrays(CDF_path:str):
     """
     For Qblox system, give a netCDF file path to return some ndarrays.
-    ## Return: XYF, z, I, Q
+    ## Return: XYF (x0), z (x1), I, Q 
     """
     dataset_processed = dh.to_gridded_dataset(xr.open_dataset(CDF_path))
     XYF = dataset_processed["x0"].to_numpy()
@@ -193,7 +210,7 @@ def read_fq_data(json_path:str):
     return flux, f01
 
 
-def set_fitting_paras(period:float,offset:float,flux_array:ndarray,Ec_guess_GHz:float=0.21,Ej_sum_guess_GHz:float=20.0,squid_ratio_guess:float=0.5):
+def set_fitting_paras(period:float,offset:float,Ec_guess_GHz:float=0.21,Ej_sum_guess_GHz:float=20.0,squid_ratio_guess:float=0.5):
     """
     There are 5 paras in Fq eqn, give the initial guess and the fitting constrains for curve fit.\n
     Return guess, upper_bound, bottom_bound.
@@ -202,8 +219,24 @@ def set_fitting_paras(period:float,offset:float,flux_array:ndarray,Ec_guess_GHz:
     b = offset
     guess = (f,b,Ec_guess_GHz,Ej_sum_guess_GHz,squid_ratio_guess) #[a, b, Ec, Ej_sum, d]
 
-    upper_bound = [f*1.1,offset*1.1,0.32,100,1] #[a, b, Ec, Ej_sum, d]
-    bottom_bound = [f*0.9,offset*0.9,0.28,1,0]
+    acceptable_loss = 30 / 100
+
+    if f < 0:
+        up_f = f * (1-acceptable_loss)
+        lo_f = f * (1+acceptable_loss)
+    else:
+        up_f = f * (1+acceptable_loss)
+        lo_f = f * (1-acceptable_loss)
+
+    if b < 0:
+        up_b = b * (1-acceptable_loss)
+        lo_b = b * (1+acceptable_loss)
+    else:
+        up_b = b * (1+acceptable_loss)
+        lo_b = b * (1-acceptable_loss)
+    
+    upper_bound =  [up_f, up_b, 0.25, 100, 1] #[a, b, Ec, Ej_sum, d]
+    bottom_bound = [lo_f, lo_b, 0.19,  1,  0]
 
     return guess, upper_bound, bottom_bound
 
@@ -222,6 +255,10 @@ def plot_fq_fit(flux_array:ndarray,f01_array:ndarray,target_q:str,popt:dict,plot
         plt.show()
     else:
         plt.close()
+
+    exam_dict = {"meas":{"z":list(flux_array), "xyf":list(f01_array)},"fit":{"z":list(flux_extend),"xyf":list(FqEqn(flux_extend,*popt))}}
+    with open(os.path.join(os.path.split(fig_path)[0],"measANDfit_points.json"), "w") as record_file:
+        json.dump(exam_dict,record_file)
 
 def FitErrorFilter(eqn:Callable,eqn_paras:dict,exp_x_ary:ndarray,exp_y_ary:ndarray,threshold:float=1.5):
     """
@@ -253,7 +290,7 @@ def fq_fit(QD:QDmanager,data2fit_path:str,target_q:str,plot:bool=True,savefig_pa
 
     flux, f01 = read_fq_data(data2fit_path)
     original_datapoints = flux.shape[0]
-    guess, upper_bound, bottom_bound = set_fitting_paras(period,offset,flux,0.3)
+    guess, upper_bound, bottom_bound = set_fitting_paras(period,offset,0.22)
     popt, pcov = curve_fit(FqEqn, flux, f01,p0=guess,bounds=(bottom_bound,upper_bound))
 
     # try filter and fit again
@@ -300,14 +337,16 @@ def fq_fit(QD:QDmanager,data2fit_path:str,target_q:str,plot:bool=True,savefig_pa
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
     from numpy import array, pi, linspace
-    qd_path = 'Modularize/QD_backup/2024_3_28/DR2#171_SumInfo.pkl'
-    json_path = 'Modularize/Meas_raw/2024_3_21/DR2q4_FluxFqFIT_H17M57S49.json'
+    # qd_path = 'Modularize/QD_backup/2024_5_15/DR3#13_SumInfo.pkl'
+    # json_path = 'Modularize/Meas_raw/2024_5_15/DR3q0_FluxFqFIT_H17M21S59.json'
     
-    q = json_path.split("/")[-1].split("_")[0][-2:]
-    QD_agent = QDmanager(qd_path)
-    QD_agent.QD_loader()
-    print(QD_agent.Fluxmanager.get_bias_dict()["q1"])
-    pic_parentpath = os.path.join(Data_manager().get_today_picFolder())
-    fq_fit(QD=QD_agent,data2fit_path=json_path,target_q=q,plot=True,savefig_path='',saveParas=False)
-
+    # q = os.path.split(json_path)[-1].split("_")[0][-2:]
+    # QD_agent = QDmanager(qd_path)
+    # QD_agent.QD_loader()
+    # print(QD_agent.Fluxmanager.get_bias_dict()["q1"])
+    # pic_parentpath = os.path.join(Data_manager().get_today_picFolder())
+    # fq_fit(QD=QD_agent,data2fit_path=json_path,target_q=q,plot=True,savefig_path='',saveParas=False,FitFilter_threshold=2.5)
+    file = 'Modularize/Meas_raw/2024_8_12/DR4q0_Flux2tone_H12M32S5.nc'
+    f, z, i, q = convert_netCDF_2_arrays(file)
+    data2plot(f,z,i,q,[0,0],q='q0',qblox=True,plot_scatter = True)
 
