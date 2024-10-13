@@ -130,13 +130,14 @@ def plot_timeDepCohe(time_values:ndarray, y_values:ndarray, exp:str, fig_path:st
 
 
 if __name__ == "__main__":
-    folder_paths = {"T1_folder_path":"Modularize/Meas_raw/T1_timeDep",
-                    "T2_folder_path":"Modularize/Meas_raw/T2_timeDep",
-                    "OS_folder_path":""
-                    }
-    QD_file_path = 'Modularize/QD_backup/2024_9_23/DR4#81_SumInfo.pkl'
-    qs = 'q4'
-    sort_mode = 'idx' # 'idx' or 'time'
+    folder_paths = {"T1_folder_path":r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\T1_timeDep_q1_20241012_copy"
+                    }#"Modularize/Meas_raw/T1_timeDep",
+                    # "T2_folder_path":"Modularize/Meas_raw/T2_timeDep",
+                    # "OS_folder_path":""
+    QD_file_path = r"Modularize\QD_backup\2024_10_12\DRKE#242_SumInfo.pkl"
+    qs = ['q1']
+    qs = 'q1'
+    sort_mode = 'time' # 'idx' or 'time'
 
     QD_agent = QDmanager(QD_file_path)
     QD_agent.QD_loader()

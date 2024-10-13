@@ -23,10 +23,11 @@ def Ramsey(QD_agent:QDmanager,meas_ctrl:MeasurementControl,freeduration:float,ar
     qubit_info = QD_agent.quantum_device.get_element(q)
     qubit_info.measure.integration_time(1e-6)
     qubit_info.measure.pulse_duration(1e-6)
-    
+    # qubit_info.rxy.amp180(0.30389033573721985)
     # qubit_info.reset.duration(qubit_info.reset.duration()*2)
     print("Integration time ",qubit_info.measure.integration_time()*1e6, "µs")
     print("Reset time ", qubit_info.reset.duration()*1e6, "µs")
+    print("rxy.amp180",qubit_info.rxy.amp180())
     # Manually change f01
     # f01 = qubit.clock_freqs.f01()
     # qubit.clock_freqs.f01(f01-2.47e6)
@@ -189,14 +190,14 @@ if __name__ == "__main__":
     chip_info_restore:bool = 1
     DRandIP = {"dr":"drke","last_ip":"242"}
     ro_elements = {
-        "q1":{"detune":0e6,"evoT":40e-6,"histo_counts":10},#-0.174e6
+        "q1":{"detune":0e6,"evoT":50e-6,"histo_counts":10},#-0.174e6
     }
     couplers = []
 
     """ Optional paras """
-    spin_echo_pi_num:int = 0
+    spin_echo_pi_num:int = 1
     time_data_points = 100
-    avg_n = 1000
+    avg_n = 300
     xy_IF = 250e6
 
 
@@ -212,13 +213,13 @@ if __name__ == "__main__":
             
             """ Running """
             Cctrl = coupler_zctrl(DRandIP["dr"],cluster,QD_agent.Fluxmanager.build_Cctrl_instructions(couplers,'i'))
-            # Cctrl['c3'](0.1)
-            # Cctrl['c2'](-0.1)
+            Cctrl['c0'](0.07)
+            Cctrl['c1'](0.05)
             init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
             slightly_print(f"Ramsey with detuning = {round(ro_elements[qubit]['detune']*1e-6,2)} MHz")
             ramsey_results, this_t2_us, average_actual_detune = ramsey_executor(QD_agent,cluster,meas_ctrl,Fctrl,qubit,artificial_detune=ro_elements[qubit]["detune"],freeDura=ro_elements[qubit]["evoT"],ith=ith_histo,run=execution,pts=time_data_points,spin_echo=spin_echo_pi_num,avg_n=avg_n,IF=xy_IF)
-            # Cctrl['c3'](0)
-            # Cctrl['c2'](0)
+            Cctrl['c0'](0)
+            Cctrl['c1'](0)
             highlight_print(f"{qubit} detune = {round(average_actual_detune[qubit]*1e-6,3)} MHz")
             if this_t2_us > 0:
                 t2_us_rec.append(this_t2_us)

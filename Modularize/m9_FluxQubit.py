@@ -170,7 +170,7 @@ if __name__ == "__main__":
     execution:bool = True
     chip_info_restore:bool = 1
     DRandIP = {"dr":"drke","last_ip":"242"}
-    ro_elements = ['q0']
+    ro_elements = ['q1']
     couplers = []
     z_shifter = 0.0 # V
 
@@ -201,21 +201,21 @@ if __name__ == "__main__":
     for qubit in ro_elements:
         if not QD_agent.Fluxmanager.get_offsweetspot_button(qubit):
             init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
-            # Cctrl['c0'](0.1)
-            # Cctrl['c1'](-0.1)
+            # Cctrl['c0'](0.07)
+            # Cctrl['c1'](0.05)
             trustable, new_ans = fluxQubit_executor(QD_agent,meas_ctrl,qubit,run=execution,z_shifter=z_shifter,zpts=flux_pts,fpts=freq_pts,span_priod_factor=span_period_factor,f_sapn_Hz=freq_span_Hz,avg_times=avg_n,xy_IF=xy_IF)
             # Cctrl['c0'](0)
             # Cctrl['c1'](0)
             cluster.reset()
 
             """ Storing """
-            if  trustable:
-                update_by_fluxQubit(QD_agent,new_ans,qubit)
-                QD_agent.QD_keeper()
-                if chip_info_restore:
-                    chip_info.update_FluxQubit(qb=qubit, result=new_ans)
-            else:
-                check_again.append(qubit)    
+            # if  trustable:
+            #     update_by_fluxQubit(QD_agent,new_ans,qubit)
+            #     QD_agent.QD_keeper()
+            #     if chip_info_restore:
+            #         chip_info.update_FluxQubit(qb=qubit, result=new_ans)
+            # else:
+            #     check_again.append(qubit)    
 
     """ Close """
     print('Flux qubit done!')

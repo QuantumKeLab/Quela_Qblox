@@ -10,10 +10,10 @@ from Modularize.analysis.Radiator.RadiatorSetAna import sort_set
 def time_label_sort(nc_file_name:str):
     return datetime.strptime(nc_file_name.split("_")[-1].split(".")[0],"H%HM%MS%S")
 
-folder = r"Modularize\Meas_raw\T1_timeDep"
-QD_file_path = r"Modularize\QD_backup\2024_9_24\DR4#81_SumInfo.pkl"
-qs = ['q4']
-time_cost = 40
+folder = r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\T1_timeDep_q1_20241012"
+QD_file_path = r"Modularize\QD_backup\2024_10_12\DRKE#242_SumInfo.pkl"
+qs = ['q1']
+time_cost = 30
 # ref_t1 = 29.8
 # ref_t1_err = 3.3
 

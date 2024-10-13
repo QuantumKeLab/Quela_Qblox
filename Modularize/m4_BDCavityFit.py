@@ -69,8 +69,8 @@ if __name__ == "__main__":
     chip_info_restore:bool = 0
     DRandIP = {"dr":"drke","last_ip":"242"}
     ro_element = {
-        "q0":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
-                "dress":{"ro_amp":0.1,"window_shift":0.3e6}},
+        # "q0":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
+        #         "dress":{"ro_amp":0.1,"window_shift":0.3e6}},
         "q1":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
                 "dress":{"ro_amp":0.1,"window_shift":1e6}},
         # "q2":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     ro_attes = {"dress":34, "bare":22} # all ro_elements shared
 
     """ Optional paras"""
-    half_ro_freq_window_Hz = 5e6
+    half_ro_freq_window_Hz = 8e6
     freq_data_points = 500
 
 
@@ -125,14 +125,14 @@ if __name__ == "__main__":
 
 
         """ Storing """
-        fillin_PDans(QD_agent, PD_ans)
+        # fillin_PDans(QD_agent, PD_ans)
 
-        if chip_info_restore:
-            chip_info.update_QD(CS_results)
-            if sweetSpot:
-                chip_info.update_BDCavityFit_sweet(CS_results)
-            else:
-                chip_info.update_BDCavityFit(CS_results)
+        # if chip_info_restore:
+        #     chip_info.update_QD(CS_results)
+        #     if sweetSpot:
+        #         chip_info.update_BDCavityFit_sweet(CS_results)
+        #     else:
+        #         chip_info.update_BDCavityFit(CS_results)
 
 
         """ Close """

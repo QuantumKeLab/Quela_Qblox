@@ -12,7 +12,7 @@ from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
 from Modularize.support.Pulse_schedule_library import Qubit_state_single_shot_plot
 from Modularize.support import QDmanager, Data_manager,init_system_atte, init_meas, shut_down, coupler_zctrl
 from Modularize.support.Pulse_schedule_library import Qubit_SS_sche, Qubit_SS_Correlation_sche, set_LO_frequency, pulse_preview, Qubit_state_single_shot_fit_analysis
-from Modularize.CorrelationMethod.CorrAna_iteration_and_plot import correlation_method
+from Modularize.CorrelationMethod.CorrAna_iteration_and_plot import correlation_method_2
 
 from numpy import median, mean, std
 try:
@@ -26,8 +26,8 @@ except:
 
 def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:str='q1',IF:float=250e6,Experi_info:dict={},ro_amp_factor:float=1,T1:float=15e-6,exp_idx:int=0,parent_datafolder:str='',plot:bool=False,correlate_delay:float=0.0):
     qubit_info = QD_agent.quantum_device.get_element(q)
-    qubit_info.measure.integration_time(1.2e-6)
-    qubit_info.measure.pulse_duration(1.2e-6)
+    qubit_info.measure.integration_time(1.5e-6)
+    qubit_info.measure.pulse_duration(1.5e-6)
     print("Integration time ",qubit_info.measure.integration_time()*1e6, "µs")
     print("Reset time ", qubit_info.reset.duration()*1e6, "µs")    
     # qubit_info.reset.duration(250e-6)
@@ -118,10 +118,16 @@ def SS_executor(QD_agent:QDmanager,cluster:Cluster,Fctrl:dict,target_q:str,shots
                 correlate_delay=correlate_delay)
     Fctrl[target_q](0.0)
     cluster.reset()
+    #  # Custom analysis function for each path
+    # total_g = []
+    # for pth in pths:
+    #     total_g.append(correlation_method(pth))  # Run analysis on each saved path
+
+    # return total_g  # Return analysis results
     
     
-    if plot:
-        a_OSdata_correlation_analPlot(nc,plot,save_pic=save_every_pic)
+    # if plot:
+    #     a_OSdata_correlation_analPlot(nc,plot,save_pic=save_every_pic)
 
 
     return  
@@ -132,10 +138,11 @@ if __name__ == '__main__':
     """ Fill in """
     execute:bool = True
     repeat:int = 1
-    DRandIP = {"dr":"dr2","last_ip":"10"}
-    ro_elements = {'q0':{"roAmp_factor":1}}
+    DRandIP = {"dr":"drke","last_ip":"242"}
+    ro_elements = {'q1':{"roAmp_factor":1}}
     couplers = []
-    delay_taus = [0,1,2,3,4,5,6,7,8,9,10,12,14,16,18,20,22,24,26,28,30,35,40,45,50] 
+    delay_taus = [0,1,2,3,4,5,6,7,8,9,10,12,14,16,18,20,25,30] 
+    # delay_taus = [0,1,2,3,4,5,6,7,8,9,10,12,14,16,18,20,22,24,26,28,30,35,40,45,50] 
     # delay_taus = [1]*10
     # delay_taus += [2]*10
     # delay_taus += [5]*5
@@ -171,7 +178,11 @@ if __name__ == '__main__':
                 init_system_atte(QD_agent.quantum_device,list([qubit]),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
                 ro_amp_scaling = ro_elements[qubit]["roAmp_factor"]
                 if ro_amp_scaling != 1 and repeat > 1 : raise ValueError("Check the RO_amp_factor should be 1 when you want to repeat it!")
+                Cctrl['c0'](0.07)
+                Cctrl['c1'](0.05)
                 nc_path = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=ro_amp_scaling,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF,correlate_delay=correlate_delay)
+                Cctrl['c0'](0.0)
+                Cctrl['c1'](0.0)
                 pths.append(nc_path)
                 if ro_amp_scaling !=1 or ro_atte_degrade_dB != 0:
                     keep = mark_input(f"Keep this RO amp for {qubit}?[y/n]")

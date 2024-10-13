@@ -167,7 +167,11 @@ if __name__ == '__main__':
             init_system_atte(QD_agent.quantum_device,list([qubit]),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
             ro_amp_scaling = ro_elements[qubit]["roAmp_factor"]
             if ro_amp_scaling != 1 and repeat > 1 : raise ValueError("Check the RO_amp_factor should be 1 when you want to repeat it!")
+            Cctrl['c0'](0.07)
+            Cctrl['c1'](0.05)
             info = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=ro_amp_scaling,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF)
+            Cctrl['c0'](0)
+            Cctrl['c1'](0)
             snr_rec[qubit].append(info[2])
             effT_rec[qubit].append(info[1])
             thermal_pop[qubit].append(info[0]*100)

@@ -19,8 +19,8 @@ def Rabi(QD_agent:QDmanager,meas_ctrl:MeasurementControl,XY_amp:float=0.5, XY_du
     qubit_info = QD_agent.quantum_device.get_element(q)
     
     LO= qubit_info.clock_freqs.f01()+IF
-    qubit_info.measure.pulse_duration(2e-6)
-    qubit_info.measure.integration_time(2e-6)#
+    qubit_info.measure.pulse_duration(1e-6)
+    qubit_info.measure.integration_time(1e-6)#
     qubit_info.reset.duration(250e-6)
     print("Integration time ",qubit_info.measure.integration_time()*1e6, "µs")
     print("Reset time ", qubit_info.reset.duration()*1e6, "µs")
@@ -156,16 +156,16 @@ if __name__ == "__main__":
     execution:bool = 1
     chip_info_restore:bool = 1
     DRandIP = {"dr":"drke","last_ip":"242"}
-    ro_elements = ['q0']
+    ro_elements = ['q1']
     couplers = []
 
 
     """ Optional paras """
-    pi_duration:float = 200e-9
-    pi_amp_max:float = 0.6
+    pi_duration:float = 100e-9
+    pi_amp_max:float = 0.4
     rabi_type:str = 'power'  # 'time' or 'power'
     data_pts = 100
-    avg_n:int = 1000
+    avg_n:int = 500
     xy_atte:int = 10
     adj_freq = 0e6
     
@@ -184,25 +184,25 @@ if __name__ == "__main__":
         rabi_results = {}
         Cctrl = coupler_zctrl(DRandIP["dr"],cluster,QD_agent.Fluxmanager.build_Cctrl_instructions(couplers,'i'))
         init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
-        # Cctrl['c0'](0.1)
-        # Cctrl['c1'](-0.1)
+        # Cctrl['c0'](0.07)
+        # Cctrl['c1'](0.05)
         rabi_results[qubit], trustable = rabi_executor(QD_agent,cluster,meas_ctrl,Fctrl,qubit,run=execution,XYdura_max=pi_duration,XYamp_max=pi_amp_max,which_rabi=rabi_type,avg_times=avg_n,pts=data_pts)
         # Cctrl['c0'](0)
         # Cctrl['c1'](0)
         cluster.reset()
     
         """ Storing """
-        if trustable:   
-            QD_agent.refresh_log("after Rabi")
-            if adj_freq != 0:
-                ans = mark_input(f"This adj_freq is not 0, save it ? [y/n]")
-                if ans.lower() in ['y', 'yes']:
-                    QD_agent.QD_keeper()
-            else:
-                pass
-                QD_agent.QD_keeper()
-            if chip_info_restore:
-                chip_info.update_RabiOsci(qb=qubit)
+        # if trustable:   
+        #     QD_agent.refresh_log("after Rabi")
+        #     if adj_freq != 0:
+        #         ans = mark_input(f"This adj_freq is not 0, save it ? [y/n]")
+        #         if ans.lower() in ['y', 'yes']:
+        #             QD_agent.QD_keeper()
+        #     else:
+        #         pass
+        #         QD_agent.QD_keeper()
+        #     if chip_info_restore:
+        #         chip_info.update_RabiOsci(qb=qubit)
 
 
         """ Close """

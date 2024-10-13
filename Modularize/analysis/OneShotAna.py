@@ -44,7 +44,7 @@ def a_OSdata_analPlot(QD_agent:QDmanager, target_q:str, nc_path:str, plot:bool=T
     p00 = g1d_fidelity.g1d_dist[0][0][0]
     p01 = g1d_fidelity.g1d_dist[0][0][1]
     p11 = g1d_fidelity.g1d_dist[1][0][1]
-    effT_mK = p01_to_Teff(p01, transi_freq)*1000
+    effT_mK = np.abs(p01_to_Teff(p01, transi_freq)*1000)#p01_to_Teff(p01, transi_freq)*1000
     RO_fidelity_percentage = (p00+p11)*100/2
     if plot:
         plot_readout_fidelity( tarin_data[0], gmm2d_fidelity, g1d_fidelity,transi_freq,pic_save_path)
@@ -105,7 +105,7 @@ def a_OSdata_correlation_analPlot(nc_path:str, plot:bool=True, pic_path:str='', 
         
         'Plot the scatter points for two readouts'
         plt.scatter(I_readout_1, Q_readout_1, c='blue', label="Readout 1", alpha=0.5, s=0.5)
-        plt.scatter(I_readout_2, Q_readout_2, c='red', label="Readout 2", alpha=0.5)
+        plt.scatter(I_readout_2, Q_readout_2, c='red', label="Readout 2", alpha=0.5,s=0.5)
         plt.axis('equal')
 
         # Label axes
@@ -227,11 +227,10 @@ if __name__ == "__main__":
     # nc_path = r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_10\DRKEq1_cor_2\DRKEq1_SingleShot(0)_H21M14S14.nc"
     # a_OSdata_correlation_analPlot(nc_path)
     
-    QD_agent_path=r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_10_11\DRKE#242_SumInfo.pkl"
+    QD_agent_path=r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_10_13\DRKE#242_SumInfo.pkl"
     Qmanager = QDmanager(QD_agent_path)
     Qmanager.QD_loader()
 
     target_q='q1'
-    nc_path=r'C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_11\DRKEq1_SingleShot(0)_H11M44S1.nc'
-    
+    nc_path=r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_13\150mK\SS\DRKEq1_SingleShot(0)_H20M40S42.nc"
     a_OSdata_analPlot(Qmanager,target_q, nc_path)

@@ -120,8 +120,8 @@ def multiplexing_CS_ana(QD_agent:QDmanager, ds:Dataset, ro_elements:dict, save_p
         S21 = ds[f"y{2*idx}"] * cos(
                 deg2rad(ds[f"y{2*idx+1}"])
             ) + 1j * ds[f"y{2*idx}"] * sin(deg2rad(ds[f"y{2*idx+1}"]))
-        freq = array(ro_elements[q])[1:]
-        res_er = ResonatorData(freq=freq,zdata=array(S21)[1:])
+        freq = array(ro_elements[q])[3:]
+        res_er = ResonatorData(freq=freq,zdata=array(S21)[3:])
         result, data2plot, fit2plot = res_er.fit()
         fig, ax = plt.subplots(1,2,figsize=(9,6))
         ax0:plt.Axes = ax[0]        
