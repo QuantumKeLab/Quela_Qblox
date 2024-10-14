@@ -130,7 +130,7 @@ def plot_timeDepCohe(time_values:ndarray, y_values:ndarray, exp:str, fig_path:st
 
 
 if __name__ == "__main__":
-    folder_paths = {"T1_folder_path":r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\T1_timeDep_q1_20241012_copy"
+    folder_paths = {"T1_folder_path":r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\T1_timeDep_q1_20241012"
                     }#"Modularize/Meas_raw/T1_timeDep",
                     # "T2_folder_path":"Modularize/Meas_raw/T2_timeDep",
                     # "OS_folder_path":""
@@ -165,7 +165,11 @@ if __name__ == "__main__":
                     raw_data.append(data)
                     if folder_name.split("_")[0] == "T1":   
                         data_fit= T1_fit_analysis(data=data,freeDu=samples,T1_guess=25e-6)
-                        ans.append(data_fit.attrs['T1_fit']*1e6)
+                        print(data_fit.attrs['T1_fit'])
+                        if data_fit.attrs['T1_fit']>0 or data_fit.attrs['T1_fit']<50:
+                            ans.append(data_fit.attrs['T1_fit']*1e6)
+                        else: 
+                            pass#ans.append
                     else:
                         data_fit= T2_fit_analysis(data=data,freeDu=samples,T2_guess=10e-6)
                         ans.append(data_fit.attrs['T2_fit']*1e6)

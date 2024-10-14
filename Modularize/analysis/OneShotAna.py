@@ -227,10 +227,10 @@ if __name__ == "__main__":
     # nc_path = r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_10\DRKEq1_cor_2\DRKEq1_SingleShot(0)_H21M14S14.nc"
     # a_OSdata_correlation_analPlot(nc_path)
     
-    QD_agent_path=r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_10_13\DRKE#242_SumInfo.pkl"
+    QD_agent_path=r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_10_12\DRKE#242_SumInfo.pkl"
     Qmanager = QDmanager(QD_agent_path)
     Qmanager.QD_loader()
 
     target_q='q1'
-    nc_path=r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_13\150mK\SS\DRKEq1_SingleShot(0)_H20M40S42.nc"
+    nc_path=r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_12\210mK\SS\DRKEq1_SingleShot(0)_H14M49S56.nc"
     a_OSdata_analPlot(Qmanager,target_q, nc_path)
