@@ -13,6 +13,7 @@ from Modularize.support.Pulse_schedule_library import Qubit_state_single_shot_pl
 from Modularize.support import QDmanager, Data_manager,init_system_atte, init_meas, shut_down, coupler_zctrl
 from Modularize.support.Pulse_schedule_library import Qubit_SS_sche, Qubit_SS_Correlation_sche, set_LO_frequency, pulse_preview, Qubit_state_single_shot_fit_analysis
 
+# aaaaaaa
 
 try:
     from qcat.analysis.state_discrimination.discriminator import train_GMModel # type: ignore
