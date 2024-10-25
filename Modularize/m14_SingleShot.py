@@ -25,8 +25,8 @@ except:
 
 def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:str='q1',IF:float=250e6,Experi_info:dict={},ro_amp_factor:float=1,T1:float=15e-6,exp_idx:int=0,parent_datafolder:str='',plot:bool=False):
     qubit_info = QD_agent.quantum_device.get_element(q)
-    qubit_info.measure.integration_time(1.5e-6)
-    qubit_info.measure.pulse_duration(1.5e-6)
+    qubit_info.measure.integration_time(2e-6)
+    qubit_info.measure.pulse_duration(2e-6)
     print("Integration time ",qubit_info.measure.integration_time()*1e6, "µs")
     print("Reset time ", qubit_info.reset.duration()*1e6, "µs")
     
@@ -123,9 +123,10 @@ def SS_executor(QD_agent:QDmanager,cluster:Cluster,Fctrl:dict,target_q:str,shots
             effT_mk, ro_fidelity, thermal_p = 0, 0, 0
         else:
             effT_mk, ro_fidelity, thermal_p = 0, 0, 0
+    # else:
+    #     thermal_p, effT_mk, ro_fidelity = a_OSdata_analPlot(QD_agent,target_q,nc,plot,save_pic=save_every_pic)
     else:
-        thermal_p, effT_mk, ro_fidelity = a_OSdata_analPlot(QD_agent,target_q,nc,plot,save_pic=save_every_pic)
-
+        effT_mk, ro_fidelity, thermal_p = 0, 0, 0
 
     return thermal_p, effT_mk, ro_fidelity
 
@@ -134,9 +135,9 @@ if __name__ == '__main__':
 
     """ Fill in """
     execute:bool = 1
-    repeat:int = 10
+    repeat:int = 2
     DRandIP = {"dr":"drke","last_ip":"242"}
-    ro_elements = {'q1':{"roAmp_factor":1}}
+    ro_elements = {'q0':{"roAmp_factor":1}}
     couplers = []
 
 
@@ -167,23 +168,23 @@ if __name__ == '__main__':
             init_system_atte(QD_agent.quantum_device,list([qubit]),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
             ro_amp_scaling = ro_elements[qubit]["roAmp_factor"]
             if ro_amp_scaling != 1 and repeat > 1 : raise ValueError("Check the RO_amp_factor should be 1 when you want to repeat it!")
-            Cctrl['c0'](0.07)
-            Cctrl['c1'](0.05)
-            info = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=ro_amp_scaling,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF)
-            Cctrl['c0'](0)
-            Cctrl['c1'](0)
-            snr_rec[qubit].append(info[2])
-            effT_rec[qubit].append(info[1])
-            thermal_pop[qubit].append(info[0]*100)
-            if ro_amp_scaling !=1 or ro_atte_degrade_dB != 0:
-                keep = mark_input(f"Keep this RO amp for {qubit}?[y/n]")
-            else:
-                keep = 'y'
+            # Cctrl['c0'](0.07)
+            # Cctrl['c1'](0.05)
+            info = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=ro_amp_scaling,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF,data_folder=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25")
+            # Cctrl['c0'](0)
+            # Cctrl['c1'](0)
+            # snr_rec[qubit].append(info[2])
+            # effT_rec[qubit].append(info[1])
+            # thermal_pop[qubit].append(info[0]*100)
+            # if ro_amp_scaling !=1 or ro_atte_degrade_dB != 0:
+            #     keep = mark_input(f"Keep this RO amp for {qubit}?[y/n]")
+            # else:
+            #     keep = 'y'
 
-            """ Storing """ 
-            if execute and repeat == 1:
-                if keep.lower() in ['y', 'yes']:
-                    QD_agent.QD_keeper() 
+            # """ Storing """ 
+            # if execute and repeat == 1:
+            #     if keep.lower() in ['y', 'yes']:
+            #         QD_agent.QD_keeper() 
                     
                     
                 
@@ -192,10 +193,10 @@ if __name__ == '__main__':
             end_time = time.time()
             slightly_print(f"time cose: {round(end_time-start_time,1)} secs")
 
-    for qubit in effT_rec:
-        highlight_print(f"{qubit}: {round(median(array(effT_rec[qubit])),1)} +/- {round(std(array(effT_rec[qubit])),1)} mK")
-        Data_manager().save_histo_pic(QD_agent,effT_rec,qubit,mode="ss")
-        Data_manager().save_histo_pic(QD_agent,thermal_pop,qubit,mode="pop")
+    # for qubit in effT_rec:
+    #     highlight_print(f"{qubit}: {round(median(array(effT_rec[qubit])),2)} +/- {round(std(array(effT_rec[qubit])),3)} mK")
+    #     Data_manager().save_histo_pic(QD_agent,effT_rec,qubit,mode="ss")
+    #     Data_manager().save_histo_pic(QD_agent,thermal_pop,qubit,mode="pop")
         
         
 

@@ -680,7 +680,7 @@ Hcfg_drke = {
         # ============ FLUX ============#
         f"clusterdrke_module2": {
             "instrument_type": "QCM",
-            "real_output_3": {"portclock_configs": [{"port": "q0:fl", "clock": "cl0.baseband"}]},
+            "real_output_0": {"portclock_configs": [{"port": "q0:fl", "clock": "cl0.baseband"}]},
             "real_output_1": {"portclock_configs": [{"port": "q1:fl", "clock": "cl0.baseband"}]},
         },
         # ============ READOUT ============#
@@ -754,9 +754,9 @@ def get_FluxController(cluster, ip:str)->dict:
         }
     elif which_dr.lower() == 'drke':
         Fctrl: callable = {
-            "q0":cluster.module2.out3_offset,# actually is out0
+            "q0":cluster.module2.out0_offset, 
             "q1":cluster.module2.out1_offset,
-            
+            "q2":cluster.module2.out2_offset, 
         }
 
     else:

@@ -1355,14 +1355,14 @@ def hist_plot(q:str,data:dict,title:str, save_path:str='', show:bool=True):
     ax.set_ylabel('Counts')
     if title.lower() in ['t1','t2','t2*']:
         ax.set_xlabel(f"{title} (µs)")
-        plt.title(f"{title} = {round(np.median(np.array(data[q])),1)}  $\pm$ {round(np.std(np.array(data[q])),1)} µs")
+        plt.title(f"{title} = {round(np.median(np.array(data[q])),2)}  $\pm$ {round(np.std(np.array(data[q])),3)} µs")
     else:
         if title.lower() in ["thermalpop"]:
             ax.set_xlabel(f"{title} (%)")
-            plt.title(f"{title} = {round(np.median(np.array(data[q])),1)}  $\pm$ {round(np.std(np.array(data[q])),1)} %")
+            plt.title(f"{title} = {round(np.median(np.array(data[q])),2)}  $\pm$ {round(np.std(np.array(data[q])),3)} %")
         else:
             ax.set_xlabel(f"{title} (mK)")
-            plt.title(f"{title} = {round(np.median(np.array(data[q])),1)}  $\pm$ {round(np.std(np.array(data[q])),1)} mK")
+            plt.title(f"{title} = {round(np.median(np.array(data[q])),2)}  $\pm$ {round(np.std(np.array(data[q])),3)} mK")
         
     plt.tight_layout()
     if save_path != '':

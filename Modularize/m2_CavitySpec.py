@@ -196,14 +196,15 @@ if __name__ == "__main__":
         # q1=6.0736e9,
         # # q3=6.1060e9
         q0=5.848e9,
-        q1=6.119e9
+        q1=6.119e9,
+        # q2=5.9226e9,
     )
 
     """ Optional paras """ 
-    coupler_number:int = 0
-    qubit_num:int = 2
+    coupler_number:int = 2
+    qubit_num:int = 3
     freq_data_points = 201
-    half_freq_window_Hz = 13e6
+    half_freq_window_Hz = 7e6
     n_avg: int = 100
 
 

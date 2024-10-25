@@ -12,7 +12,7 @@ from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
 from Modularize.support.Pulse_schedule_library import Qubit_state_single_shot_plot
 from Modularize.support import QDmanager, Data_manager,init_system_atte, init_meas, shut_down, coupler_zctrl
 from Modularize.support.Pulse_schedule_library import Qubit_SS_sche, Qubit_SS_Correlation_sche, set_LO_frequency, pulse_preview, Qubit_state_single_shot_fit_analysis
-from Modularize.CorrelationMethod.CorrAna_iteration_and_plot import correlation_method_2
+from Modularize.CorrelationMethod.CorrAna_iteration_and_plot import correlation_method_fitting
 
 from numpy import median, mean, std
 try:
@@ -137,11 +137,11 @@ if __name__ == '__main__':
 
     """ Fill in """
     execute:bool = True
-    repeat:int = 1
+    repeat:int = 2
     DRandIP = {"dr":"drke","last_ip":"242"}
-    ro_elements = {'q1':{"roAmp_factor":1}}
+    ro_elements = {'q0':{"roAmp_factor":1}}
     couplers = []
-    delay_taus = [0,1,2,3,4,5,6,7,8,9,10,12,14,16,18,20,25,30] 
+    delay_taus = [0,0.5,1,2,3,4,5,6,7,8,9,10,12,14,16,18,20,22,24,26,28,30,35,40] 
     # delay_taus = [0,1,2,3,4,5,6,7,8,9,10,12,14,16,18,20,22,24,26,28,30,35,40,45,50] 
     # delay_taus = [1]*10
     # delay_taus += [2]*10
@@ -178,11 +178,11 @@ if __name__ == '__main__':
                 init_system_atte(QD_agent.quantum_device,list([qubit]),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
                 ro_amp_scaling = ro_elements[qubit]["roAmp_factor"]
                 if ro_amp_scaling != 1 and repeat > 1 : raise ValueError("Check the RO_amp_factor should be 1 when you want to repeat it!")
-                Cctrl['c0'](0.07)
-                Cctrl['c1'](0.05)
+                # Cctrl['c0'](0.07)
+                # Cctrl['c1'](0.05)
                 nc_path = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=ro_amp_scaling,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF,correlate_delay=correlate_delay)
-                Cctrl['c0'](0.0)
-                Cctrl['c1'](0.0)
+                # Cctrl['c0'](0.0)
+                # Cctrl['c1'](0.0)
                 pths.append(nc_path)
                 if ro_amp_scaling !=1 or ro_atte_degrade_dB != 0:
                     keep = mark_input(f"Keep this RO amp for {qubit}?[y/n]")

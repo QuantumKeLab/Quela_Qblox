@@ -130,7 +130,7 @@ if __name__ == "__main__":
     execution:bool = True
     chip_info_restore:bool = 0
     DRandIP = {"dr":"drke","last_ip":"242"}
-    ro_elements = ['q1']
+    ro_elements = ['q0']
     cp_ctrl = {}#'c0':-0.3
 
     """ Optional paras """
@@ -158,11 +158,11 @@ if __name__ == "__main__":
         init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
         qu = QD_agent.quantum_device.get_element(qubit)
         qu.clock_freqs.readout(qu.clock_freqs.readout()+freq_center_shift)
-        Cctrl['c0'](0.00)
-        Cctrl['c1'](0.0)
+        # Cctrl['c0'](0.00)
+        # Cctrl['c1'](0.0)
         FD_results[qubit] = fluxCavity_executor(QD_agent,meas_ctrl,qubit,run=execution,flux_span=flux_half_window_V,ro_span_Hz=freq_half_window_Hz, zpts=flux_data_points,fpts=freq_data_points)
-        Cctrl['c0'](0)
-        Cctrl['c1'](0)
+        # Cctrl['c0'](0)
+        # Cctrl['c1'](0)
         cluster.reset()
         if execution:
             permission = mark_input("Update the QD with this result ? [y/n]") 

@@ -24,8 +24,9 @@ def Zgate_two_tone_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,Z_amp_st
 
     analysis_result = {}
     qubit_info = QD_agent.quantum_device.get_element(q)
+    # qubit_info.clock_freqs.f01()
     original_f01 = qubit_info.clock_freqs.f01()
-    print(original_f01)
+    print("original_f01",original_f01)
 
     if xyf == 0:
         xyf_highest = original_f01+IF
@@ -33,6 +34,7 @@ def Zgate_two_tone_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,Z_amp_st
         xyf_highest = xyf + IF
     qubit_info.clock_freqs.f01(NaN)
     set_LO_frequency(QD_agent.quantum_device,q=q,module_type='drive',LO_frequency=xyf_highest)
+    print("LO_frequency",xyf_highest)
     f01_samples = linspace(xyf_highest-xyf_span_Hz,xyf_highest,f_points)
     
     freq = ManualParameter(name="freq", unit="Hz", label="Frequency")
@@ -170,19 +172,19 @@ if __name__ == "__main__":
     execution:bool = True
     chip_info_restore:bool = 1
     DRandIP = {"dr":"drke","last_ip":"242"}
-    ro_elements = ['q1']
+    ro_elements = ['q0']
     couplers = []
     z_shifter = 0.0 # V
 
     
     """ Optional paras """
-    span_period_factor:float = 10 # range in [sweet - period/span_period_factor, sweet + period/span_period_factor]
+    span_period_factor:float = 10#20 # range in [sweet - period/span_period_factor, sweet + period/span_period_factor]
     flux_pts:int = 30
     freq_pts:int = 40
     freq_span_Hz:float = 500e6
     sweet_flux_shifter:float = 0
     xy_IF = 100e6
-    avg_n:int = 500
+    avg_n:int = 100
 
 
 
@@ -200,22 +202,23 @@ if __name__ == "__main__":
     Cctrl = coupler_zctrl(DRandIP["dr"],cluster,QD_agent.Fluxmanager.build_Cctrl_instructions(couplers,'i'))
     for qubit in ro_elements:
         if not QD_agent.Fluxmanager.get_offsweetspot_button(qubit):
+        # if QD_agent.Fluxmanager.get_offsweetspot_button(qubit): #**when at off-sweet spot**
             init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
-            # Cctrl['c0'](0.07)
-            # Cctrl['c1'](0.05)
+            # Cctrl['c0'](-0.15)
+            # Cctrl['c1'](0.104)
             trustable, new_ans = fluxQubit_executor(QD_agent,meas_ctrl,qubit,run=execution,z_shifter=z_shifter,zpts=flux_pts,fpts=freq_pts,span_priod_factor=span_period_factor,f_sapn_Hz=freq_span_Hz,avg_times=avg_n,xy_IF=xy_IF)
             # Cctrl['c0'](0)
             # Cctrl['c1'](0)
             cluster.reset()
 
             """ Storing """
-            # if  trustable:
-            #     update_by_fluxQubit(QD_agent,new_ans,qubit)
-            #     QD_agent.QD_keeper()
-            #     if chip_info_restore:
-            #         chip_info.update_FluxQubit(qb=qubit, result=new_ans)
-            # else:
-            #     check_again.append(qubit)    
+            if  trustable:
+                update_by_fluxQubit(QD_agent,new_ans,qubit)
+                QD_agent.QD_keeper()
+                if chip_info_restore:
+                    chip_info.update_FluxQubit(qb=qubit, result=new_ans)
+            else:
+                check_again.append(qubit)    
 
     """ Close """
     print('Flux qubit done!')

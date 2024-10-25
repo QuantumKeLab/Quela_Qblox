@@ -5,7 +5,7 @@ from qcat.visualization.readout_fidelity import plot_readout_fidelity
 from xarray import Dataset, open_dataset
 from Modularize.analysis.Radiator.RadiatorSetAna import OSdata_arranger
 from Modularize.support.UserFriend import *
-from Modularize.support.QDmanager import QDmanager
+from Modularize.support.QDmanager import QDmanager, Data_manager
 from numpy import array, moveaxis, mean, std, median, arange
 import matplotlib.pyplot as plt
 from Modularize.analysis.Radiator.RadiatorSetAna import sort_files
@@ -43,6 +43,8 @@ def a_OSdata_analPlot(QD_agent:QDmanager, target_q:str, nc_path:str, plot:bool=T
     print(gmm2d_fidelity.label_map.label_assign.result)
     p00 = g1d_fidelity.g1d_dist[0][0][0]
     p01 = g1d_fidelity.g1d_dist[0][0][1]
+    if p00 < p01:
+        p00, p01 = p01, p00
     p11 = g1d_fidelity.g1d_dist[1][0][1]
     effT_mK = np.abs(p01_to_Teff(p01, transi_freq)*1000)#p01_to_Teff(p01, transi_freq)*1000
     RO_fidelity_percentage = (p00+p11)*100/2
@@ -182,6 +184,49 @@ def a_OSdata_correlation_analPlot(nc_path:str, plot:bool=True, pic_path:str='', 
 
     return I_readout_1, I_readout_2, Q_readout_1, Q_readout_2
 
+def a_OSdata_analPlot_3G(QD_agent:QDmanager, target_q:str, nc_path:str, plot:bool=True, pic_path:str='', save_pic:bool=False): # 
+    folder = os.path.join(os.path.split(nc_path)[0],'OS_pic')
+    if not os.path.exists(folder):
+        os.mkdir(folder)
+    if save_pic:
+        pic_save_path = os.path.join(folder,os.path.split(nc_path)[1].split(".")[0]) if pic_path == '' else pic_path
+    else:
+        pic_save_path = None
+    SS_ds = open_dataset(nc_path)
+    ss_dict = Dataset.to_dict(SS_ds)
+    # print(ss_dict)
+    pf_I, pf_Q = ss_dict['data_vars']['f']['data']
+    pe_I, pe_Q = ss_dict['data_vars']['e']['data']
+    pg_I, pg_Q = ss_dict['data_vars']['g']['data']
+
+    pgI_collection = [pg_I]
+    pgQ_collection = [pg_Q]
+    peI_collection = [pe_I]
+    peQ_collection = [pe_Q]
+    pfI_collection = [pf_I]
+    pfQ_collection = [pf_Q]
+
+    OS_data = 1000*array([[pgI_collection,peI_collection, pfI_collection],[pgQ_collection,peQ_collection, pfQ_collection]]) # can train or predict 2*2*histo_counts*shot
+    tarin_data, fit_arrays = OSdata_arranger(OS_data)
+    # train GMM
+    # print(tarin_data)
+    gmm2d_fidelity = GMMROFidelity()
+    gmm2d_fidelity._import_data(tarin_data[0])
+    gmm2d_fidelity._start_analysis()
+    g1d_fidelity = gmm2d_fidelity.export_G1DROFidelity()
+    transi_freq = QD_agent.quantum_device.get_element(target_q).clock_freqs.f01()
+    print(gmm2d_fidelity.label_map.label_assign.result)
+    p00 = g1d_fidelity.g1d_dist[0][0][0]
+    p01 = g1d_fidelity.g1d_dist[0][0][1]
+    p11 = g1d_fidelity.g1d_dist[1][0][1]
+    effT_mK = np.abs(p01_to_Teff(p01, transi_freq)*1000)#p01_to_Teff(p01, transi_freq)*1000
+    RO_fidelity_percentage = (p00+p11)*100/2
+    if plot:
+        plot_readout_fidelity( tarin_data[0], gmm2d_fidelity, g1d_fidelity,transi_freq,pic_save_path)
+        plt.close()
+
+    return p01, effT_mK, RO_fidelity_percentage
+
 def share_model_OSana(QD_agent:QDmanager,target_q:str,folder_path:str,pic_save:bool=True):
     transi_freq = QD_agent.quantum_device.get_element(target_q).clock_freqs.f01()
     files = [name for name in os.listdir(folder_path) if (os.path.isfile(os.path.join(folder_path,name)) and name.split("_")[1].split("(")[0]=="SingleShot")]
@@ -227,10 +272,37 @@ if __name__ == "__main__":
     # nc_path = r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_10\DRKEq1_cor_2\DRKEq1_SingleShot(0)_H21M14S14.nc"
     # a_OSdata_correlation_analPlot(nc_path)
     
-    QD_agent_path=r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_10_12\DRKE#242_SumInfo.pkl"
+    QD_agent_path=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_10_25\DRKE#242_SumInfo.pkl"
     Qmanager = QDmanager(QD_agent_path)
     Qmanager.QD_loader()
 
-    target_q='q1'
-    nc_path=r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_12\210mK\SS\DRKEq1_SingleShot(0)_H14M49S56.nc"
+    target_q='q0'
+    nc_path=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25\15mK_IntegrationTime_1750ns\SS\DRKEq0_SingleShot(0)_H19M15S42.nc"
     a_OSdata_analPlot(Qmanager,target_q, nc_path)
+
+    # folder_path=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25\15mK_IntegrationTime_1250ns\SS"
+    # share_model_OSana(Qmanager,target_q, folder_path )
+    # """ Iteration """
+    # snr_rec, effT_rec, thermal_pop = {}, {}, {}
+    # for qubit in ro_elements:
+    #     for i in range(repeat):
+
+    #         """ Preparation """
+    #         QD_path =find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
+
+
+    #         """ Running """
+    #         if i == 0:
+    #             snr_rec[qubit], effT_rec[qubit], thermal_pop[qubit] = [], [], []
+    
+    #         info = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=ro_amp_scaling,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF,data_folder=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25")
+   
+    #         snr_rec[qubit].append(info[2])
+    #         effT_rec[qubit].append(info[1])
+    #         thermal_pop[qubit].append(info[0]*100)
+
+
+    # for qubit in effT_rec:
+    #     highlight_print(f"{qubit}: {round(median(array(effT_rec[qubit])),2)} +/- {round(std(array(effT_rec[qubit])),3)} mK")
+    #     Data_manager().save_histo_pic(QD_agent,effT_rec,qubit,mode="ss")
+    #     Data_manager().save_histo_pic(QD_agent,thermal_pop,qubit,mode="pop")

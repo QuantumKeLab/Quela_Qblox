@@ -22,8 +22,8 @@ def Two_tone_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,IF:float=100e6
     original_inteW = qubit_info.measure.integration_time()
     if not drive_read_overlap:
         drive_pulse_ref_pt = 'start'
-        qubit_info.measure.pulse_duration(2e-6)
-        qubit_info.measure.integration_time(2e-6)#1e-6
+        qubit_info.measure.pulse_duration(1e-6)
+        qubit_info.measure.integration_time(1e-6)#1e-6
         drive_pulse_length = 50e-6
     else:
         drive_pulse_ref_pt = 'end'
@@ -187,7 +187,7 @@ if __name__ == "__main__":
     DRandIP = {"dr":"drke","last_ip":"242"}
     #
     ro_elements = {
-        "q1":{"xyf_guess":[4.64e9],"xyl_guess":[0.03],"g_guess":40e6, "tune_bias":0} # g you can try a single value about 90e6 for a 5Q4C chip.
+        "q0":{"xyf_guess":[4.4e9],"xyl_guess":[0.01],"g_guess":45.9e6, "tune_bias":0} # g you can try a single value about 90e6 for a 5Q4C chip.
     }                                                                            # tune_bias is the voltage away from sweet spot. If it was given, here will calculate a ROF according to that z-bias and store it in Notebook.
     couplers = []
 
@@ -214,16 +214,16 @@ if __name__ == "__main__":
                 """ Running """
                 tt_results = {}
                 Cctrl = coupler_zctrl(DRandIP["dr"],cluster,QD_agent.Fluxmanager.build_Cctrl_instructions(couplers,'i'))
-                Cctrl['c0'](0.07)
-                Cctrl['c1'](0.05)
+                # Cctrl['c0'](0.15)
+                # Cctrl['c1'](0.104)
                 QD_agent.Notewriter.save_DigiAtte_For(0,qubit,'xy')
                 init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
 
                 tune_bias = ro_elements[qubit]["tune_bias"]
                 print(xyf)
                 tt_results = conti2tone_executor(QD_agent,meas_ctrl,cluster,specific_qubits=qubit,XYF=xyf,XYL=xyl,run=execution,xy_if=xy_IF,xyf_span=xyf_range,V_away_from=tune_bias,drive_read_overlap=drive_read_overlap,avg_times=avg_n,fpts=fpts)
-                Cctrl['c0'](0.0)
-                Cctrl['c1'](0.0)
+                # Cctrl['c0'](0.0)
+                # Cctrl['c1'](0.0)
                 if xyl == 0: 
                     background = tt_results
                 else:
@@ -237,11 +237,11 @@ if __name__ == "__main__":
                     update = False
                     
                 """ Storing """
-                # if update:
-                #     QD_agent.refresh_log("After continuous 2-tone!")
-                #     QD_agent.QD_keeper()
-                #     if chip_info_restore:
-                #         chip_info.update_Cnti2Tone({str(qubit):tt_results})
+                if update:
+                    QD_agent.refresh_log("After continuous 2-tone!")
+                    QD_agent.QD_keeper()
+                    if chip_info_restore:
+                        chip_info.update_Cnti2Tone({str(qubit):tt_results})
 
                 """ Close """
                 print('2-tone done!')

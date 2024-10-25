@@ -96,7 +96,7 @@ if __name__ == "__main__":
     """ Fill in """
     execution = True
     DRandIP = {"dr":"drke","last_ip":"242"}
-    ro_elements = {'q1':{"ro_amp_factor":1},}
+    ro_elements = {'q0':{"ro_amp_factor":0.9999958746183941236},}
                 
     couplers = []
 
@@ -111,11 +111,11 @@ if __name__ == "__main__":
         Cctrl = coupler_zctrl(DRandIP["dr"],cluster,QD_agent.Fluxmanager.build_Cctrl_instructions(couplers,'i'))
     
         init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
-        Cctrl['c0'](0.07)
-        Cctrl['c1'](0.05)
+        # Cctrl['c0'](0.07)
+        # Cctrl['c1'](0.05)
         refIQ_executor(QD_agent,cluster,Fctrl,specific_qubits=qubit,run=execution,ro_amp_adj=ro_elements[qubit]["ro_amp_factor"])
-        Cctrl['c0'](0)
-        Cctrl['c1'](0)
+        # Cctrl['c0'](0)
+        # Cctrl['c1'](0)
         if ro_elements[qubit]["ro_amp_factor"] !=1:
             keep = mark_input(f"Keep this RO amp for {qubit}?[y/n]")
         else:

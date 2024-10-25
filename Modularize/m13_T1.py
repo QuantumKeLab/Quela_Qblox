@@ -20,8 +20,8 @@ def T1(QD_agent:QDmanager,meas_ctrl:MeasurementControl,freeduration:float=80e-6,
     sche_func= T1_sche
     
     qubit_info = QD_agent.quantum_device.get_element(q)
-    qubit_info.measure.integration_time(1e-6)
-    qubit_info.measure.pulse_duration(1e-6)
+    qubit_info.measure.integration_time(2e-6)
+    qubit_info.measure.pulse_duration(2e-6)
     # qubit_info.rxy.amp180()
     print("Integration time ",qubit_info.measure.integration_time()*1e6, "µs")
     print("Reset time ", qubit_info.reset.duration()*1e6, "µs")
@@ -127,7 +127,7 @@ if __name__ == "__main__":
     chip_info_restore:bool = 1
     DRandIP = {"dr":"drke","last_ip":"242"}
     ro_elements = {
-        "q1":{"evoT":40e-6,"histo_counts":10},
+        "q0":{"evoT":40e-6,"histo_counts":30},
     }
     couplers = []
 
@@ -152,12 +152,12 @@ if __name__ == "__main__":
             Cctrl = coupler_zctrl(DRandIP["dr"],cluster,QD_agent.Fluxmanager.build_Cctrl_instructions(couplers,'i'))
             init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
             evoT = ro_elements[qubit]["evoT"]
-            Cctrl['c0'](0.07)
-            Cctrl['c1'](0.05)
+            # Cctrl['c0'](0.07)
+            # Cctrl['c1'](0.05)
             T1_results, this_t1_us = T1_executor(QD_agent,cluster,meas_ctrl,Fctrl,qubit,freeDura=evoT,run=execution,ith=ith_histo,avg_times=avg_n,pts=time_data_points,IF=xy_IF)#specific_folder=r"Modularize\Meas_raw\T1_timeDep"
             t1_us_rec.append(this_t1_us)
-            Cctrl['c0'](0)
-            Cctrl['c1'](0)
+            # Cctrl['c0'](0)
+            # Cctrl['c1'](0)
 
             """ Storing """
             if ith_histo == int(ro_elements[qubit]["histo_counts"])-1:
