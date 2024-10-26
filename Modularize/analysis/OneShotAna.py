@@ -12,6 +12,7 @@ from Modularize.analysis.Radiator.RadiatorSetAna import sort_files
 from qcat.analysis.state_discrimination import p01_to_Teff
 import numpy as np
 from matplotlib.ticker import MultipleLocator
+from Modularize.analysis.Radiator.RadiatorSetAna import sort_set
 
 def a_OSdata_analPlot(QD_agent:QDmanager, target_q:str, nc_path:str, plot:bool=True, pic_path:str='', save_pic:bool=False): # 
     folder = os.path.join(os.path.split(nc_path)[0],'OS_pic')
@@ -40,11 +41,10 @@ def a_OSdata_analPlot(QD_agent:QDmanager, target_q:str, nc_path:str, plot:bool=T
     gmm2d_fidelity._start_analysis()
     g1d_fidelity = gmm2d_fidelity.export_G1DROFidelity()
     transi_freq = QD_agent.quantum_device.get_element(target_q).clock_freqs.f01()
+    print(gmm2d_fidelity.discriminator.cluster_model.means_)
     print(gmm2d_fidelity.label_map.label_assign.result)
     p00 = g1d_fidelity.g1d_dist[0][0][0]
     p01 = g1d_fidelity.g1d_dist[0][0][1]
-    if p00 < p01:
-        p00, p01 = p01, p00
     p11 = g1d_fidelity.g1d_dist[1][0][1]
     effT_mK = np.abs(p01_to_Teff(p01, transi_freq)*1000)#p01_to_Teff(p01, transi_freq)*1000
     RO_fidelity_percentage = (p00+p11)*100/2
@@ -269,40 +269,33 @@ def share_model_OSana(QD_agent:QDmanager,target_q:str,folder_path:str,pic_save:b
 
 
 if __name__ == "__main__":
-    # nc_path = r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_10\DRKEq1_cor_2\DRKEq1_SingleShot(0)_H21M14S14.nc"
-    # a_OSdata_correlation_analPlot(nc_path)
+
     
     QD_agent_path=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_10_25\DRKE#242_SumInfo.pkl"
     Qmanager = QDmanager(QD_agent_path)
     Qmanager.QD_loader()
-
     target_q='q0'
-    nc_path=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25\15mK_IntegrationTime_1750ns\SS\DRKEq0_SingleShot(0)_H19M15S42.nc"
+
+    "For single file"
+    nc_path=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25\15mK_IntegrationTime_2000ns\SS_30aveg\DRKEq0_SingleShot(0)_H21M42S42.nc"
     a_OSdata_analPlot(Qmanager,target_q, nc_path)
-
-    # folder_path=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25\15mK_IntegrationTime_1250ns\SS"
-    # share_model_OSana(Qmanager,target_q, folder_path )
-    # """ Iteration """
-    # snr_rec, effT_rec, thermal_pop = {}, {}, {}
-    # for qubit in ro_elements:
-    #     for i in range(repeat):
-
-    #         """ Preparation """
-    #         QD_path =find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
-
-
-    #         """ Running """
-    #         if i == 0:
-    #             snr_rec[qubit], effT_rec[qubit], thermal_pop[qubit] = [], [], []
+    # a_OSdata_correlation_analPlot(nc_path)
     
-    #         info = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=ro_amp_scaling,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF,data_folder=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25")
-   
-    #         snr_rec[qubit].append(info[2])
-    #         effT_rec[qubit].append(info[1])
-    #         thermal_pop[qubit].append(info[0]*100)
+    # "For multiple files in a folder"
+    # folder_path=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25\15mK_IntegrationTime_1250ns\SS"
+    # for i in folder_path:
+    #     efft_rec=[]
+    #     thermal_pop= []
+
+    #     info=a_OSdata_analPlot(Qmanager,target_q, folder_path)
+
+    #     efft_rec.append(info[1])
+    #     thermal_pop.append(info[0]*100)
+    
+
+    #     # for target_q in efft_rec:
+    #     #     highlight_print(f"{target_q}: {round(median(array(efft_rec[target_q])),2)} +/- {round(std(array(efft_rec[target_q])),3)} mK")
+    # Data_manager().save_histo_pic(Qmanager,efft_rec,target_q,mode="ss")
+    # Data_manager().save_histo_pic(Qmanager,thermal_pop,target_q,mode="pop")
 
 
-    # for qubit in effT_rec:
-    #     highlight_print(f"{qubit}: {round(median(array(effT_rec[qubit])),2)} +/- {round(std(array(effT_rec[qubit])),3)} mK")
-    #     Data_manager().save_histo_pic(QD_agent,effT_rec,qubit,mode="ss")
-    #     Data_manager().save_histo_pic(QD_agent,thermal_pop,qubit,mode="pop")

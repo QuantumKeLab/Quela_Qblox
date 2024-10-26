@@ -15,7 +15,7 @@ from Modularize.support.Pulse_schedule_library import Qubit_SS_sche, Qubit_SS_Co
 
 try:
     from qcat.analysis.state_discrimination.discriminator import train_GMModel # type: ignore
-    from qcat.visualization.readout_fidelity import plot_readout_fidelity
+    # from qcat.visualization.readout_fidelity import plot_readout_fidelity
     from Modularize.analysis.OneShotAna import a_OSdata_analPlot, a_OSdata_correlation_analPlot
     mode = "AS"
 except:

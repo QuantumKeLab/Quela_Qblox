@@ -71,8 +71,8 @@ if __name__ == "__main__":
     ro_element = {
         "q0":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
                 "dress":{"ro_amp":0.1,"window_shift":0.3e6}},        
-        # "q1":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
-        #         "dress":{"ro_amp":0.1,"window_shift":1e6}},
+        "q1":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
+                "dress":{"ro_amp":0.1,"window_shift":1e6}},
         # "q2":{  "bare" :{"ro_amp":0.2,"window_shift":0e6},
         #         "dress":{"ro_amp":0.05,"window_shift":0.7e6}},
 
@@ -98,8 +98,8 @@ if __name__ == "__main__":
         eyeson_print(f"{state} cavities: ")
         """ Preparations """ 
         QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
-        # QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
-        QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l',new_HCFG=True)
+        QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
+        # QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l',new_HCFG=True)
         ro_elements, amps, PD_ans, original_rof = BDC_waiter(QD_agent, state, ro_element, ro_attes, half_ro_freq_window_Hz, freq_data_points)
         # Create or Load chip information
         chip_info = cds.Chip_file(QD_agent=QD_agent)

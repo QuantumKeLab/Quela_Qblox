@@ -25,8 +25,8 @@ except:
 
 def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:str='q1',IF:float=250e6,Experi_info:dict={},ro_amp_factor:float=1,T1:float=15e-6,exp_idx:int=0,parent_datafolder:str='',plot:bool=False):
     qubit_info = QD_agent.quantum_device.get_element(q)
-    qubit_info.measure.integration_time(2e-6)
-    qubit_info.measure.pulse_duration(2e-6)
+    qubit_info.measure.integration_time(1.5e-6)
+    qubit_info.measure.pulse_duration(1.5e-6)
     print("Integration time ",qubit_info.measure.integration_time()*1e6, "µs")
     print("Reset time ", qubit_info.reset.duration()*1e6, "µs")
     
@@ -135,7 +135,7 @@ if __name__ == '__main__':
 
     """ Fill in """
     execute:bool = 1
-    repeat:int = 2
+    repeat:int = 700
     DRandIP = {"dr":"drke","last_ip":"242"}
     ro_elements = {'q0':{"roAmp_factor":1}}
     couplers = []
@@ -170,7 +170,7 @@ if __name__ == '__main__':
             if ro_amp_scaling != 1 and repeat > 1 : raise ValueError("Check the RO_amp_factor should be 1 when you want to repeat it!")
             # Cctrl['c0'](0.07)
             # Cctrl['c1'](0.05)
-            info = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=ro_amp_scaling,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF,data_folder=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25")
+            info = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=ro_amp_scaling,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF,data_folder=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25\SS_overnight")
             # Cctrl['c0'](0)
             # Cctrl['c1'](0)
             # snr_rec[qubit].append(info[2])
