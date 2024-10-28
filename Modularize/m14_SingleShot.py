@@ -195,8 +195,9 @@ if __name__ == '__main__':
 
     # for qubit in effT_rec:
     #     highlight_print(f"{qubit}: {round(median(array(effT_rec[qubit])),2)} +/- {round(std(array(effT_rec[qubit])),3)} mK")
-    #     Data_manager().save_histo_pic(QD_agent,effT_rec,qubit,mode="ss")
-    #     Data_manager().save_histo_pic(QD_agent,thermal_pop,qubit,mode="pop")
+    
+        # Data_manager().save_histo_pic(QD_agent,effT_rec,qubit,mode="ss")
+        # Data_manager().save_histo_pic(QD_agent,thermal_pop,qubit,mode="pop")
         
         
 

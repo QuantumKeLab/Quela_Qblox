@@ -271,31 +271,13 @@ def share_model_OSana(QD_agent:QDmanager,target_q:str,folder_path:str,pic_save:b
 if __name__ == "__main__":
 
     
-    QD_agent_path=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_10_25\DRKE#242_SumInfo.pkl"
+    QD_agent_path=r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_25\DRKE#242_SumInfo.pkl"
     Qmanager = QDmanager(QD_agent_path)
     Qmanager.QD_loader()
     target_q='q0'
 
     "For single file"
-    nc_path=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25\15mK_IntegrationTime_2000ns\SS_30aveg\DRKEq0_SingleShot(0)_H21M42S42.nc"
+    nc_path=r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\2024_10_25\15mK_IntegrationTime_1500ns(itis1250\SS_10aveg\DRKEq0_SingleShot(9)_H12M27S36.nc"
     a_OSdata_analPlot(Qmanager,target_q, nc_path)
     # a_OSdata_correlation_analPlot(nc_path)
     
-    # "For multiple files in a folder"
-    # folder_path=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25\15mK_IntegrationTime_1250ns\SS"
-    # for i in folder_path:
-    #     efft_rec=[]
-    #     thermal_pop= []
-
-    #     info=a_OSdata_analPlot(Qmanager,target_q, folder_path)
-
-    #     efft_rec.append(info[1])
-    #     thermal_pop.append(info[0]*100)
-    
-
-    #     # for target_q in efft_rec:
-    #     #     highlight_print(f"{target_q}: {round(median(array(efft_rec[target_q])),2)} +/- {round(std(array(efft_rec[target_q])),3)} mK")
-    # Data_manager().save_histo_pic(Qmanager,efft_rec,target_q,mode="ss")
-    # Data_manager().save_histo_pic(Qmanager,thermal_pop,target_q,mode="pop")
-
-

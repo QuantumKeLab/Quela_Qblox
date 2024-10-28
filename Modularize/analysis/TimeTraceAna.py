@@ -8,6 +8,7 @@ from Modularize.support.Pulse_schedule_library import IQ_data_dis, dataset_to_ar
 from datetime import datetime 
 from matplotlib.gridspec import GridSpec as GS
 from Modularize.analysis.Radiator.RadiatorSetAna import sort_set
+import numpy as np
 
 def time_label_sort(nc_file_name:str):
     return datetime.strptime(nc_file_name.split("_")[-1].split(".")[0],"H%HM%MS%S")
@@ -130,65 +131,139 @@ def plot_timeDepCohe(time_values:ndarray, y_values:ndarray, exp:str, fig_path:st
 
 
 if __name__ == "__main__":
-    folder_paths = {"T1_folder_path":r"C:\Users\admin\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\T1_timeDep_q1_20241012"
+    folder_paths = {"T1_folder_path":r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\2024_10_27\T1_overnight_test"
                     }#"Modularize/Meas_raw/T1_timeDep",
                     # "T2_folder_path":"Modularize/Meas_raw/T2_timeDep",
                     # "OS_folder_path":""
-    QD_file_path = r"Modularize\QD_backup\2024_10_12\DRKE#242_SumInfo.pkl"
-    qs = ['q1']
-    qs = 'q1'
+    QD_file_path = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_25\DRKE#242_SumInfo.pkl"
+    qs = ['q0']
+    qs = 'q0'
     sort_mode = 'time' # 'idx' or 'time'
+    T1_guess_parameter=10e-6
+    T2_guess_parameter=15e-6
 
     QD_agent = QDmanager(QD_file_path)
     QD_agent.QD_loader()
 
-    for folder_name in folder_paths: 
+    # for folder_name in folder_paths: 
+    #     folder = folder_paths[folder_name]
+    #     if folder_paths[folder_name] != '':
+    #         if sort_mode == 'time':
+    #             files = sorted([name for name in os.listdir(folder) if (os.path.isfile(os.path.join(folder,name)) and name.split(".")[-1] == "nc")],key=lambda name:time_label_sort(name))
+    #         elif sort_mode == 'idx':
+    #             files = [name for name in os.listdir(folder) if (os.path.isfile(os.path.join(folder,name)) and name.split(".")[-1] == "nc")]
+    #             sort_set(files,3)
+    #         else:
+    #             raise KeyError(f"Unsupported sort mode was given = '{sort_mode}'")
+    #         raw_data = []
+    #         ans = []
+    #         detu = []
+    #         for idx, file in enumerate(files) :
+    #             path = os.path.join(folder,file)
+    #             nc = open_dataset(path)
+    #             if folder_name.split("_")[0] in ["T1", "T2"]:
+    #                 samples = array(nc.x0)
+    #                 I,Q= dataset_to_array(dataset=nc,dims=1)
+    #                 data = IQ_data_dis(I,Q,ref_I=QD_agent.refIQ[qs][0],ref_Q=QD_agent.refIQ[qs][-1])
+    #                 raw_data.append(data)
+    #                 if folder_name.split("_")[0] == "T1":   
+    #                     data_fit= T1_fit_analysis(data=data,freeDu=samples,T1_guess=25e-6)
+    #                     print(data_fit.attrs['T1_fit'])
+    #                     if data_fit.attrs['T1_fit']>0 or data_fit.attrs['T1_fit']<50:
+    #                         ans.append(data_fit.attrs['T1_fit']*1e6)
+    #                     else: 
+    #                         pass#ans.append
+    #                 else:
+    #                     data_fit= T2_fit_analysis(data=data,freeDu=samples,T2_guess=10e-6)
+    #                     ans.append(data_fit.attrs['T2_fit']*1e6)
+    #                     detu.append(data_fit.attrs['f']*1e-6)
+    #             else:
+    #                 #　OS to build
+    #                 pass
+            
+    #         time_json_path = [os.path.join(folder,name) for name in os.listdir(folder) if (os.path.isfile(os.path.join(folder,name)) and name.split(".")[-1] == "json")][0]
+    #         with open(time_json_path) as time_record_file:
+    #             time_past_dict:dict = json.load(time_record_file)
+    #         time_array = array(list(time_past_dict.values())[0])
+    #         if folder_name.split("_")[0].lower() in ['t1','t2']:
+    #             colormap(time_array,samples*1e6,array(raw_data),array(ans),fig_path=os.path.join(folder,f"{qs}_{folder_name.split('_')[0]}_timeDep_colormap.png"))
+
+    #         if folder_name.split("_")[0].lower() == 't1':
+    #             plot_timeDepCohe(time_array, array(ans), folder_name.split("_")[0], units={"x":"min","y":"µs"}, fig_path=os.path.join(folder,f"{qs}_T1_timeDep.png"))
+    #         elif folder_name.split("_")[0].lower() == 't2':   
+    #             plot_timeDepCohe(time_array, array(ans), folder_name.split("_")[0], units={"x":"min","y":"µs"}, fig_path=os.path.join(folder,f"{qs}_T2_timeDep.png"))
+    #             plot_timeDepCohe(time_array, array(detu)-array(detu)[0], "δf", units={"x":"min","y":"MHz"}, fig_path=os.path.join(folder,f"{qs}_Detune_timeDep.png"))
+    #         else:
+    #             pass
+    for folder_name in folder_paths:
         folder = folder_paths[folder_name]
         if folder_paths[folder_name] != '':
             if sort_mode == 'time':
-                files = sorted([name for name in os.listdir(folder) if (os.path.isfile(os.path.join(folder,name)) and name.split(".")[-1] == "nc")],key=lambda name:time_label_sort(name))
+                files = sorted([name for name in os.listdir(folder) if (os.path.isfile(os.path.join(folder,name)) and name.split(".")[-1] == "nc")], key=lambda name: time_label_sort(name))
             elif sort_mode == 'idx':
                 files = [name for name in os.listdir(folder) if (os.path.isfile(os.path.join(folder,name)) and name.split(".")[-1] == "nc")]
-                sort_set(files,3)
+                sort_set(files, 3)
             else:
                 raise KeyError(f"Unsupported sort mode was given = '{sort_mode}'")
+
             raw_data = []
             ans = []
             detu = []
-            for idx, file in enumerate(files) :
-                path = os.path.join(folder,file)
+
+            for idx, file in enumerate(files):
+                path = os.path.join(folder, file)
                 nc = open_dataset(path)
                 if folder_name.split("_")[0] in ["T1", "T2"]:
                     samples = array(nc.x0)
-                    I,Q= dataset_to_array(dataset=nc,dims=1)
-                    data = IQ_data_dis(I,Q,ref_I=QD_agent.refIQ[qs][0],ref_Q=QD_agent.refIQ[qs][-1])
+                    I, Q = dataset_to_array(dataset=nc, dims=1)
+                    data = IQ_data_dis(I, Q, ref_I=QD_agent.refIQ[qs][0], ref_Q=QD_agent.refIQ[qs][-1])
                     raw_data.append(data)
-                    if folder_name.split("_")[0] == "T1":   
-                        data_fit= T1_fit_analysis(data=data,freeDu=samples,T1_guess=25e-6)
+
+                    if folder_name.split("_")[0] == "T1":
+                        data_fit = T1_fit_analysis(data=data, freeDu=samples, T1_guess=T1_guess_parameter)
                         print(data_fit.attrs['T1_fit'])
-                        if data_fit.attrs['T1_fit']>0 or data_fit.attrs['T1_fit']<50:
-                            ans.append(data_fit.attrs['T1_fit']*1e6)
-                        else: 
-                            pass#ans.append
+                        t1_fit = data_fit.attrs['T1_fit']
+                        if not np.isnan(t1_fit) and 0 < t1_fit < 50:
+                            ans.append(t1_fit * 1e6)
+                        else:
+                            if ans:  # Only replace if ans already has valid entries
+                                mean_ans = np.mean(ans)
+                                std_ans = np.std(ans)
+                                ans.append(mean_ans + std_ans)
                     else:
-                        data_fit= T2_fit_analysis(data=data,freeDu=samples,T2_guess=10e-6)
-                        ans.append(data_fit.attrs['T2_fit']*1e6)
-                        detu.append(data_fit.attrs['f']*1e-6)
+                        data_fit = T2_fit_analysis(data=data, freeDu=samples, T2_guess=T2_guess_parameter)
+                        t2_fit = data_fit.attrs['T2_fit']
+                        if not np.isnan(t2_fit):
+                            ans.append(t2_fit * 1e6)
+                        else:
+                            if ans:  # Only replace if ans already has valid entries
+                                mean_ans = np.mean(ans)
+                                std_ans = np.std(ans)
+                                ans.append(mean_ans + std_ans)
+
+                        if not np.isnan(data_fit.attrs['f']):
+                            detu.append(data_fit.attrs['f'] * 1e-6)
                 else:
-                    #　OS to build
+                    # OS to build
                     pass
-            
-            time_json_path = [os.path.join(folder,name) for name in os.listdir(folder) if (os.path.isfile(os.path.join(folder,name)) and name.split(".")[-1] == "json")][0]
+            print(f"Number of processed files: {len(files)}")    
+                     
+            time_json_path = [os.path.join(folder, name) for name in os.listdir(folder) if (os.path.isfile(os.path.join(folder, name)) and name.split(".")[-1] == "json")][0]
             with open(time_json_path) as time_record_file:
-                time_past_dict:dict = json.load(time_record_file)
-            time_array = array(list(time_past_dict.values())[0])
-            if folder_name.split("_")[0].lower() in ['t1','t2']:
-                colormap(time_array,samples*1e6,array(raw_data),array(ans),fig_path=os.path.join(folder,f"{qs}_{folder_name.split('_')[0]}_timeDep_colormap.png"))
+                time_past_dict = json.load(time_record_file)
+            time_array = np.array(list(time_past_dict.values())[0])
+            print(f"Length of time array: {len(time_array)}")
+
+            if folder_name.split("_")[0].lower() in ['t1', 't2']:
+                colormap(time_array, samples * 1e6, np.array(raw_data), np.array(ans), fig_path=os.path.join(folder, f"{qs}_{folder_name.split('_')[0]}_timeDep_colormap.png"))
 
             if folder_name.split("_")[0].lower() == 't1':
-                plot_timeDepCohe(time_array, array(ans), folder_name.split("_")[0], units={"x":"min","y":"µs"}, fig_path=os.path.join(folder,f"{qs}_T1_timeDep.png"))
-            elif folder_name.split("_")[0].lower() == 't2':   
-                plot_timeDepCohe(time_array, array(ans), folder_name.split("_")[0], units={"x":"min","y":"µs"}, fig_path=os.path.join(folder,f"{qs}_T2_timeDep.png"))
-                plot_timeDepCohe(time_array, array(detu)-array(detu)[0], "δf", units={"x":"min","y":"MHz"}, fig_path=os.path.join(folder,f"{qs}_Detune_timeDep.png"))
+                plot_timeDepCohe(time_array, np.array(ans), folder_name.split("_")[0], units={"x": "min", "y": "µs"}, fig_path=os.path.join(folder, f"{qs}_T1_timeDep.png"))
+            elif folder_name.split("_")[0].lower() == 't2':
+                plot_timeDepCohe(time_array, np.array(ans), folder_name.split("_")[0], units={"x": "min", "y": "µs"}, fig_path=os.path.join(folder, f"{qs}_T2_timeDep.png"))
+                plot_timeDepCohe(time_array, np.array(detu) - np.array(detu)[0], "δf", units={"x": "min", "y": "MHz"}, fig_path=os.path.join(folder, f"{qs}_Detune_timeDep.png"))
             else:
                 pass
+   
+
+
