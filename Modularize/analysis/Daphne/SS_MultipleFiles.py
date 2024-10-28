@@ -3,7 +3,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', "
 from qcat.analysis.state_discrimination.readout_fidelity import GMMROFidelity
 from qcat.visualization.readout_fidelity import plot_readout_fidelity
 from xarray import Dataset, open_dataset
-from Modularize.analysis.Radiator.RadiatorSetAna import OSdata_arranger
+# from Modularize.analysis.Radiator.RadiatorSetAna import OSdata_arranger
 from Modularize.support.UserFriend import *
 from Modularize.support.QDmanager import QDmanager, Data_manager
 from numpy import array, moveaxis, mean, std, median, arange
@@ -80,7 +80,7 @@ def analyze_and_plot(Qmanager, target_q, folder_path, show_each_plot, save_folde
 if __name__ == "__main__":
     QD_agent_path = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_25\DRKE#242_SumInfo.pkl"
     target_q = 'q0'
-    base_folder = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\2024_10_25"
+    base_folder = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForRearrange\QDbackupIs1025"
     show_each_plot = False
     specific_folder_name="SS_30aveg" #"SS"
     # 初始化 Qmanager

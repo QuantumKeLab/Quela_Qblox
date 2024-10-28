@@ -17,12 +17,10 @@ from Modularize.analysis.OneShotAna import a_OSdata_analPlot
 import re
 
 
-######
-import os
-import re
+######可用但是跑長時間的，圖只出現前面幾筆####
 from datetime import datetime, timedelta
-import numpy as np
-import matplotlib.pyplot as plt
+
+
 
 def extract_time_from_filename(filename):
     """從檔名中提取時間並轉換為時間字串和秒數，格式假設為 H18M25S41"""
