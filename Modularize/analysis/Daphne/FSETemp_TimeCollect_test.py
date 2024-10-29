@@ -78,15 +78,11 @@ def analyze_and_plot(Qmanager, target_q, folder_path, show_each_plot, save_folde
     return folder_path, p01_mean, p01_std, effT_mean, effT_std
 
 if __name__ == "__main__":
-
-    """Fill in"""
-    QD_agent_path = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_26\DRKE#242_SumInfo.pkl"
+    QD_agent_path = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_25\DRKE#242_SumInfo.pkl"
     target_q = 'q0'
-    base_folder = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1026OrCouldBe1028"
+    base_folder = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForRearrange\QDbackupIs1025"
     show_each_plot = False
-    specific_folder_name="SS" #"SS_30aveg"
-
-    """Running"""
+    specific_folder_name="SS_30aveg" #"SS"
     # 初始化 Qmanager
     Qmanager = QDmanager(QD_agent_path)
     Qmanager.QD_loader()
@@ -111,4 +107,61 @@ if __name__ == "__main__":
         print(f"effT Mean: {effT_mean:.4f} mK, Std: {effT_std:.5f} mK\n")
 
     print("Analysis done! Check out the histogram in each SS folder.")
+
+    
+
+import numpy as np
+import os
+import re
+from datetime import datetime
+
+# Function to read dataset from a file
+def read_dataset(file_path):
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+    data = []
+    for line in lines:
+        date_str, time_str, value = line.strip().split(',')
+        timestamp = datetime.strptime(f"{date_str} {time_str}", "%d-%m-%y %H:%M:%S")
+        data.append((timestamp, float(value)))
+    return data
+
+# Function to filter data by timestamp range
+def filter_data_by_time(data, start_time, end_time):
+    return [value for timestamp, value in data if start_time <= timestamp <= end_time]
+
+# Process the earliest and latest file timestamps
+def extract_timestamp_from_filename(filename):
+    match = re.search(r'H(\d{2})M(\d{2})S(\d{2})', filename)
+    if match:
+        hour, minute, second = map(int, match.groups())
+        return hour, minute, second
+    return None
+
+# Main analysis function
+def analyze_folder(folder_path, start_time, end_time):
+    data_file = os.path.join(folder_path, "your_data_file.txt")  # Replace with actual file name
+    data = read_dataset(data_file)
+
+    # Filter data within the specified time range
+    filtered_data = filter_data_by_time(data, start_time, end_time)
+    
+    # Convert to numpy array for analysis
+    values = np.array(filtered_data) * 1e3  # Scale as per original script
+    mean = np.mean(values)
+    std_dev = np.std(values)
+
+    print(f"Mean: {mean:.3f} +/- Std Dev: {std_dev:.4f}")
+    return mean, std_dev
+
+# Example of usage
+folder_path = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForRearrange\QDbackupIs1025"
+earliest_time = datetime(2024, 10, 27, 21, 32, 50)  # 27-10-24,21:32:50
+latest_time = datetime(2024, 10, 27, 21, 43, 50)    # 27-10-24,21:43:50
+
+# Analyze the folder data within the time range
+analyze_folder(folder_path, earliest_time, latest_time)
+
+
+
 

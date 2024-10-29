@@ -135,7 +135,7 @@ if __name__ == '__main__':
 
     """ Fill in """
     execute:bool = 1
-    repeat:int = 700
+    repeat:int = 27
     DRandIP = {"dr":"drke","last_ip":"242"}
     ro_elements = {'q0':{"roAmp_factor":1}}
     couplers = []
@@ -170,7 +170,7 @@ if __name__ == '__main__':
             if ro_amp_scaling != 1 and repeat > 1 : raise ValueError("Check the RO_amp_factor should be 1 when you want to repeat it!")
             # Cctrl['c0'](0.07)
             # Cctrl['c1'](0.05)
-            info = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=ro_amp_scaling,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF,data_folder=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25\SS_overnight")
+            info = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=ro_amp_scaling,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF)#,data_folder=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25\SS_overnight"
             # Cctrl['c0'](0)
             # Cctrl['c1'](0)
             # snr_rec[qubit].append(info[2])

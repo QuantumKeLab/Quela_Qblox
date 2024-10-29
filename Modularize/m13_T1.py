@@ -127,13 +127,13 @@ if __name__ == "__main__":
     chip_info_restore:bool = 1
     DRandIP = {"dr":"drke","last_ip":"242"}
     ro_elements = {
-        "q0":{"evoT":40e-6,"histo_counts":30},
+        "q0":{"evoT":10e-6,"histo_counts":30},
     }
     couplers = []
 
     """ Optional paras """
     time_data_points = 100
-    avg_n = 300
+    avg_n = 600
     xy_IF = 250e6
   
 

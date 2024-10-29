@@ -277,7 +277,7 @@ if __name__ == "__main__":
     target_q='q0'
 
     "For single file"
-    nc_path=r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\2024_10_25\15mK_IntegrationTime_1500ns(itis1250\SS_10aveg\DRKEq0_SingleShot(9)_H12M27S36.nc"
+    nc_path=r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\2024_10_25\15mK_IntegrationTime_2000ns\SS_30aveg\DRKEq0_SingleShot(25)_H22M2S31.nc"
     a_OSdata_analPlot(Qmanager,target_q, nc_path)
     # a_OSdata_correlation_analPlot(nc_path)
     

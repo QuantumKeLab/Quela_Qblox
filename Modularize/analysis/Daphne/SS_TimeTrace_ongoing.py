@@ -1,5 +1,5 @@
 import os, sys 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', ".."))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', "..", ".."))
 from qcat.analysis.state_discrimination.readout_fidelity import GMMROFidelity
 from qcat.visualization.readout_fidelity import plot_readout_fidelity
 from xarray import Dataset, open_dataset
@@ -106,9 +106,9 @@ def analyze_and_plot(Qmanager, target_q, folder_path, show_each_plot, save_folde
     return folder_path, p01_mean, p01_std, effT_mean, effT_std
 
 if __name__ == "__main__":
-    QD_agent_path = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_25\DRKE#242_SumInfo.pkl"
+    QD_agent_path = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_26\DRKE#242_SumInfo.pkl"
     target_q = 'q0'
-    base_folder = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\2024_10_25\SS_overnight"
+    base_folder = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1026OrCouldBe1028"
     show_each_plot = False
     time_mode = "relative"  # "real" 或 "relative"
 
