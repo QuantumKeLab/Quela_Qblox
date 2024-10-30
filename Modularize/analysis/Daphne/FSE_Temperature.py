@@ -6,14 +6,15 @@ from datetime import datetime
 # Find the earliest and latest times from filenames in a folder
 def find_time_range_from_filenames(folder_path, log_date):
     times = []
-    pattern = re.compile(r"H(\d{2})M(\d{2})S(\d{2})")  # Match time format in the filename
+    pattern = re.compile(r"H(\d{1,2})M(\d{2})S(\d{2})")  # Match single or double digit hour format
 
     for filename in os.listdir(folder_path):
         if filename.endswith(".nc"):  # Only process .nc files
             match = pattern.search(filename)
             if match:
-                # Extract time and convert to datetime object
+                # Extract time and add a leading zero if hour is a single digit
                 hour, minute, second = match.groups()
+                hour = hour.zfill(2)  # Ensure hour has two digits
                 time_str = f"{log_date},{hour}:{minute}:{second}"
                 time_obj = datetime.strptime(time_str, '%y-%m-%d,%H:%M:%S')
                 times.append(time_obj)
@@ -60,7 +61,7 @@ def find_target_folders(main_folder, target_folders):
     return matched_folders
 
 # Main function to process each target folder's .nc files
-def main(main_folder, log_file_path,target_folders_list):
+def main(main_folder, log_file_path, target_folders_list):
     # Extract date from .log filename
     log_filename = os.path.basename(log_file_path)
     log_date_match = re.search(r"(\d{2}-\d{2}-\d{2})", log_filename)
@@ -88,16 +89,10 @@ def main(main_folder, log_file_path,target_folders_list):
     else:
         print("Unable to extract date from filename")
 
+# Define paths and target folders
+main_folder = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1025" # Main folder path
+log_file_path = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1025\CH9_FSE_24-10-25.log" # .log file name
+target_folders_list = ['SS', 'T1', 'T2_Ramsey', 'T2_SpinEcho']
 
-
-"""Fill in"""
-main_folder = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1025" # Main folder path
-log_file_path = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1025\CH9_FSE_24-10-26.log" # .log file name
-target_folders_list = ['SS', 'T1', 'T2_Ramsey','T2_SpinEcho'] 
-
-"""Execute program"""
-main(main_folder, log_file_path,target_folders_list)
-
-
-
-
+# Execute program
+main(main_folder, log_file_path, target_folders_list)

@@ -123,10 +123,10 @@ def SS_executor(QD_agent:QDmanager,cluster:Cluster,Fctrl:dict,target_q:str,shots
             effT_mk, ro_fidelity, thermal_p = 0, 0, 0
         else:
             effT_mk, ro_fidelity, thermal_p = 0, 0, 0
-    # else:
-    #     thermal_p, effT_mk, ro_fidelity = a_OSdata_analPlot(QD_agent,target_q,nc,plot,save_pic=save_every_pic)
     else:
-        effT_mk, ro_fidelity, thermal_p = 0, 0, 0
+        thermal_p, effT_mk, ro_fidelity = a_OSdata_analPlot(QD_agent,target_q,nc,plot,save_pic=save_every_pic)
+    # else:
+        # effT_mk, ro_fidelity, thermal_p = 0, 0, 0
 
     return thermal_p, effT_mk, ro_fidelity
 
@@ -135,7 +135,7 @@ if __name__ == '__main__':
 
     """ Fill in """
     execute:bool = 1
-    repeat:int = 27
+    repeat:int = 15
     DRandIP = {"dr":"drke","last_ip":"242"}
     ro_elements = {'q0':{"roAmp_factor":1}}
     couplers = []
@@ -173,18 +173,18 @@ if __name__ == '__main__':
             info = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=ro_amp_scaling,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF)#,data_folder=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25\SS_overnight"
             # Cctrl['c0'](0)
             # Cctrl['c1'](0)
-            # snr_rec[qubit].append(info[2])
-            # effT_rec[qubit].append(info[1])
-            # thermal_pop[qubit].append(info[0]*100)
-            # if ro_amp_scaling !=1 or ro_atte_degrade_dB != 0:
-            #     keep = mark_input(f"Keep this RO amp for {qubit}?[y/n]")
-            # else:
-            #     keep = 'y'
+            snr_rec[qubit].append(info[2])
+            effT_rec[qubit].append(info[1])
+            thermal_pop[qubit].append(info[0]*100)
+            if ro_amp_scaling !=1 or ro_atte_degrade_dB != 0:
+                keep = mark_input(f"Keep this RO amp for {qubit}?[y/n]")
+            else:
+                keep = 'y'
 
-            # """ Storing """ 
-            # if execute and repeat == 1:
-            #     if keep.lower() in ['y', 'yes']:
-            #         QD_agent.QD_keeper() 
+            """ Storing """ 
+            if execute and repeat == 1:
+                if keep.lower() in ['y', 'yes']:
+                    QD_agent.QD_keeper() 
                     
                     
                 
@@ -193,11 +193,11 @@ if __name__ == '__main__':
             end_time = time.time()
             slightly_print(f"time cose: {round(end_time-start_time,1)} secs")
 
-    # for qubit in effT_rec:
-    #     highlight_print(f"{qubit}: {round(median(array(effT_rec[qubit])),2)} +/- {round(std(array(effT_rec[qubit])),3)} mK")
+    for qubit in effT_rec:
+        highlight_print(f"{qubit}: {round(median(array(effT_rec[qubit])),2)} +/- {round(std(array(effT_rec[qubit])),3)} mK")
     
-        # Data_manager().save_histo_pic(QD_agent,effT_rec,qubit,mode="ss")
-        # Data_manager().save_histo_pic(QD_agent,thermal_pop,qubit,mode="pop")
+        Data_manager().save_histo_pic(QD_agent,effT_rec,qubit,mode="ss")
+        Data_manager().save_histo_pic(QD_agent,thermal_pop,qubit,mode="pop")
         
         
 

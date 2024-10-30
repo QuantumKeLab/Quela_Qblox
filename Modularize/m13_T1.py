@@ -20,8 +20,8 @@ def T1(QD_agent:QDmanager,meas_ctrl:MeasurementControl,freeduration:float=80e-6,
     sche_func= T1_sche
     
     qubit_info = QD_agent.quantum_device.get_element(q)
-    qubit_info.measure.integration_time(2e-6)
-    qubit_info.measure.pulse_duration(2e-6)
+    qubit_info.measure.integration_time(1.5e-6)
+    qubit_info.measure.pulse_duration(1.5e-6)
     # qubit_info.rxy.amp180()
     print("Integration time ",qubit_info.measure.integration_time()*1e6, "µs")
     print("Reset time ", qubit_info.reset.duration()*1e6, "µs")

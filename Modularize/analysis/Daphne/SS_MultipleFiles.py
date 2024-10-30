@@ -72,17 +72,17 @@ def analyze_and_plot(Qmanager, target_q, folder_path, show_each_plot, save_folde
     result_dict = {q: np.array(v) for q, v in results.items()}
     
     # 保存 histogram 圖片
-    # Data_manager().save_histo_pic(Qmanager, result_dict, 'p01', mode="pop", save_fig=True, pic_folder=save_folder)
-    # Data_manager().save_histo_pic(Qmanager, result_dict, 'effT_mK', mode="ss", save_fig=True, pic_folder=save_folder)
+    Data_manager().save_histo_pic(Qmanager, result_dict, 'p01', mode="pop", save_fig=True, pic_folder=save_folder)
+    Data_manager().save_histo_pic(Qmanager, result_dict, 'effT_mK', mode="ss", save_fig=True, pic_folder=save_folder)
     
     return folder_path, p01_mean, p01_std, effT_mean, effT_std
 
 if __name__ == "__main__":
 
     """Fill in"""
-    QD_agent_path = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_26\DRKE#242_SumInfo.pkl"
+    QD_agent_path = r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_10_29\DRKE#242_SumInfo.pkl"
     target_q = 'q0'
-    base_folder = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1026OrCouldBe1028"
+    base_folder = r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_29"
     show_each_plot = False
     specific_folder_name="SS" #"SS_30aveg"
 
