@@ -131,11 +131,11 @@ def plot_timeDepCohe(time_values:ndarray, y_values:ndarray, exp:str, fig_path:st
 
 
 if __name__ == "__main__":
-    folder_paths = {"T1_folder_path":r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\2024_10_27\T1_overnight_test"
+    folder_paths = {"T1_folder_path":r"C:\Users\Ke Lab\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\2024_10_27\T1_overnight"
                     }#"Modularize/Meas_raw/T1_timeDep",
                     # "T2_folder_path":"Modularize/Meas_raw/T2_timeDep",
                     # "OS_folder_path":""
-    QD_file_path = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_25\DRKE#242_SumInfo.pkl"
+    QD_file_path = r"C:\Users\Ke Lab\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_26\DRKE#242_SumInfo.pkl"
     qs = ['q0']
     qs = 'q0'
     sort_mode = 'time' # 'idx' or 'time'
@@ -248,7 +248,15 @@ if __name__ == "__main__":
                     pass
             print(f"Number of processed files: {len(files)}")    
                      
-            time_json_path = [os.path.join(folder, name) for name in os.listdir(folder) if (os.path.isfile(os.path.join(folder, name)) and name.split(".")[-1] == "json")][0]
+            # time_json_path = [os.path.join(folder, name) for name in os.listdir(folder) if (os.path.isfile(os.path.join(folder, name)) and name.split(".")[-1] == "json")][0]
+            json_files = [os.path.join(folder, name) for name in os.listdir(folder) if (os.path.isfile(os.path.join(folder, name)) and name.split(".")[-1] == "json")]
+
+            if json_files:
+                time_json_path = json_files[0]
+                # 你的後續處理代碼
+            else:
+                print("No JSON files found in the specified folder.")
+                
             with open(time_json_path) as time_record_file:
                 time_past_dict = json.load(time_record_file)
             time_array = np.array(list(time_past_dict.values())[0])
