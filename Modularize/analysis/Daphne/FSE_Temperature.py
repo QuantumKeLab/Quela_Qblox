@@ -1,222 +1,103 @@
+import os
+import re
 import numpy as np
+from datetime import datetime
 
-# Your data categorized by temperature
-data_sets ={"65mK":"""
-    28-10-24,01:36:50,6.513200e-02
-    28-10-24,01:37:50,6.511600e-02
-    28-10-24,01:38:50,6.528000e-02
-    28-10-24,01:39:50,6.519900e-02
-    28-10-24,01:40:50,6.517400e-02
-    28-10-24,01:41:50,6.516000e-02
-    28-10-24,01:42:50,6.506900e-02
-    28-10-24,01:43:50,6.519800e-02
-    28-10-24,01:44:50,6.519400e-02
-    28-10-24,01:45:50,6.514600e-02
-    28-10-24,01:46:50,6.516100e-02
-    28-10-24,01:47:50,6.523800e-02
-    28-10-24,01:48:50,6.525300e-02
-    28-10-24,01:49:50,6.515600e-02
-    28-10-24,01:50:50,6.514900e-02
-    28-10-24,01:51:50,6.521800e-02
-    28-10-24,01:52:50,6.506600e-02
-    28-10-24,01:53:50,6.521500e-02
-    28-10-24,01:54:50,6.518700e-02
-    28-10-24,01:55:50,6.518400e-02
-    """,
-    "70mK": """
-    28-10-24,11:02:50,7.020500e-02
-    28-10-24,11:03:50,7.030600e-02
-    28-10-24,11:04:50,7.032200e-02
-    28-10-24,11:05:50,7.020100e-02
-    28-10-24,11:06:50,7.027900e-02
-    28-10-24,11:07:50,7.026000e-02
-    28-10-24,11:08:50,7.030000e-02
-    28-10-24,11:09:50,7.027900e-02
-    28-10-24,11:10:50,7.023000e-02
-    28-10-24,11:11:50,7.028100e-02
-    28-10-24,11:12:50,7.038200e-02
-    28-10-24,11:13:50,7.040200e-02
-    28-10-24,11:14:50,7.025400e-02
-    28-10-24,11:15:50,7.029000e-02
-    28-10-24,11:16:50,7.021500e-02
-    28-10-24,11:17:50,7.031500e-02
-    28-10-24,11:18:50,7.024200e-02
-    28-10-24,11:19:50,7.019700e-02
-    28-10-24,11:20:50,7.021800e-02
-    28-10-24,11:21:50,7.018100e-02
-    """,
-    "80mK": """
-    28-10-24,13:29:50,7.983400e-02
-    28-10-24,13:30:50,7.976800e-02
-    28-10-24,13:31:50,7.991000e-02
-    28-10-24,13:32:50,7.993900e-02
-    28-10-24,13:33:50,7.991300e-02
-    28-10-24,13:34:50,8.000200e-02
-    28-10-24,13:35:50,7.994100e-02
-    28-10-24,13:36:50,7.985400e-02
-    28-10-24,13:37:50,7.986000e-02
-    28-10-24,13:38:50,7.986600e-02
-    28-10-24,13:39:50,8.004700e-02
-    28-10-24,13:40:50,7.993800e-02
-    28-10-24,13:41:50,7.997900e-02
-    28-10-24,13:42:50,7.987500e-02
-    28-10-24,13:43:50,7.998500e-02
-    28-10-24,13:44:50,8.000300e-02
-    28-10-24,13:45:50,7.995300e-02
-    28-10-24,13:46:50,8.001700e-02
-    28-10-24,13:47:50,7.996700e-02
-    28-10-24,13:48:50,7.997600e-02
-    28-10-24,13:49:50,7.996400e-02
-    28-10-24,13:50:50,8.015200e-02
-    """,
-    "90mK": """
-    28-10-24,15:31:50,9.036300e-02
-    28-10-24,15:32:50,9.041600e-02
-    28-10-24,15:33:50,9.050500e-02
-    28-10-24,15:34:50,9.044200e-02
-    28-10-24,15:35:50,9.039200e-02
-    28-10-24,15:36:50,9.029900e-02
-    28-10-24,15:37:50,9.036400e-02
-    28-10-24,15:38:50,9.039100e-02
-    28-10-24,15:39:50,9.052500e-02
-    28-10-24,15:40:50,9.052700e-02
-    28-10-24,15:41:50,9.046200e-02
-    28-10-24,15:42:50,9.056300e-02
-    28-10-24,15:43:50,9.047300e-02
-    28-10-24,15:44:50,9.048700e-02
-    28-10-24,15:45:50,9.057500e-02
-    28-10-24,15:46:50,9.064000e-02
-    28-10-24,15:47:50,9.050700e-02
-    28-10-24,15:48:50,9.058400e-02
-    28-10-24,15:49:50,9.056700e-02
-    28-10-24,15:50:50,9.057200e-02
-    28-10-24,15:51:50,9.050400e-02
-    """,
-    "100mK": """
-    28-10-24,17:37:50,1.016370e-01
-    28-10-24,17:38:50,1.016460e-01
-    28-10-24,17:39:50,1.017430e-01
-    28-10-24,17:40:50,1.016350e-01
-    28-10-24,17:41:50,1.015920e-01
-    28-10-24,17:42:50,1.016460e-01
-    28-10-24,17:43:50,1.016750e-01
-    28-10-24,17:44:50,1.016740e-01
-    28-10-24,17:45:50,1.017820e-01
-    28-10-24,17:46:50,1.016940e-01
-    28-10-24,17:47:50,1.015860e-01
-    28-10-24,17:48:50,1.016560e-01
-    28-10-24,17:49:50,1.018360e-01
-    28-10-24,17:50:50,1.016900e-01
-    28-10-24,17:51:50,1.017210e-01
-    28-10-24,17:52:50,1.017280e-01
-    28-10-24,17:53:50,1.018230e-01
-    28-10-24,17:54:50,1.017940e-01
-    28-10-24,17:55:50,1.017870e-01
-    28-10-24,17:56:50,1.018010e-01
-    28-10-24,17:57:50,1.018270e-01
-    """,
-    "120mK": """
-    28-10-24,19:54:50,1.212720e-01
-    28-10-24,19:55:50,1.213780e-01
-    28-10-24,19:56:50,1.213990e-01
-    28-10-24,19:57:50,1.213760e-01
-    28-10-24,19:58:50,1.212370e-01
-    28-10-24,19:59:50,1.214050e-01
-    28-10-24,20:00:50,1.214890e-01
-    28-10-24,20:01:50,1.214470e-01
-    28-10-24,20:02:50,1.214290e-01
-    28-10-24,20:03:50,1.214650e-01
-    28-10-24,20:04:50,1.213460e-01
-    28-10-24,20:05:50,1.215420e-01
-    28-10-24,20:06:50,1.213970e-01
-    28-10-24,20:07:50,1.214420e-01
-    28-10-24,20:08:50,1.215370e-01
-    28-10-24,20:09:50,1.214260e-01
-    28-10-24,20:10:50,1.216180e-01
-    28-10-24,20:11:50,1.216440e-01
-    28-10-24,20:12:50,1.216760e-01
-    28-10-24,20:13:50,1.215960e-01
-    28-10-24,20:14:50,1.215860e-01
-    28-10-24,20:15:50,1.215140e-01
-    """,
-    "140mK": """
-    28-10-24,22:43:50,1.421630e-01
-    28-10-24,22:44:50,1.420490e-01
-    28-10-24,22:45:50,1.420530e-01
-    28-10-24,22:46:50,1.420770e-01
-    28-10-24,22:47:50,1.422600e-01
-    28-10-24,22:48:50,1.421360e-01
-    28-10-24,22:49:50,1.421200e-01
-    28-10-24,22:50:50,1.420830e-01
-    28-10-24,22:51:50,1.419980e-01
-    28-10-24,22:52:50,1.421820e-01
-    28-10-24,22:53:50,1.421780e-01
-    28-10-24,22:54:50,1.422240e-01
-    28-10-24,22:55:50,1.420140e-01
-    28-10-24,22:56:50,1.423320e-01
-    28-10-24,22:57:50,1.421310e-01
-    28-10-24,22:58:50,1.421820e-01
-    28-10-24,22:59:50,1.421790e-01
-    28-10-24,23:00:50,1.422380e-01
-    28-10-24,23:01:50,1.422900e-01
-    28-10-24,23:02:50,1.420850e-01
-    """
-} 
+# Find the earliest and latest times from filenames in a folder
+def find_time_range_from_filenames(folder_path, log_date):
+    times = []
+    pattern = re.compile(r"H(\d{2})M(\d{2})S(\d{2})")  # Match time format in the filename
 
-# Function to process each dataset
-def process_dataset(data_str):
-    lines = data_str.strip().split('\n')
-    values = [float(line.split(',')[2]) * 1e3 for line in lines]
-    values_array = np.array(values)
-    mean = np.mean(values_array)
-    std_dev = np.std(values_array)
-    return mean, std_dev
-
-# Process and print mean and standard deviations for all datasets
-for temp, data_str in data_sets.items():
-    mean, std_dev = process_dataset(data_str)
-    print(f"{temp} Mean: {mean:.3f} +/- Std Dev: {std_dev:.4f}")
-
-# import numpy as np
-# from datetime import datetime
-
-# # 讀取檔案並處理數據的函式
-# def process_file(file_path, start_time_str, end_time_str):
-#     # 設定時間範圍
-#     start_time = datetime.strptime(start_time_str, '%d-%m-%y,%H:%M:%S')
-#     end_time = datetime.strptime(end_time_str, '%d-%m-%y,%H:%M:%S')
+    for filename in os.listdir(folder_path):
+        if filename.endswith(".nc"):  # Only process .nc files
+            match = pattern.search(filename)
+            if match:
+                # Extract time and convert to datetime object
+                hour, minute, second = match.groups()
+                time_str = f"{log_date},{hour}:{minute}:{second}"
+                time_obj = datetime.strptime(time_str, '%y-%m-%d,%H:%M:%S')
+                times.append(time_obj)
     
-#     values = []
+    # Find the earliest and latest times
+    if times:
+        start_time = min(times)
+        end_time = max(times)
+        return start_time.strftime('%y-%m-%d,%H:%M:%S'), end_time.strftime('%y-%m-%d,%H:%M:%S')
+    else:
+        return None, None
 
-#     # 開啟並讀取檔案
-#     with open(file_path, 'r') as file:
-#         for line in file:
-#             # 解析每一行數據
-#             date_str, time_str, value_str = line.strip().split(',')
-#             timestamp = datetime.strptime(f"{date_str},{time_str}", '%d-%m-%y,%H:%M:%S')
-#             value = float(value_str) * 1e3  # 轉換值為毫單位
+# Read data from a .log file and calculate the mean and standard deviation
+def process_file(file_path, start_time_str, end_time_str):
+    start_time = datetime.strptime(start_time_str, '%y-%m-%d,%H:%M:%S')
+    end_time = datetime.strptime(end_time_str, '%y-%m-%d,%H:%M:%S')
+    values = []
+
+    with open(file_path, 'r') as file:
+        for line in file:
+            date_str, time_str, value_str = line.strip().split(',')
+            timestamp = datetime.strptime(f"{date_str},{time_str}", '%d-%m-%y,%H:%M:%S')
+            value = float(value_str) * 1e3
             
-#             # 檢查是否在指定時間範圍內
-#             if start_time <= timestamp <= end_time:
-#                 values.append(value)
+            if start_time <= timestamp <= end_time:
+                values.append(value)
 
-#     # 將資料轉為 numpy array，並計算平均值和標準差
-#     values_array = np.array(values)
-#     if values_array.size > 0:
-#         mean = np.mean(values_array)
-#         std_dev = np.std(values_array)
-#         return mean, std_dev
-#     else:
-#         print("指定時間範圍內無數據")
-#         return None, None
+    values_array = np.array(values)
+    if values_array.size > 0:
+        mean = np.mean(values_array)
+        std_dev = np.std(values_array)
+        return mean, std_dev
+    else:
+        print("No data found in the specified time range")
+        return None, None
 
-# # 使用範例
-# file_path = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForRearrange\QDbackupIs1026\CH9_FSE_24-10-27"  # 替換成您的檔案名稱
-# start_time_str = '25-10-24,19:04:50'
-# end_time_str = '25-10-24,19:13:50'
+# Recursively find folders that match target names within the main folder
+def find_target_folders(main_folder, target_folders):
+    matched_folders = []
+    for root, dirs, files in os.walk(main_folder):
+        for dir_name in dirs:
+            if dir_name in target_folders:
+                matched_folders.append(os.path.join(root, dir_name))
+    return matched_folders
 
-# mean, std_dev = process_file(file_path, start_time_str, end_time_str)
-# if mean is not None:
-#     print(f"Mean: {mean:.3f} +/- Std Dev: {std_dev:.4f}")
+# Main function to process each target folder's .nc files
+def main(main_folder, log_file_path,target_folders_list):
+    # Extract date from .log filename
+    log_filename = os.path.basename(log_file_path)
+    log_date_match = re.search(r"(\d{2}-\d{2}-\d{2})", log_filename)
+    if log_date_match:
+        log_date = log_date_match.group(1)  # Date format is YY-MM-DD
+        print(f"Extracted date: {log_date}")
+
+        # Specify the target folder names to search for
+        target_folders = target_folders_list  # List of folder names to analyze
+        matched_folders = find_target_folders(main_folder, target_folders)
+
+        # Process each matched folder
+        for folder in matched_folders:
+            print(f"\nProcessing folder: {folder}")
+            start_time_str, end_time_str = find_time_range_from_filenames(folder, log_date)
+            if start_time_str and end_time_str:
+                print(f"Time range: {start_time_str} to {end_time_str}")
+                
+                # Process .log file based on the time range
+                mean, std_dev = process_file(log_file_path, start_time_str, end_time_str)
+                if mean is not None:
+                    print(f"Mean: {mean:.3f} +/- Std Dev: {std_dev:.4f}")
+            else:
+                print("No matching time found")
+    else:
+        print("Unable to extract date from filename")
+
+
+
+"""Fill in"""
+main_folder = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1025" # Main folder path
+log_file_path = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1025\CH9_FSE_24-10-26.log" # .log file name
+target_folders_list = ['SS', 'T1', 'T2_Ramsey','T2_SpinEcho'] 
+
+"""Execute program"""
+main(main_folder, log_file_path,target_folders_list)
+
+
 
 
