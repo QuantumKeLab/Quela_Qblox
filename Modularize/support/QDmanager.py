@@ -4,7 +4,8 @@ from Modularize.support.FluxBiasDict import FluxBiasDict
 from Modularize.support.Notebook import Notebook
 from quantify_scheduler.device_under_test.quantum_device import QuantumDevice
 from quantify_scheduler.device_under_test.transmon_element import BasicTransmonElement
-
+import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 def ret_q(dict_a):
     x = []
     for i in dict_a:
@@ -60,7 +61,8 @@ class QDmanager():
         with open(self.path, 'rb') as inp:
             gift = pickle.load(inp) # refer to `merged_file` in QD_keeper()
         # string and int
-        self.chip_name:str = gift["chip_name"]
+        self.chip_name:str = gift["chip_info"]["name"]
+        self.chip_type:str = gift["chip_info"]["type"]
         self.Identity:str = gift["ID"]
         self.Log:str = gift["Log"]
         self.q_num:int = len(list(filter(ret_q,gift["Flux"])))
@@ -93,7 +95,7 @@ class QDmanager():
             self.path = os.path.join(db.raw_folder,f"{self.Identity}_SumInfo.pkl")
         Hcfg = self.quantum_device.generate_hardware_config()
         # TODO: Here is onlu for the hightlighs :)
-        merged_file = {"ID":self.Identity,"chip_name":self.chip_name,"QD":self.quantum_device,"Flux":self.Fluxmanager.get_bias_dict(),"Hcfg":Hcfg,"refIQ":self.refIQ,"Note":self.Notewriter.get_notebook(),"Log":self.Log}
+        merged_file = {"ID":self.Identity,"chip_info":{"name":self.chip_name,"type":self.chip_type},"QD":self.quantum_device,"Flux":self.Fluxmanager.get_bias_dict(),"Hcfg":Hcfg,"refIQ":self.refIQ,"Note":self.Notewriter.get_notebook(),"Log":self.Log}
         
         with open(self.path if special_path == '' else special_path, 'wb') as file:
             pickle.dump(merged_file, file)
@@ -250,52 +252,96 @@ class Data_manager:
 
     
     def save_raw_data(self,QD_agent:QDmanager,ds:Dataset,qb:str='q0',label:str=0,exp_type:str='CS', specific_dataFolder:str='', get_data_loc:bool=False):
+        """
+        If the arg `specific_dataFolder` was given, the raw nc will be saved into that given path. 
+        """
         exp_timeLabel = self.get_time_now()
         self.build_folder_today(self.raw_data_dir)
         parent_dir = self.raw_folder if specific_dataFolder =='' else specific_dataFolder
         dr_loc = QD_agent.Identity.split("#")[0]
         if exp_type.lower() == 'cs':
             path = os.path.join(parent_dir,f"{dr_loc}{qb}_CavitySpectro_{exp_timeLabel}.nc")
-            ds.to_netcdf(path)
+            
         elif exp_type.lower() == 'pd':
             path = os.path.join(parent_dir,f"{dr_loc}{qb}_PowerCavity_{exp_timeLabel}.nc")
-            ds.to_netcdf(path)
+            
         elif exp_type.lower() == 'fd':
             path = os.path.join(parent_dir,f"{dr_loc}{qb}_FluxCavity_{exp_timeLabel}.nc")
-            ds.to_netcdf(path)
+            
         elif exp_type.lower() == 'ss':
             path = os.path.join(parent_dir,f"{dr_loc}{qb}_SingleShot({label})_{exp_timeLabel}.nc")
-            ds.to_netcdf(path)
+            
         elif exp_type.lower() == '2tone':
             path = os.path.join(parent_dir,f"{dr_loc}{qb}_2tone_{exp_timeLabel}.nc")
-            ds.to_netcdf(path)
+            
         elif exp_type.lower() == 'f2tone':
             path = os.path.join(parent_dir,f"{dr_loc}{qb}_Flux2tone_{exp_timeLabel}.nc")
-            ds.to_netcdf(path)
+            
         elif exp_type.lower() == 'powerrabi':
             path = os.path.join(parent_dir,f"{dr_loc}{qb}_powerRabi_{exp_timeLabel}.nc")
-            ds.to_netcdf(path)
+            
         elif exp_type.lower() == 'timerabi':
             path = os.path.join(parent_dir,f"{dr_loc}{qb}_timeRabi_{exp_timeLabel}.nc")
-            ds.to_netcdf(path)
+            
         elif exp_type.lower() == 'ramsey':
             path = os.path.join(parent_dir,f"{dr_loc}{qb}_ramsey_{exp_timeLabel}.nc")
-            ds.to_netcdf(path)
+            
         elif exp_type.lower() == 't1':
             path = os.path.join(parent_dir,f"{dr_loc}{qb}_T1({label})_{exp_timeLabel}.nc")
-            ds.to_netcdf(path)
+            
         elif exp_type.lower() == 't2':
             path = os.path.join(parent_dir,f"{dr_loc}{qb}_T2({label})_{exp_timeLabel}.nc")
-            ds.to_netcdf(path)
+            
         elif exp_type.lower() == 'rofcali':
             path = os.path.join(parent_dir,f"{dr_loc}{qb}_RofCali({label})_{exp_timeLabel}.nc")
+            
+        elif exp_type.lower() == 'zt1':
+            path = os.path.join(parent_dir,f"{dr_loc}{qb}_zT1({label})_{exp_timeLabel}.nc")
+            
+        elif exp_type.lower() == 'xylcali':
+            path = os.path.join(parent_dir,f"{dr_loc}{qb}_XYLCali({label})_{exp_timeLabel}.nc")
+            
+        elif exp_type.lower() == 'xyl05cali':
+            path = os.path.join(parent_dir,f"{dr_loc}{qb}_HalfPiCali({label})_{exp_timeLabel}.nc")
+            
+        elif exp_type.lower()[:4] == 'cryo':
+            path = os.path.join(parent_dir,f"{dr_loc}{qb}_CryoScope{exp_type.lower()[-1]}({label})_{exp_timeLabel}.nc")
+            
+        elif exp_type.lower() == 'chevron':
+            path = os.path.join(parent_dir,f"{dr_loc}{qb}_RabiChevron_{exp_timeLabel}.nc")
+            
+        elif exp_type.lower() == 'fringe':
+            path = os.path.join(parent_dir,f"{dr_loc}{qb}RamseyFringe{exp_timeLabel}.nc")
+            
+        else:
+            path = os.path.join(parent_dir,"Unknown.nc")
+            raise KeyError("Wrong experience type!")
+        
+        ds.to_netcdf(path)
+
+        if get_data_loc:
+            return path
+    
+    def save_2Qraw_data(self,QD_agent:QDmanager,ds:Dataset,qubits:list,label:str=0,exp_type:str='iswap', specific_dataFolder:str='', get_data_loc:bool=False):
+        exp_timeLabel = self.get_time_now()
+        self.build_folder_today(self.raw_data_dir)
+        parent_dir = self.raw_folder if specific_dataFolder =='' else specific_dataFolder
+        dr_loc = QD_agent.Identity.split("#")[0]
+        
+        operators = ""
+        for qORc in qubits:
+            operators += qORc
+
+        if exp_type.lower() == 'iswap':
+            path = os.path.join(parent_dir,f"{dr_loc}{operators}_iSwap_{exp_timeLabel}.nc")
             ds.to_netcdf(path)
         else:
-            path = ''
-            raise KeyError("Wrong experience type!")
+            path = None
+            raise KeyError(f"irrecognizable 2Q gate exp = {exp_type}")
         
         if get_data_loc:
             return path
+        
     
     def save_histo_pic(self,QD_agent:QDmanager,hist_dict:dict,qb:str='q0',mode:str="t1", show_fig:bool=False, save_fig:bool=True,pic_folder:str=''):
         from Modularize.support.Pulse_schedule_library import hist_plot
@@ -312,9 +358,15 @@ class Data_manager:
             else:
                 fig_path = ''
             hist_plot(qb,hist_dict ,title=f"T1",save_path=fig_path, show=show_fig)
-        elif mode.lower() =="t2" :
+        elif mode.lower() =="t2*" :
             if save_fig:
                 fig_path = os.path.join(pic_dir,f"{dr_loc}{qb}_T2histo_{exp_timeLabel}.png")
+            else:
+                fig_path = ''
+            hist_plot(qb,hist_dict ,title=f"T2*",save_path=fig_path, show=show_fig)
+        elif mode.lower() =="t2" :
+            if save_fig:
+                fig_path = os.path.join(pic_dir,f"{dr_loc}{qb}_T2ehisto_{exp_timeLabel}.png")
             else:
                 fig_path = ''
             hist_plot(qb,hist_dict ,title=f"T2",save_path=fig_path, show=show_fig)
@@ -324,9 +376,33 @@ class Data_manager:
             else:
                 fig_path = ''
             hist_plot(qb,hist_dict ,title=f"eff_T",save_path=fig_path, show=show_fig)
+        elif mode.lower() in ["pop"] :
+            if save_fig:
+                fig_path = os.path.join(pic_dir,f"{dr_loc}{qb}_thermalPOPhisto_{exp_timeLabel}.png")
+            else:
+                fig_path = ''
+            hist_plot(qb,hist_dict ,title=f"ThermalPop",save_path=fig_path, show=show_fig)
         else:
             raise KeyError("mode should be 'T1' or 'T2'!")
         
+    def save_multiplex_pics(self, QD_agent:QDmanager, qb:str, exp_type:str, fig:Figure, specific_dataFolder:str=''):
+        exp_timeLabel = self.get_time_now()
+        self.build_folder_today(self.raw_data_dir)
+        multiplex_ro_dir = os.path.join(self.raw_folder, "MultiplexingRO")
+        if not os.path.exists(multiplex_ro_dir):
+            os.mkdir(multiplex_ro_dir)
+        parent_dir = multiplex_ro_dir if specific_dataFolder =='' else specific_dataFolder
+        if QD_agent != None:
+            dr_loc = QD_agent.Identity.split("#")[0]
+        else:
+            dr_loc = "ARBi"
+        if exp_type.lower() == 'cs':
+            path = os.path.join(parent_dir,f"{dr_loc}{qb}_MultiplexCS_{exp_timeLabel}.png")
+        else:
+            raise KeyError(f"Un-supported exp-type was given = {exp_type}")
+        fig.savefig(path)
+        plt.close()
+    
     def save_dict2json(self,QD_agent:QDmanager,data_dict:dict,qb:str='q0',get_json:bool=False):
         """
         Save a dict into json file. Currently ONLY support z-gate 2tone fitting data.
@@ -348,5 +424,13 @@ class Data_manager:
         """
         self.build_folder_today(self.raw_data_dir)
         return self.pic_folder
+    
+    def creat_datafolder_today(self,folder_name:str)->str:
+        """ create a new folder in the raw data folder today with the given name"""
+        self.build_folder_today(self.raw_data_dir)
+        new_folder = os.path.join(self.raw_folder,folder_name)
+        if not os.path.exists(new_folder):
+            os.mkdir(new_folder)
+        return new_folder
 
 

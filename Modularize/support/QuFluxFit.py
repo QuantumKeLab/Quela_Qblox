@@ -1,4 +1,5 @@
-import os, json
+import os, json, sys
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 import xarray as xr
 import quantify_core.data.handling as dh
 import matplotlib.pyplot as plt
@@ -10,7 +11,24 @@ from numpy import ndarray, cos, sin, deg2rad, real, imag, transpose, abs
 from scipy.optimize import curve_fit
 
 
-
+def plot_QbFlux(Qmanager:QDmanager, nc_path:str, target_q:str):
+    if target_q in Qmanager.refIQ:
+        ref = Qmanager.refIQ[target_q]
+    else:
+        ref = [0,0]
+    # plot flux-qubit 
+    f,z,i,q = convert_netCDF_2_arrays(nc_path)
+    amp = array(sqrt((i-array(ref)[0])**2+(q-array(ref)[1])**2)).transpose()
+    fig, ax = plt.subplots(figsize=(12,8))
+    ax:plt.Axes
+    c = ax.pcolormesh(z, f*1e-9, amp, cmap='RdBu')
+    ax.set_xlabel("Flux Pulse amp (V)", fontsize=20)
+    ax.set_ylabel("Driving Frequency (GHz)", fontsize=20)
+    fig.colorbar(c, ax=ax, label='Contrast (V)')
+    ax.xaxis.set_tick_params(labelsize=18)
+    ax.yaxis.set_tick_params(labelsize=18)
+    plt.tight_layout()
+    plt.show()
 
 
 # Plotting
@@ -87,7 +105,7 @@ def sortAndDecora(raw_z:ndarray,raw_XYF:ndarray,raw_mag:ndarray,threshold:float=
             break
     
     # extract the values by the filtered idx
-    extracted = []
+    extracted = [] # [z, xyf, mag]
     for i in range(len(f_idx)):
         extracted.append([raw_z[z_idx[i]],raw_XYF[f_idx[i]],XL_mag[i]])
     # filter out the freq when it's under the same bias
@@ -113,7 +131,7 @@ def sortAndDecora(raw_z:ndarray,raw_XYF:ndarray,raw_mag:ndarray,threshold:float=
 def convert_netCDF_2_arrays(CDF_path:str):
     """
     For Qblox system, give a netCDF file path to return some ndarrays.
-    ## Return: XYF, z, I, Q
+    ## Return: XYF (x0), z (x1), I, Q 
     """
     dataset_processed = dh.to_gridded_dataset(xr.open_dataset(CDF_path))
     XYF = dataset_processed["x0"].to_numpy()
@@ -319,14 +337,16 @@ def fq_fit(QD:QDmanager,data2fit_path:str,target_q:str,plot:bool=True,savefig_pa
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
     from numpy import array, pi, linspace
-    qd_path = 'Modularize/QD_backup/2024_5_15/DR3#13_SumInfo.pkl'
-    json_path = 'Modularize/Meas_raw/2024_5_15/DR3q0_FluxFqFIT_H17M21S59.json'
+    # qd_path = 'Modularize/QD_backup/2024_5_15/DR3#13_SumInfo.pkl'
+    # json_path = 'Modularize/Meas_raw/2024_5_15/DR3q0_FluxFqFIT_H17M21S59.json'
     
-    q = os.path.split(json_path)[-1].split("_")[0][-2:]
-    QD_agent = QDmanager(qd_path)
-    QD_agent.QD_loader()
-    print(QD_agent.Fluxmanager.get_bias_dict()["q1"])
-    pic_parentpath = os.path.join(Data_manager().get_today_picFolder())
-    fq_fit(QD=QD_agent,data2fit_path=json_path,target_q=q,plot=True,savefig_path='',saveParas=False,FitFilter_threshold=2.5)
-
+    # q = os.path.split(json_path)[-1].split("_")[0][-2:]
+    # QD_agent = QDmanager(qd_path)
+    # QD_agent.QD_loader()
+    # print(QD_agent.Fluxmanager.get_bias_dict()["q1"])
+    # pic_parentpath = os.path.join(Data_manager().get_today_picFolder())
+    # fq_fit(QD=QD_agent,data2fit_path=json_path,target_q=q,plot=True,savefig_path='',saveParas=False,FitFilter_threshold=2.5)
+    file = 'Modularize/Meas_raw/2024_8_12/DR4q0_Flux2tone_H12M32S5.nc'
+    f, z, i, q = convert_netCDF_2_arrays(file)
+    data2plot(f,z,i,q,[0,0],q='q0',qblox=True,plot_scatter = True)
 
