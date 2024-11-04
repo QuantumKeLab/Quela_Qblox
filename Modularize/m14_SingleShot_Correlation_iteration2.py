@@ -12,7 +12,6 @@ from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
 from Modularize.support.Pulse_schedule_library import Qubit_state_single_shot_plot
 from Modularize.support import QDmanager, Data_manager,init_system_atte, init_meas, shut_down, coupler_zctrl
 from Modularize.support.Pulse_schedule_library import Qubit_SS_sche, Qubit_SS_Correlation_sche, set_LO_frequency, pulse_preview, Qubit_state_single_shot_fit_analysis
-from Modularize.CorrelationMethod.CorrAna_iteration_and_plot import correlation_method_fitting
 
 from numpy import median, mean, std
 try:
@@ -136,7 +135,7 @@ if __name__ == '__main__':
     
 
     """ Fill in """
-    execute:bool = True
+    execute:bool = False
     repeat:int = 1
     DRandIP = {"dr":"drke","last_ip":"242"}
     ro_elements = {'q0':{"roAmp_factor":1}}

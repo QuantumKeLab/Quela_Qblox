@@ -1360,9 +1360,26 @@ def hist_plot(q:str,data:dict,title:str, save_path:str='', show:bool=True):
         if title.lower() in ["thermalpop"]:
             ax.set_xlabel(f"{title} (%)")
             plt.title(f"{title} = {round(np.median(np.array(data[q])),4)}  $\pm$ {round(np.std(np.array(data[q])),5)} %")
-        else:
+        # else:
+        #     ax.set_xlabel(f"{title} (mK)")
+        #     plt.title(f"{title} = {round(np.median(np.array(data[q])),4)}  $\pm$ {round(np.std(np.array(data[q])),5)} mK")
+        elif title.lower() in ["eff_t"]:
             ax.set_xlabel(f"{title} (mK)")
             plt.title(f"{title} = {round(np.median(np.array(data[q])),4)}  $\pm$ {round(np.std(np.array(data[q])),5)} mK")
+        elif title.lower() in ["readout fidelity"]:
+            ax.set_xlabel(f"{title} (%)")
+            plt.title(f"{title} = {round(np.median(np.array(data[q])),4)}  $\pm$ {round(np.std(np.array(data[q])),5)} %")
+        elif title.lower() in ["p10"]:
+            ax.set_xlabel(f"{title} (%)")
+            plt.title(f"{title} = {round(np.median(np.array(data[q])),4)}  $\pm$ {round(np.std(np.array(data[q])),5)} %")
+        elif title.lower() in ["Voltage SNR"]:
+            ax.set_xlabel(f"{title} ")
+            plt.title(f"{title} = {round(np.median(np.array(data[q])),4)}  $\pm$ {round(np.std(np.array(data[q])),5)} ")
+        else:
+        # elif title.lower() in ["Power SNR dB"]:
+            ax.set_xlabel(f"{title} dB")
+            plt.title(f"{title} = {round(np.median(np.array(data[q])),4)}  $\pm$ {round(np.std(np.array(data[q])),5)} dB")
+        
         
     plt.tight_layout()
     if save_path != '':

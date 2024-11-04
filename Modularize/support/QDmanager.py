@@ -382,6 +382,30 @@ class Data_manager:
             else:
                 fig_path = ''
             hist_plot(qb,hist_dict ,title=f"ThermalPop",save_path=fig_path, show=show_fig)
+        elif mode.lower() in ["rofdlty"] :
+            if save_fig:
+                fig_path = os.path.join(pic_dir,f"{dr_loc}{qb}_ROfidelityhisto_{exp_timeLabel}.png")
+            else:
+                fig_path = ''
+            hist_plot(qb,hist_dict ,title=f"Readout Fidelity",save_path=fig_path, show=show_fig)
+        elif mode.lower() in ["p10"] :
+            if save_fig:
+                fig_path = os.path.join(pic_dir,f"{dr_loc}{qb}_P10_Precentagehisto_{exp_timeLabel}.png")
+            else:
+                fig_path = ''
+            hist_plot(qb,hist_dict ,title=f"P10_Precentage",save_path=fig_path, show=show_fig)
+        elif mode.lower() in ["snr"] :
+            if save_fig:
+                fig_path = os.path.join(pic_dir,f"{dr_loc}{qb}_SNRhisto_{exp_timeLabel}.png")
+            else:
+                fig_path = ''
+            hist_plot(qb,hist_dict ,title=f"Voltage SNR",save_path=fig_path, show=show_fig)
+        elif mode.lower() in ["powersnr"] :
+            if save_fig:
+                fig_path = os.path.join(pic_dir,f"{dr_loc}{qb}_PowerSNRhisto_{exp_timeLabel}.png")
+            else:
+                fig_path = ''
+            hist_plot(qb,hist_dict ,title=f"Power SNR dB",save_path=fig_path, show=show_fig)
         else:
             raise KeyError("mode should be 'T1' or 'T2'!")
         
