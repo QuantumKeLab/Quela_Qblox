@@ -42,23 +42,23 @@ def analyze_and_plot(Qmanager, target_q, folder_path, show_each_plot, save_folde
     result_dict = {q: np.array(v) for q, v in results.items()}
     
     # 保存 histogram 圖片
-    Data_manager().save_histo_pic(Qmanager, result_dict, 'p01', mode="pop", save_fig=True, pic_folder=save_folder)
-    Data_manager().save_histo_pic(Qmanager, result_dict, 'effT_mK', mode="ss", save_fig=True, pic_folder=save_folder)
-    Data_manager().save_histo_pic(Qmanager, result_dict, 'RO_fidelity_percentage', mode="rofdlty", save_fig=True, pic_folder=save_folder)
-    Data_manager().save_histo_pic(Qmanager, result_dict, 'p10', mode="p10", save_fig=True, pic_folder=save_folder)
-    Data_manager().save_histo_pic(Qmanager, result_dict, 'snr', mode="snr", save_fig=True, pic_folder=save_folder)
-    Data_manager().save_histo_pic(Qmanager, result_dict, 'power_snr_dB', mode="powersnr", save_fig=True, pic_folder=save_folder)
+    # Data_manager().save_histo_pic(Qmanager, result_dict, 'p01', mode="pop", save_fig=True, pic_folder=save_folder)
+    # Data_manager().save_histo_pic(Qmanager, result_dict, 'effT_mK', mode="ss", save_fig=True, pic_folder=save_folder)
+    # Data_manager().save_histo_pic(Qmanager, result_dict, 'RO_fidelity_percentage', mode="rofdlty", save_fig=True, pic_folder=save_folder)
+    # Data_manager().save_histo_pic(Qmanager, result_dict, 'p10', mode="p10", save_fig=True, pic_folder=save_folder)
+    # Data_manager().save_histo_pic(Qmanager, result_dict, 'snr', mode="snr", save_fig=True, pic_folder=save_folder)
+    # Data_manager().save_histo_pic(Qmanager, result_dict, 'power_snr_dB', mode="powersnr", save_fig=True, pic_folder=save_folder)
     
     return folder_path, p01_mean, p01_std, effT_mean, effT_std, RO_fidelity_percentage_mean, RO_fidelity_percentage_std, p10_mean, p10_std,snr_mean, snr_std, power_snr_dB_mean, power_snr_dB_std
 
 if __name__ == "__main__":
 
     """Fill in"""
-    QD_agent_path = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_26\DRKE#242_SumInfo.pkl"
+    QD_agent_path = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_24\DRKE#242_SumInfo.pkl"
     target_q = 'q0'
-    main_folder = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\TEST_FOLDER"
+    main_folder = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\2024_10_25"
     show_each_plot = False
-    specific_folder_name="SS" #"SS_30aveg"
+    specific_folder_name="SS_30aveg"#"SS" #
 
     """Running"""
     # 初始化 Qmanager
@@ -75,7 +75,7 @@ if __name__ == "__main__":
         if os.path.isdir(temp_path):
             # 呼叫分析函數並生成 histogram，並將結果添加到列表中
             analysis_results.append(analyze_and_plot(Qmanager, target_q, temp_path, show_each_plot, temp_path))
-    print('analysis_results:',analysis_results)
+    # print('analysis_results:',analysis_results)
     # 統一列印所有資料夾的結果
     print("\nAll Folder Analysis Results:")
     for result in analysis_results:
@@ -84,8 +84,8 @@ if __name__ == "__main__":
         print(f"p01 Mean: {p01_mean:.4f}, Std: {p01_std:.5f}")
         print(f"effT Mean: {effT_mean:.4f} mK, Std: {effT_std:.5f} mK")
         print(f"RO_fidelity Mean: {RO_fidelity_percentage_mean:.4f}% , Std: {RO_fidelity_percentage_std:.5f} %")
-        print(f"p01 Mean: {snr_mean:.4f}%, Std: {snr_std:.5f}%")
-        print(f"SNR Mean: {p10_mean:.4f}%, Std: {p10_std:.5f}%")
+        print(f"p10 Mean: {p10_mean:.4f}%, Std: {p10_std:.5f}%")
+        print(f"SNR Mean: {snr_mean:.4f}, Std: {snr_std:.5f}")
         print(f"Power SNR Mean: {power_snr_dB_mean:.4f}dB, Std: {power_snr_dB_std:.5f}dB\n")
 
 

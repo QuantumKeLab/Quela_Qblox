@@ -31,7 +31,7 @@ def analyze_and_plot(Qmanager, target_q, folder_path, show_each_plot, save_folde
     for file in os.listdir(folder_path):
         if file.endswith('.nc'):  # 確認檔案副檔名為 .nc
             nc_path = os.path.join(folder_path, file)
-            p01, effT_mK, _ = a_OSdata_analPlot(Qmanager, target_q, nc_path, plot=show_each_plot)
+            p01, effT_mK, RO_fidelity_percentage, p10,snr,power_snr_dB= a_OSdata_analPlot(Qmanager, target_q, nc_path, plot=show_each_plot)
 
             # 提取檔案中的時間資訊
             file_datetime = extract_datetime_from_filename(file)
@@ -88,9 +88,9 @@ def analyze_and_plot(Qmanager, target_q, folder_path, show_each_plot, save_folde
     return folder_path, p01_mean, p01_std, effT_mean, effT_std
 
 if __name__ == "__main__":
-    QD_agent_path = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_24\DRKE#242_SumInfo.pkl"
+    QD_agent_path = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_24\DRKE#242_SumInfo.pkl"
     target_q = 'q0'
-    base_folder = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupCouldBe1024\testFolder"
+    base_folder = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupCouldBe1024\SS_overnight"
     show_each_plot = False
     time_mode = "relative"  # "real" 或 "relative"
 

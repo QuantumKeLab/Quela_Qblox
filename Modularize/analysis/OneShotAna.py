@@ -47,6 +47,7 @@ def a_OSdata_analPlot(QD_agent:QDmanager, target_q:str, nc_path:str, plot:bool=T
     p01 = g1d_fidelity.g1d_dist[0][0][1]
     p10 = g1d_fidelity.g1d_dist[1][0][0]#
     p11 = g1d_fidelity.g1d_dist[1][0][1]
+    p01=np.abs(p01)
     effT_mK = np.abs(p01_to_Teff(p01, transi_freq)*1000)#p01_to_Teff(p01, transi_freq)*1000
     RO_fidelity_percentage = (p00+p11)*100/2
     p10_precentage=p10*100
@@ -67,7 +68,7 @@ def a_OSdata_analPlot(QD_agent:QDmanager, target_q:str, nc_path:str, plot:bool=T
         
         plt.close()
 
-    print('p00',p00)
+    print('|p01|',p01)
     print('effT_mK',effT_mK)
     print('p10',p10)
     print("snr",snr)
@@ -291,13 +292,13 @@ def share_model_OSana(QD_agent:QDmanager,target_q:str,folder_path:str,pic_save:b
 if __name__ == "__main__":
 
     
-    QD_agent_path=r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_26\DRKE#242_SumInfo.pkl"
+    QD_agent_path=r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_24\DRKE#242_SumInfo.pkl"
     Qmanager = QDmanager(QD_agent_path)
     Qmanager.QD_loader()
     target_q='q0'
 
     "For single file"
-    nc_path=r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1026\40mK\SS\DRKEq0_SingleShot(16)_H14M20S31.nc"
+    nc_path=r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupCouldBe1024\15mK_IntegrationTime_1000ns\SS_30aveg\DRKEq0_SingleShot(0)_H20M49S37.nc"
     a_OSdata_analPlot(Qmanager,target_q, nc_path)
     # a_OSdata_correlation_analPlot(nc_path)
     
