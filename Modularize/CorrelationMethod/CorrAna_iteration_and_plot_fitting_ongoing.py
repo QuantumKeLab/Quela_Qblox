@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import xarray as xr
 import re
 from datetime import datetime
-from lmfit import Model
+from scipy.optimize import curve_fit
 
 def ave_Ve(ave_V_nc_file: str):
     dataset = xr.open_dataset(ave_V_nc_file)
@@ -49,52 +49,8 @@ def calculate_g1_and_teff(Vk_nc_file, Vg_mean_I, Ve_mean_I, f01):
     T_eff = -h_bar * qubit_frequency / (k_B * np.log(P_e / (1 - P_e))) * 1000
     return normalized_g_1, T_eff
 
-def T1_func(D, A, T1, offset):
+def t1(D, A, T1, offset):
     return A * np.exp(-D / T1) + offset
-
-def T1_fit_analysis(data: np.ndarray, freeDu: np.ndarray, T1_guess: float = 10 * 1e-6, return_error: bool = False):
-    offset_guess = data[-1]
-    a_guess = np.max(data) - offset_guess if data[-1] > offset_guess else np.min(data) - offset_guess
-    T1_model = Model(T1_func)
-    result = T1_model.fit(data, D=freeDu, A=a_guess, T1=T1_guess, offset=offset_guess)
-
-    A_fit = result.best_values['A']
-    T1_fit = result.best_values['T1']
-    offset_fit = result.best_values['offset']
-    para_fit = np.linspace(freeDu.min(), freeDu.max(), 50 * len(data))
-    fitting = T1_func(para_fit, A_fit, T1_fit, offset_fit)
-    
-    if not return_error:
-        return xr.Dataset(
-            data_vars=dict(
-                data=(['freeDu'], data),
-                fitting=(['para_fit'], fitting)
-            ),
-            coords=dict(
-                freeDu=(['freeDu'], freeDu),
-                para_fit=(['para_fit'], para_fit)
-            ),
-            attrs=dict(
-                exper="T1",
-                T1_fit=T1_fit
-            )
-        )
-    else:
-        fit_error = float(result.covar[1][1]) * 1e6
-        return xr.Dataset(
-            data_vars=dict(
-                data=(['freeDu'], data),
-                fitting=(['para_fit'], fitting)
-            ),
-            coords=dict(
-                freeDu=(['freeDu'], freeDu),
-                para_fit=(['para_fit'], para_fit)
-            ),
-            attrs=dict(
-                exper="T1",
-                T1_fit=T1_fit
-            )
-        ), fit_error
 
 def correlation_method(ave_Ve_nc_file, Vk_directory, f01, correlate_delays):
     Ve_mean_I = ave_Ve(ave_Ve_nc_file)
@@ -120,12 +76,35 @@ def correlation_method(ave_Ve_nc_file, Vk_directory, f01, correlate_delays):
     g1_values = np.array(g1_values[1:])
     correlate_delays = np.array(correlate_delays[1:len(g1_values) + 1])
     
-    # Step 3: Fit T1 and plot results
-    T1_dataset = T1_fit_analysis(g1_values, correlate_delays)
+    # Step 3: Fit T1 using curve_fit from scipy
+# 調整 A 和 offset 的初始猜測值和邊界
+    A_guess = g1_values[0] - g1_values[-1]
+    T1_guess = np.mean(correlate_delays)
+    offset_guess = g1_values[-1]
 
+    # 增加 A 和 offset 的合理上下限範圍
+    A_guess_upper = max(2 * (g1_values[0] - g1_values[-1]), 0.5 * (g1_values[0] - g1_values[-1]))
+    A_guess_lower = min(-2 * abs(g1_values[0] - g1_values[-1]), 0.5 * (g1_values[0] - g1_values[-1]))  # 允許 A 為負
+    C_guess_upper = max(0.1 * g1_values[-1], 2 * g1_values[-1])
+    C_guess_lower = 0  # 假設 offset 最小不能小於零
+
+    bounds = ((A_guess_lower, 0.1 * T1_guess, C_guess_lower), (A_guess_upper, 3 * T1_guess, C_guess_upper))
+    p0 = (A_guess, T1_guess, offset_guess)
+    ans, ans_error = curve_fit(t1, correlate_delays, g1_values, p0=p0, bounds=bounds)
+
+    # Calculate effective temperature when g^(1) = 0
+    T1_fit, offset_fit = ans[1], ans[2]
+    g1_at_y0_delay = -T1_fit * np.log(-offset_fit / ans[0]) if ans[0] < 0 else None
+
+    if g1_at_y0_delay is not None:
+        print(f"g^(1) reaches 0 at delay: {g1_at_y0_delay:.2f} µs")
+    else:
+        print("g^(1) does not reach 0 within the fitted range.")
+
+    # Step 4: Plot results
     plt.figure(figsize=(10, 6))
-    plt.plot(correlate_delays, g1_values, 'o', label="g^(1) Data")
-    plt.plot(T1_dataset['para_fit'], T1_dataset['fitting'], '-', label="T1 Fit")
+    plt.scatter(correlate_delays, g1_values, c='blue', label="g^(1) Data")
+    plt.plot(correlate_delays, t1(correlate_delays, *ans), c='red', label="T1 Fit")
     plt.xlabel("Correlate Delay (us)")
     plt.ylabel("g^(1)")
     plt.legend()
@@ -137,11 +116,9 @@ def correlation_method(ave_Ve_nc_file, Vk_directory, f01, correlate_delays):
     plt.show()
     return
 
-
 if __name__ == '__main__':
-    ave_Ve_nc_file = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1029\160mK\SS\DRKEq0_SingleShot(0)_H21M5S12.nc"
-    Vk_directory = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1029\160mK\SS_corre"
+    ave_Ve_nc_file = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1026OrCouldBe1028\100mK\SS\DRKEq0_SingleShot(29)_H17M37S18.nc"
+    Vk_directory = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1026OrCouldBe1028\100mK\SS_corre"
     correlate_delays = [0, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 35, 40]
     f01 = 4.31791e9
     correlation_method(ave_Ve_nc_file, Vk_directory, f01, correlate_delays)
-
