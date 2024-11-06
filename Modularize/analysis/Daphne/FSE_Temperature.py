@@ -89,6 +89,7 @@ def main(main_folder, log_file_path, target_folders_list):
     else:
         print("Unable to extract date from filename")
 
+"""Fill in"""
 # Define paths and target folders
 main_folder = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1029" # Main folder path
 log_file_path = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1029\CH9_FSE_24-10-30.log" # .log file name
