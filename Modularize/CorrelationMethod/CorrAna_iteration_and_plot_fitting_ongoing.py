@@ -77,19 +77,33 @@ def correlation_method(ave_Ve_nc_file, Vk_directory, f01, correlate_delays):
     correlate_delays = np.array(correlate_delays[1:len(g1_values) + 1])
     
     # Step 3: Fit T1 using curve_fit from scipy
-# 調整 A 和 offset 的初始猜測值和邊界
     A_guess = g1_values[0] - g1_values[-1]
     T1_guess = np.mean(correlate_delays)
     offset_guess = g1_values[-1]
 
-    # 增加 A 和 offset 的合理上下限範圍
     A_guess_upper = max(2 * (g1_values[0] - g1_values[-1]), 0.5 * (g1_values[0] - g1_values[-1]))
-    A_guess_lower = min(-2 * abs(g1_values[0] - g1_values[-1]), 0.5 * (g1_values[0] - g1_values[-1]))  # 允許 A 為負
-    C_guess_upper = max(0.1 * g1_values[-1], 2 * g1_values[-1])
-    C_guess_lower = 0  # 假設 offset 最小不能小於零
+    A_guess_lower = min(2 * (g1_values[0] - g1_values[-1]), 0.5 * (g1_values[0] - g1_values[-1]))
+
+    C_guess_upper = max(0.5 * g1_values[-1], 2 * g1_values[-1])
+    C_guess_lower = min(0.5 * g1_values[-1], 2 * g1_values[-1])
 
     bounds = ((A_guess_lower, 0.1 * T1_guess, C_guess_lower), (A_guess_upper, 3 * T1_guess, C_guess_upper))
     p0 = (A_guess, T1_guess, offset_guess)
+    
+    # # 調整 A 和 offset 的初始猜測值和邊界
+    # A_guess = g1_values[0] - g1_values[-1]
+    # T1_guess = np.mean(correlate_delays)
+    # offset_guess = g1_values[-1]
+
+    # # 增加 A 和 offset 的合理上下限範圍
+    # A_guess_upper = max(2 * (g1_values[0] - g1_values[-1]), 0.5 * (g1_values[0] - g1_values[-1]))
+    # A_guess_lower = min(-2 * abs(g1_values[0] - g1_values[-1]), 0.5 * (g1_values[0] - g1_values[-1]))  # 允許 A 為負
+    # C_guess_upper = max(0.1 * g1_values[-1], 2 * g1_values[-1])
+    # C_guess_lower = 0  # 假設 offset 最小不能小於零
+
+    # bounds = ((A_guess_lower, 0.1 * T1_guess, C_guess_lower), (A_guess_upper, 3 * T1_guess, C_guess_upper))
+    # p0 = (A_guess, T1_guess, offset_guess)
+
     ans, ans_error = curve_fit(t1, correlate_delays, g1_values, p0=p0, bounds=bounds)
 
     # Calculate effective temperature when g^(1) = 0
