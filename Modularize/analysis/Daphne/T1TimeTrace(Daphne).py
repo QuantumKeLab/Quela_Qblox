@@ -4,19 +4,20 @@ from xarray import Dataset, open_dataset
 from Modularize.support import QDmanager, Data_manager
 import matplotlib.pyplot as plt
 from numpy import array, median, std
-from Modularize.support.Pulse_schedule_library import IQ_data_dis, dataset_to_array, T1_fit_analysis
+from Modularize.support.Pulse_schedule_library import IQ_data_dis, dataset_to_array, T1_fit_analysis, Fit_analysis_plot
 from datetime import datetime
 from Modularize.analysis.Radiator.RadiatorSetAna import sort_set
 import numpy as np
+ 
 
 def time_label_sort(nc_file_name: str):
     return datetime.strptime(nc_file_name.split("_")[-1].split(".")[0], "H%HM%MS%S")
 
-folder = r"C:\Users\Ke Lab\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\2024_10_27\T1_overnight"
-QD_file_path = r"C:\Users\Ke Lab\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_26\DRKE#242_SumInfo.pkl"
-T1_guess=10e-6
+folder = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241031_DR5_FQV1+NCU-1\Qblox\FQV1_Q0_20241103\Q0\T1_timeDep"
+QD_file_path = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241031_DR5_FQV1+NCU-1\Qblox\QD_backup\2024_11_3\DRKE#242_SumInfo.pkl"
+T1_guess=100e-6
 qs = ['q0']
-time_cost = 30
+time_cost = 50
 time_mode = 'relative'  # 'relative' 或 'real'(not done yet)
 
 files = [name for name in os.listdir(folder) if (os.path.isfile(os.path.join(folder, name)) and name.split(".")[-1] == "nc")]
@@ -56,7 +57,12 @@ for idx, file in enumerate(files):
     time.append(time_cost * (idx + 1))
 
 # 確保目錄存在
-output_dir = os.path.join("C:\\Users\\Ke Lab\\Documents\\GitHub\\Quela_Qblox\\Modularize", "Meas_raw", datetime.now().strftime("%Y_%m_%d"))
+"""P6F-2"""
+# output_dir = os.path.join("C:\\Users\\Ke Lab\\Documents\\GitHub\\Quela_Qblox\\Modularize", "Meas_raw", datetime.now().strftime("%Y_%m_%d"))
+# os.makedirs(output_dir, exist_ok=True)
+
+"""P6F-1"""
+output_dir = os.path.join(r"C:\\Users\\admin\\Documents\\GitHub\\Quela_Qblox\\Quela_Qblox\\Modularize", "Meas_raw", datetime.now().strftime("%Y_%m_%d"))
 os.makedirs(output_dir, exist_ok=True)
 
 
@@ -68,7 +74,17 @@ else:
     time_array = array(time) / 60
 
 Data_manager().save_histo_pic(QD_agent, {qs[0]: t1}, qs[0], mode="t1")
+
 raw_data = array(raw_data)
+
+t1_hero = max(t1)
+t1_hero_idx = t1.index(t1_hero)  # 找到最大 t1 值的索引
+t1_hero_file = files[t1_hero_idx]  # 根據索引找到對應的 .nc 檔案名稱
+
+print(t1)
+print("Maximum t1 is:", t1_hero)
+print("Corresponding .nc file:", t1_hero_file)
+
 ref_t1 = median(array(t1))
 ref_t1_err = std(array(t1))
 
@@ -84,3 +100,4 @@ plt.title("Time dependent relaxation time")
 plt.grid()
 plt.tight_layout()
 plt.show()
+

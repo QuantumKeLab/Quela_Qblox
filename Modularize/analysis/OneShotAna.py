@@ -292,13 +292,13 @@ def share_model_OSana(QD_agent:QDmanager,target_q:str,folder_path:str,pic_save:b
 if __name__ == "__main__":
 
     
-    QD_agent_path=r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_24\DRKE#242_SumInfo.pkl"
+    QD_agent_path=r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241009_DRKe_5XQv4#5_second_coating_and_effT\QD_Backup\2024_10_13\DRKE#242_SumInfo.pkl"
     Qmanager = QDmanager(QD_agent_path)
     Qmanager.QD_loader()
     target_q='q0'
 
     "For single file"
-    nc_path=r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupCouldBe1024\15mK_IntegrationTime_1000ns\SS_30aveg\DRKEq0_SingleShot(0)_H20M49S37.nc"
+    nc_path=r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241009_DRKe_5XQv4#5_second_coating_and_effT\2024_10_13\100mK\SS\DRKEq1_SingleShot(0)_H19M58S9.nc"
     a_OSdata_analPlot(Qmanager,target_q, nc_path)
     # a_OSdata_correlation_analPlot(nc_path)
     
