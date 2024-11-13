@@ -129,7 +129,7 @@ if __name__ == "__main__":
     """ Fill in """
     execution:bool = True
     chip_info_restore:bool = 0
-    DRandIP = {"dr":"drke","last_ip":"242"}
+    DRandIP = {"dr":"dr4","last_ip":"81"}
     ro_elements = ['q0']
     cp_ctrl = {}#'c0':-0.3
 

@@ -144,7 +144,7 @@ if __name__ == "__main__":
     
     """ Fill in """
     execution = 1
-    DRandIP = {"dr":"drke","last_ip":"242"}
+    DRandIP = {"dr":"dr4","last_ip":"81"}
     ro_elements = {
         "q4":{"detune":0e6,"evoT":100e-6,"histo_counts":1, "excite_qubit": "q3"}
     }

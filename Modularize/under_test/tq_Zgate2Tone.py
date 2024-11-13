@@ -183,7 +183,7 @@ if __name__ == "__main__":
     chip_info_restore:bool = 0
     update:bool = 0
     #
-    DRandIP = {"dr":"drke","last_ip":"242"}
+    DRandIP = {"dr":"dr4","last_ip":"81"}
     #
     ro_elements = {
         "q0":{"xyf_guess":[5.0e9],"xyl_guess":[0.03],"g_guess":100e6, "tune_bias":0} # g you can try a single value about 90e6 for a 5Q4C chip.

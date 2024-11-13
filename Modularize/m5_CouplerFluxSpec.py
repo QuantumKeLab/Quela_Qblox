@@ -131,7 +131,7 @@ if __name__ == "__main__":
     execution:bool = True
     chip_info_restore:bool = 1
     sweet_spot:bool = 0
-    DRandIP = {"dr":"drke","last_ip":"242"}
+    DRandIP = {"dr":"dr4","last_ip":"81"}
     ro_elements = {"q1":["c0","c1"]}
 
     

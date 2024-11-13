@@ -67,12 +67,12 @@ if __name__ == "__main__":
     execution:bool = True 
     sweetSpot:bool = 0     # If true, only support one one qubit
     chip_info_restore:bool = 0
-    DRandIP = {"dr":"drke","last_ip":"242"}
+    DRandIP = {"dr":"dr4","last_ip":"81"}
     ro_element = {
-        "q0":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
-                "dress":{"ro_amp":0.1,"window_shift":0.3e6}},        
+        "q0":{  "bare" :{"ro_amp":0.45,"window_shift":0e6},
+                "dress":{"ro_amp":0.1,"window_shift":0.6e6}},        
         "q1":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
-                "dress":{"ro_amp":0.1,"window_shift":1e6}},
+                "dress":{"ro_amp":0.05,"window_shift":0.55e6}},
         # "q2":{  "bare" :{"ro_amp":0.2,"window_shift":0e6},
         #         "dress":{"ro_amp":0.05,"window_shift":0.7e6}},
 
@@ -84,10 +84,10 @@ if __name__ == "__main__":
         # "q4":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
         #         "dress":{"ro_amp":0.1,"window_shift":3.4e6}},
     }
-    ro_attes = {"dress":34, "bare":22} # all ro_elements shared
+    ro_attes = {"dress":34, "bare":30} # all ro_elements shared
 
     """ Optional paras"""
-    half_ro_freq_window_Hz = 8e6
+    half_ro_freq_window_Hz = 2e6
     freq_data_points = 500
 
 

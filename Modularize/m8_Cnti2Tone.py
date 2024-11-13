@@ -22,8 +22,8 @@ def Two_tone_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,IF:float=100e6
     original_inteW = qubit_info.measure.integration_time()
     if not drive_read_overlap:
         drive_pulse_ref_pt = 'start'
-        qubit_info.measure.pulse_duration(1e-6)
-        qubit_info.measure.integration_time(1e-6)#1e-6
+        qubit_info.measure.pulse_duration(1.5e-6)
+        qubit_info.measure.integration_time(1.5e-6)#1e-6
         drive_pulse_length = 50e-6
     else:
         drive_pulse_ref_pt = 'end'
@@ -184,10 +184,10 @@ if __name__ == "__main__":
     chip_info_restore:bool = 0
     update:bool = 1
     #
-    DRandIP = {"dr":"drke","last_ip":"242"}
+    DRandIP = {"dr":"dr4","last_ip":"81"}
     #
     ro_elements = {
-        "q0":{"xyf_guess":[4.4e9],"xyl_guess":[0.01],"g_guess":45.9e6, "tune_bias":0} # g you can try a single value about 90e6 for a 5Q4C chip.
+        "q1":{"xyf_guess":[3.4e9],"xyl_guess":[0.07],"g_guess":45.9e6, "tune_bias":0} # g you can try a single value about 90e6 for a 5Q4C chip.
     }                                                                            # tune_bias is the voltage away from sweet spot. If it was given, here will calculate a ROF according to that z-bias and store it in Notebook.
     couplers = []
 

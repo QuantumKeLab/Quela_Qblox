@@ -188,14 +188,14 @@ if __name__ == "__main__":
     """ Fill in """
     execution:bool = 1
     chip_info_restore:bool = 1
-    DRandIP = {"dr":"drke","last_ip":"242"}
+    DRandIP = {"dr":"dr4","last_ip":"81"}
     ro_elements = {
-        "q0":{"detune":0e6,"evoT":6e-6,"histo_counts":30},#-0.174e6
+        "q1":{"detune":0e6,"evoT":50e-6,"histo_counts":30},#-0.174e6
     }
     couplers = []
 
     """ Optional paras """
-    spin_echo_pi_num:int = 1
+    spin_echo_pi_num:int = 0
     time_data_points = 100
     avg_n = 600
     xy_IF = 250e6

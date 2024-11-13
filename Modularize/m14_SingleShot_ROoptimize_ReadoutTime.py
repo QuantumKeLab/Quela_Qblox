@@ -102,7 +102,7 @@ def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:st
     return analysis_result, nc_path
 
 
-def SS_executor(QD_agent:QDmanager,cluster:Cluster,Fctrl:dict,target_q:str,shots:int=10000,execution:bool=True,data_folder='',plot:bool=True,roAmp_modifier:float=1,exp_label:int=0,save_every_pic:bool=False,IF:float=250e6):
+def SS_executor(QD_agent:QDmanager,cluster:Cluster,Fctrl:dict,target_q:str,shots:int=10000,execution:bool=True,data_folder='',plot:bool=True,roAmp_modifier:float=1,exp_label:int=0,save_every_pic:bool=False,IF:float=250e6,RO_time:float=1e6,Integration_time_list:float=1e6):
 
     Fctrl[target_q](float(QD_agent.Fluxmanager.get_proper_zbiasFor(target_q)))
 
@@ -128,7 +128,7 @@ def SS_executor(QD_agent:QDmanager,cluster:Cluster,Fctrl:dict,target_q:str,shots
         else:
             effT_mk, ro_fidelity, thermal_p = 0, 0, 0
     else:
-        thermal_p, effT_mk, ro_fidelity = a_OSdata_analPlot(QD_agent,target_q,nc,plot,save_pic=save_every_pic)
+        thermal_p, effT_mk, ro_fidelity, p10_precentage,snr,power_snr_dB = a_OSdata_analPlot(QD_agent,target_q,nc,plot,save_pic=save_every_pic)
     # else:
         # effT_mk, ro_fidelity, thermal_p = 0, 0, 0
 
@@ -140,10 +140,10 @@ if __name__ == '__main__':
     """ Fill in """
     execute:bool = 1
     repeat:int = 15
-    DRandIP = {"dr":"drke","last_ip":"242"}
+    DRandIP = {"dr":"dr4","last_ip":"81"}
     ro_elements = {'q0':{"roAmp_factor":1}}
     couplers = []
-    RO_time_list=[]#0.5e-6, 0.75e-6, 1e-6,1.25e-6,1.5e-6
+    RO_time_list=[1.5e-6, 1.75e-6, 2e-6,2.25e-6,2.5e-6]#0.5e-6, 0.75e-6, 1e-6,1.25e-6,1.5e-6
     Integration_time_list=RO_time_list
 
 

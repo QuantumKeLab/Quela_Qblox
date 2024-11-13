@@ -20,6 +20,10 @@ def rofCali(QD_agent:QDmanager,meas_ctrl:MeasurementControl,ro_span_Hz:float=3e6
     qubit = QD_agent.quantum_device.get_element(q)
 
     ro_f_origin= qubit.clock_freqs.readout()
+    qubit.measure.integration_time(3e-6)
+    qubit.measure.pulse_duration(3e-6)
+    print("Integration time ",qubit.measure.integration_time()*1e6, "µs")
+    print("Reset time ", qubit.reset.duration()*1e6, "µs")
     LO= ro_f_origin+IF+ro_span_Hz
     from numpy import NaN
     qubit.clock_freqs.readout(NaN)
@@ -144,8 +148,8 @@ if __name__ == '__main__':
 
     """ Fill in """
     execute:bool = True
-    DRandIP = {"dr":"drke","last_ip":"242"}
-    ro_elements = {'q0':{"span_Hz":3e6}}
+    DRandIP = {"dr":"dr4","last_ip":"81"}
+    ro_elements = {'q1':{"span_Hz":0.5e6}}
     couplers = []
 
 
@@ -162,11 +166,11 @@ if __name__ == '__main__':
     
         init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
         ro_span = ro_elements[qubit]["span_Hz"]
-        Cctrl['c0'](0.07)
-        Cctrl['c1'](0.05)
+        # Cctrl['c0'](0.07)
+        # Cctrl['c1'](0.05)
         optimal_rof = rofCali_executor(QD_agent,cluster,meas_ctrl,Fctrl,qubit,execution=execute,ro_f_span=ro_span)
-        Cctrl['c0'](0.0)
-        Cctrl['c1'](0.0)
+        # Cctrl['c0'](0.0)
+        # Cctrl['c1'](0.0)
         if execute:
             permission = mark_input(f"Update the optimal ROF for {qubit}?[y/n] or assign a RO freq in Hz directly: ")
             try:

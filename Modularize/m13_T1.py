@@ -26,6 +26,7 @@ def T1(QD_agent:QDmanager,meas_ctrl:MeasurementControl,freeduration:float=80e-6,
     print("Integration time ",qubit_info.measure.integration_time()*1e6, "µs")
     print("Reset time ", qubit_info.reset.duration()*1e6, "µs")
     print("rxy.amp180",qubit_info.rxy.amp180())
+    print(qubit_info.clock_freqs.f01()/1e9,"GHz")
     LO= qubit_info.clock_freqs.f01()+IF
     set_LO_frequency(QD_agent.quantum_device,q=q,module_type='drive',LO_frequency=LO)
     Para_free_Du = ManualParameter(name="free_Duration", unit="s", label="Time")
@@ -125,9 +126,9 @@ if __name__ == "__main__":
     """ Fill in """
     execution:bool = 1
     chip_info_restore:bool = 1
-    DRandIP = {"dr":"drke","last_ip":"242"}
+    DRandIP = {"dr":"dr4","last_ip":"81"}
     ro_elements = {
-        "q0":{"evoT":10e-6,"histo_counts":30},
+        "q1":{"evoT":200e-6,"histo_counts":1},
     }
     couplers = []
 

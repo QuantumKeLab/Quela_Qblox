@@ -6,11 +6,11 @@ from numpy import array
 from Modularize.support.Pulse_schedule_library import IQ_data_dis, dataset_to_array, T1_fit_analysis, Fit_analysis_plot
 
 
-folder = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241031_DR5_FQV1+NCU-1\Qblox\FQV1_Q0_20241103\Q0\T1_timeDep"
-QD_file_path = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241031_DR5_FQV1+NCU-1\Qblox\QD_backup\2024_11_3\DRKE#242_SumInfo.pkl"
+folder = r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_11_13\Q0_T1_timeDependent"
+QD_file_path = r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_11_13\DR4#81_SumInfo.pkl"
 T1_guess=100e-6
 qs = ['q0']
-file= r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241031_DR5_FQV1+NCU-1\Qblox\FQV1_Q0_20241103\Q0\T1_timeDep\DRKEq0_T1(557)_H7M35S47.nc"
+file= r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_11_13\Q0_T1_timeDependent\DR4q0_T1(51)_H1M33S58.nc"
 
 
 QD_agent = QDmanager(QD_file_path)

@@ -13,13 +13,25 @@ import numpy as np
 def time_label_sort(nc_file_name: str):
     return datetime.strptime(nc_file_name.split("_")[-1].split(".")[0], "H%HM%MS%S")
 
-folder = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241031_DR5_FQV1+NCU-1\Qblox\FQV1_Q0_20241103\Q0\T1_timeDep"
-QD_file_path = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241031_DR5_FQV1+NCU-1\Qblox\QD_backup\2024_11_3\DRKE#242_SumInfo.pkl"
-T1_guess=100e-6
+"""Remember to change the path of output_dir"""
+folder = r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_11_13\Q0_T1_timeDependent"
+QD_file_path = r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_11_13\DR4#81_SumInfo.pkl"
+T1_guess=10e-6
 qs = ['q0']
-time_cost = 50
+time_cost = 44
 time_mode = 'relative'  # 'relative' 或 'real'(not done yet)
 
+# 確保目錄存在
+"""P6F-2"""
+output_dir = os.path.join("C:\\Users\\Ke Lab\\Documents\\GitHub\\Quela_Qblox\\Modularize", "Meas_raw", datetime.now().strftime("%Y_%m_%d"))
+os.makedirs(output_dir, exist_ok=True)
+
+"""P6F-1"""
+# output_dir = os.path.join(r"C:\\Users\\admin\\Documents\\GitHub\\Quela_Qblox\\Quela_Qblox\\Modularize", "Meas_raw", datetime.now().strftime("%Y_%m_%d"))
+# os.makedirs(output_dir, exist_ok=True)
+
+
+"""Running"""
 files = [name for name in os.listdir(folder) if (os.path.isfile(os.path.join(folder, name)) and name.split(".")[-1] == "nc")]
 sort_set(files, 3)
 
@@ -55,15 +67,6 @@ for idx, file in enumerate(files):
             t1.append(mean_t1 + std_t1)
     
     time.append(time_cost * (idx + 1))
-
-# 確保目錄存在
-"""P6F-2"""
-# output_dir = os.path.join("C:\\Users\\Ke Lab\\Documents\\GitHub\\Quela_Qblox\\Modularize", "Meas_raw", datetime.now().strftime("%Y_%m_%d"))
-# os.makedirs(output_dir, exist_ok=True)
-
-"""P6F-1"""
-output_dir = os.path.join(r"C:\\Users\\admin\\Documents\\GitHub\\Quela_Qblox\\Quela_Qblox\\Modularize", "Meas_raw", datetime.now().strftime("%Y_%m_%d"))
-os.makedirs(output_dir, exist_ok=True)
 
 
 # 獲取實際時間
