@@ -13,12 +13,11 @@ import numpy as np
 def time_label_sort(nc_file_name: str):
     return datetime.strptime(nc_file_name.split("_")[-1].split(".")[0], "H%HM%MS%S")
 
-"""Remember to change the path of output_dir"""
-folder = r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_11_13\Q0_T1_timeDependent"
-QD_file_path = r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_11_13\DR4#81_SumInfo.pkl"
-T1_guess=10e-6
+folder = r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_11_2\T1_timeDep"
+QD_file_path = r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_11_2\DRKE#242_SumInfo.pkl"
+T1_guess=100e-6
 qs = ['q0']
-time_cost = 44
+time_cost = 50
 time_mode = 'relative'  # 'relative' 或 'real'(not done yet)
 
 # 確保目錄存在

@@ -87,7 +87,7 @@ if __name__ == "__main__":
     ro_attes = {"dress":34, "bare":30} # all ro_elements shared
 
     """ Optional paras"""
-    half_ro_freq_window_Hz = 2e6
+    half_ro_freq_window_Hz = 1.5e6
     freq_data_points = 500
 
 

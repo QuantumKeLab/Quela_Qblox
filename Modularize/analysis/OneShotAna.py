@@ -292,13 +292,13 @@ def share_model_OSana(QD_agent:QDmanager,target_q:str,folder_path:str,pic_save:b
 if __name__ == "__main__":
 
     
-    QD_agent_path=r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241009_DRKe_5XQv4#5_second_coating_and_effT\QD_Backup\2024_10_13\DRKE#242_SumInfo.pkl"
+    QD_agent_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_11_2\DRKE#242_SumInfo.pkl"
     Qmanager = QDmanager(QD_agent_path)
     Qmanager.QD_loader()
     target_q='q0'
 
     "For single file"
-    nc_path=r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241009_DRKe_5XQv4#5_second_coating_and_effT\2024_10_13\100mK\SS\DRKEq1_SingleShot(0)_H19M58S9.nc"
+    nc_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_11_2\DRKEq0_SingleShot(0)_H17M42S56.nc"
     a_OSdata_analPlot(Qmanager,target_q, nc_path)
     # a_OSdata_correlation_analPlot(nc_path)
     

@@ -193,7 +193,7 @@ if __name__ == "__main__":
 
     """ Optional paras """
     drive_read_overlap:bool = 0
-    xy_IF = 100e6
+    xy_IF = 100e6#100e6
     xyf_range = 500e6
     fpts:int = 100
     avg_n:int = 1000

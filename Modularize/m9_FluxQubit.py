@@ -13,7 +13,28 @@ from utils.tutorial_analysis_classes import QubitFluxSpectroscopyAnalysis
 from Modularize.support import init_meas, init_system_atte, shut_down, reset_offset, coupler_zctrl
 from Modularize.support.QuFluxFit import plot_QbFlux
 from Modularize.support.Pulse_schedule_library import Z_gate_two_tone_sche, set_LO_frequency, pulse_preview
+import xarray as xr
+import numpy as np
+from quantify_core.data.handling import DataHandler as dh
 
+def convert_netCDF_2_arrays(CDF_path):
+    dataset = xr.open_dataset(CDF_path)
+    dataset_processed = dh.to_gridded_dataset(dataset)
+
+    # 確保索引唯一
+    for dim in dataset_processed.dims:
+        dataset_processed = dataset_processed.drop_duplicates(dim)
+
+    f = dataset_processed['frequency'].values
+    z = dataset_processed['Z'].values
+    i = dataset_processed['I'].values
+    q = dataset_processed['Q'].values
+
+    return f, z, i, q
+
+def plot_QbFlux(QD_agent, nc_path, specific_qubits):
+    f, z, i, q = convert_netCDF_2_arrays(nc_path)
+    # 你的繪圖代碼
 
 
 
@@ -206,7 +227,8 @@ if __name__ == "__main__":
             init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
             # Cctrl['c0'](-0.15)
             # Cctrl['c1'](0.104)
-            trustable, new_ans = fluxQubit_executor(QD_agent,meas_ctrl,qubit,run=execution,z_shifter=z_shifter,zpts=flux_pts,fpts=freq_pts,span_priod_factor=span_period_factor,f_sapn_Hz=freq_span_Hz,avg_times=avg_n,xy_IF=xy_IF)
+            # trustable, new_ans = fluxQubit_executor(QD_agent,meas_ctrl,qubit,run=execution,z_shifter=z_shifter,zpts=flux_pts,fpts=freq_pts,span_priod_factor=span_period_factor,f_sapn_Hz=freq_span_Hz,avg_times=avg_n,xy_IF=xy_IF)
+            trustable, new_ans = fluxQubit_executor(QD_agent, meas_ctrl, ro_elements[0], run=execution, z_shifter=z_shifter, zpts=flux_pts, fpts=freq_pts, span_priod_factor=span_period_factor, f_sapn_Hz=freq_span_Hz, avg_times=avg_n, xy_IF=xy_IF)
             # Cctrl['c0'](0)
             # Cctrl['c1'](0)
             cluster.reset()

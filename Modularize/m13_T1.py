@@ -155,7 +155,7 @@ if __name__ == "__main__":
             evoT = ro_elements[qubit]["evoT"]
             # Cctrl['c0'](0.07)
             # Cctrl['c1'](0.05)
-            T1_results, this_t1_us = T1_executor(QD_agent,cluster,meas_ctrl,Fctrl,qubit,freeDura=evoT,run=execution,ith=ith_histo,avg_times=avg_n,pts=time_data_points,IF=xy_IF)#specific_folder=r"Modularize\Meas_raw\T1_timeDep"
+            T1_results, this_t1_us = T1_executor(QD_agent,cluster,meas_ctrl,Fctrl,qubit,freeDura=evoT,run=execution,ith=ith_histo,avg_times=avg_n,pts=time_data_points,IF=xy_IF)#,specific_folder=r"Modularize\Meas_raw\T1_timeDep"
             t1_us_rec.append(this_t1_us)
             # Cctrl['c0'](0)
             # Cctrl['c1'](0)
