@@ -52,7 +52,8 @@ def calculate_g1_and_teff(Vk_nc_file, Vg_mean_I, Ve_mean_I, f01):
 def t1(D, A, T1, offset):
     return A * np.exp(-D / T1) + offset
 
-def correlation_method(ave_Ve_nc_file, Vk_directory, f01, correlate_delays):
+def correlation_method(ave_Ve_nc_file, Vk_directory, f01, correlate_delays, plot_title):
+    print(f"Using ave_Ve file: {ave_Ve_nc_file}")
     Ve_mean_I = ave_Ve(ave_Ve_nc_file)
     
     # Step 1: Sort .nc files by time, only include index 0
@@ -89,34 +90,23 @@ def correlation_method(ave_Ve_nc_file, Vk_directory, f01, correlate_delays):
 
     bounds = ((A_guess_lower, 0.1 * T1_guess, C_guess_lower), (A_guess_upper, 3 * T1_guess, C_guess_upper))
     p0 = (A_guess, T1_guess, offset_guess)
-    
-    # # 調整 A 和 offset 的初始猜測值和邊界
-    # A_guess = g1_values[0] - g1_values[-1]
-    # T1_guess = np.mean(correlate_delays)
-    # offset_guess = g1_values[-1]
-
-    # # 增加 A 和 offset 的合理上下限範圍
-    # A_guess_upper = max(2 * (g1_values[0] - g1_values[-1]), 0.5 * (g1_values[0] - g1_values[-1]))
-    # A_guess_lower = min(-2 * abs(g1_values[0] - g1_values[-1]), 0.5 * (g1_values[0] - g1_values[-1]))  # 允許 A 為負
-    # C_guess_upper = max(0.1 * g1_values[-1], 2 * g1_values[-1])
-    # C_guess_lower = 0  # 假設 offset 最小不能小於零
-
-    # bounds = ((A_guess_lower, 0.1 * T1_guess, C_guess_lower), (A_guess_upper, 3 * T1_guess, C_guess_upper))
-    # p0 = (A_guess, T1_guess, offset_guess)
 
     ans, ans_error = curve_fit(t1, correlate_delays, g1_values, p0=p0, bounds=bounds)
 
-    # Calculate effective temperature when g^(1) = 0
-    T1_fit, offset_fit = ans[1], ans[2]
-    g1_at_y0_delay = -T1_fit * np.log(-offset_fit / ans[0]) if ans[0] < 0 else None
+    # Calculate g^(1) at delay = 0 using fitted model
+    g1_at_zero_delay = t1(0, *ans)
+    P_e = (1 / 2) - 1 / (2 * np.sqrt(1 + 4 * g1_at_zero_delay))
+    qubit_frequency = 2 * np.pi * f01
+    h_bar = 1.054571800e-34
+    k_B = 1.381e-23
+    effT = -h_bar * qubit_frequency / (k_B * np.log(P_e / (1 - P_e))) * 1000
+    fitted_info = f"Fitted g^(1) at delay = 0: {g1_at_zero_delay:.4f}, Effective Temperature: {effT:.4f} mK"
 
-    if g1_at_y0_delay is not None:
-        print(f"g^(1) reaches 0 at delay: {g1_at_y0_delay:.2f} µs")
-    else:
-        print("g^(1) does not reach 0 within the fitted range.")
+    # print(f"Fitted g^(1) at delay = 0: {g1_at_zero_delay:.2f},  Effective Temperature={effT:.2f}")
 
-    # Step 4: Plot results
-    plt.figure(figsize=(10, 6))
+    # Step 4: Plot original results
+    plt.suptitle(fitted_info, fontsize=10)
+    plt.title(plot_title)
     plt.scatter(correlate_delays, g1_values, c='blue', label="g^(1) Data")
     plt.plot(correlate_delays, t1(correlate_delays, *ans), c='red', label="T1 Fit")
     plt.xlabel("Correlate Delay (us)")
@@ -128,11 +118,62 @@ def correlation_method(ave_Ve_nc_file, Vk_directory, f01, correlate_delays):
         print(f"Delay {delay} µs: Effective Temperature = {teff:.2f} mK")
 
     plt.show()
-    return
+
+    # # Step 5: Shift data to make the minimum value zero
+    # g1_values_shifted = g1_values - np.min(g1_values)
+    
+    # # Step 6: Fit shifted data
+    # offset_guess_shifted = 0  # After shifting, offset is expected to be zero
+    # p0_shifted = (A_guess, T1_guess, offset_guess_shifted)
+    # bounds_shifted = ((A_guess_lower, 0.1 * T1_guess, 0), (A_guess_upper, 3 * T1_guess, C_guess_upper))
+
+    # ans_shifted, ans_error_shifted = curve_fit(t1, correlate_delays, g1_values_shifted, p0=p0_shifted, bounds=bounds_shifted)
+
+    # # Calculate g^(1) at delay = 0 using shifted fit
+    # g1_at_zero_delay_shifted = t1(0, *ans_shifted)
+    # P_e = (1 / 2) - 1 / (2 * np.sqrt(1 + 4 * g1_at_zero_delay_shifted))
+    # qubit_frequency = 2 * np.pi * f01
+    # h_bar = 1.054571800e-34
+    # k_B = 1.381e-23
+    # effT= -h_bar * qubit_frequency / (k_B * np.log(P_e / (1 - P_e))) * 1000
+    # print(f"Shifted g^(1) at delay = 0: {g1_at_zero_delay_shifted:.2f},  Effective Temperature={effT:.2f}")
+ 
+    # # Step 7: Plot shifted results
+    # plt.figure(figsize=(10, 6))
+    # plt.title(plot_title + " (Shifted)")
+    # plt.scatter(correlate_delays, g1_values_shifted, c='green', label="Shifted g^(1) Data")
+    # plt.plot(correlate_delays, t1(correlate_delays, *ans_shifted), c='orange', label="Shifted T1 Fit")
+    # plt.xlabel("Correlate Delay (us)")
+    # plt.ylabel("Shifted g^(1)")
+    # plt.legend()
+    # plt.grid(True)
+
+    # plt.show()
+    # return
+
+# if __name__ == '__main__':
+#     ave_Ve_nc_file = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1026OrCouldBe1028\100mK\SS\DRKEq0_SingleShot(29)_H17M37S18.nc"
+#     Vk_directory = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1026OrCouldBe1028\100mK\SS_corre"
+#     correlate_delays = [0, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 35, 40]
+#     f01 = 4.31791e9
+#     correlation_method(ave_Ve_nc_file, Vk_directory, f01, correlate_delays)
+
+
+def analyze_all_folders(root_directory, f01, correlate_delays):
+    # Traverse all subfolders
+    for root, dirs, files in os.walk(root_directory):
+        if 'SS' in dirs and 'SS_corre' in dirs:
+            ss_folder = os.path.join(root, 'SS')
+            ss_corre_folder = os.path.join(root, 'SS_corre')
+            # Find the first .nc file in SS folder for ave_Ve
+            ss_files = [os.path.join(ss_folder, file) for file in os.listdir(ss_folder) if file.endswith('.nc')]
+            if ss_files:
+                ave_Ve_nc_file = ss_files[0]
+                plot_title = os.path.basename(root)  # Use subfolder name as the plot title
+                correlation_method(ave_Ve_nc_file, ss_corre_folder, f01, correlate_delays, plot_title)
 
 if __name__ == '__main__':
-    ave_Ve_nc_file = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1026OrCouldBe1028\100mK\SS\DRKEq0_SingleShot(29)_H17M37S18.nc"
-    Vk_directory = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1026OrCouldBe1028\100mK\SS_corre"
+    root_directory = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1026"
     correlate_delays = [0, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 35, 40]
     f01 = 4.31791e9
-    correlation_method(ave_Ve_nc_file, Vk_directory, f01, correlate_delays)
+    analyze_all_folders(root_directory, f01, correlate_delays)
