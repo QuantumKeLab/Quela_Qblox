@@ -67,28 +67,25 @@ if __name__ == "__main__":
     execution:bool = True 
     sweetSpot:bool = 0     # If true, only support one one qubit
     chip_info_restore:bool = 0
-    DRandIP = {"dr":"dr4","last_ip":"81"}
+    DRandIP = {"dr":"dr1","last_ip":"11"}
     ro_element = {
-        "q0":{  "bare" :{"ro_amp":0.45,"window_shift":0e6},
-                "dress":{"ro_amp":0.1,"window_shift":0.6e6}},        
+        # "q0":{  "bare" :{"ro_amp":0.45,"window_shift":0e6},
+        #         "dress":{"ro_amp":0.1,"window_shift":0.6e6}},        
+        # "q1":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
+        #         "dress":{"ro_amp":0.05,"window_shift":0.55e6}},
+       
         "q1":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
-                "dress":{"ro_amp":0.05,"window_shift":0.55e6}},
-        # "q2":{  "bare" :{"ro_amp":0.2,"window_shift":0e6},
-        #         "dress":{"ro_amp":0.05,"window_shift":0.7e6}},
-
-
-        # "q2":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
-        #         "dress":{"ro_amp":0.1,"window_shift":2.3e6}},                
-        # "q3":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
-        #         "dress":{"ro_amp":0.1,"window_shift":2.2e6}},
+                "dress":{"ro_amp":0.05,"window_shift":9.25e6}},                
+        # "q0":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
+        #         "dress":{"ro_amp":0.05,"window_shift":10.7e6}},
         # "q4":{  "bare" :{"ro_amp":0.3,"window_shift":0e6},
         #         "dress":{"ro_amp":0.1,"window_shift":3.4e6}},
     }
-    ro_attes = {"dress":34, "bare":30} # all ro_elements shared
+    ro_attes = {"dress":18, "bare":30} # all ro_elements shared
 
     """ Optional paras"""
-    half_ro_freq_window_Hz = 1.5e6
-    freq_data_points = 500
+    half_ro_freq_window_Hz = 7e6
+    freq_data_points = 300#500
 
 
     

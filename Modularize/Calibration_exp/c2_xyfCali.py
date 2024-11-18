@@ -14,7 +14,7 @@ if __name__ == "__main__":
     
     """ Fill in """
     execution:bool = 1
-    DRandIP = {"dr":"dr4","last_ip":"81"}
+    DRandIP = {"dr":"dr1","last_ip":"11"}
     ro_elements = {
         "q0":{"evoT":40e-6}
     }

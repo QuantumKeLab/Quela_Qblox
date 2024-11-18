@@ -140,7 +140,7 @@ if __name__ == '__main__':
     """ Fill in """
     execute:bool = 1
     repeat:int = 15
-    DRandIP = {"dr":"dr4","last_ip":"81"}
+    DRandIP = {"dr":"dr1","last_ip":"11"}
     ro_elements = {'q0':{"roAmp_factor":1}}
     couplers = []
     RO_time_list=[1.5e-6, 1.75e-6, 2e-6,2.25e-6,2.5e-6]#0.5e-6, 0.75e-6, 1e-6,1.25e-6,1.5e-6

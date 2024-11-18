@@ -135,7 +135,7 @@ if __name__ == "__main__":
     execution = True
     RT_real_atte = 120
     qrm_slot_idx = 18
-    DRandIP = {"dr":"dr4","last_ip":"81"}
+    DRandIP = {"dr":"dr1","last_ip":"11"}
     atte_settings:dict = {"atte_start":0, "atte_end":60, "step":10} # atte should be multiples of 2
     ro_elements = {
         "q0":{"assigned_rof_Hz":0}, # if assigned_rof in Hz was given, the following exp will use this RO frequency. 
