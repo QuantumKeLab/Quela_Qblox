@@ -198,7 +198,7 @@ if __name__ == "__main__":
     """ Fill in """
     execution:bool = 0
     chip_info_restore:bool = 1
-    DRandIP = {"dr":"dr4","last_ip":"81"}
+    DRandIP = {"dr":"dr1","last_ip":"11"}
     ro_elements = {
         "q1":{"detune":-0.8e6,"evoT":20e-6,"histo_counts":1},#-0.174e6
     }

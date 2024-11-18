@@ -151,7 +151,7 @@ if __name__ == "__main__":
     
     """ Fill in """
     execution:bool = 1
-    DRandIP = {"dr":"dr4","last_ip":"81"}
+    DRandIP = {"dr":"dr1","last_ip":"11"}
     ro_elements = {
         "q0":{"detune":2e6,"evoT":10e-6},#-0.174e6
     }

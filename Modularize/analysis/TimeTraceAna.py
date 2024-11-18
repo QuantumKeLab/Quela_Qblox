@@ -131,15 +131,15 @@ def plot_timeDepCohe(time_values:ndarray, y_values:ndarray, exp:str, fig_path:st
 
 
 if __name__ == "__main__":
-    folder_paths = {"T1_folder_path":r"C:\Users\Ke Lab\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\2024_10_27\T1_overnight"
+    folder_paths = {"T1_folder_path":r"C:\Users\Ke Lab\SynologyDrive\09 Data\Fridge Data\Qubit\20241031_DR5_FQV1+NCU-1\Qblox\FQV1_Q0_20241103\Q0\T1_timeDep"
                     }#"Modularize/Meas_raw/T1_timeDep",
                     # "T2_folder_path":"Modularize/Meas_raw/T2_timeDep",
                     # "OS_folder_path":""
-    QD_file_path = r"C:\Users\Ke Lab\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_26\DRKE#242_SumInfo.pkl"
+    QD_file_path = r"C:\Users\Ke Lab\SynologyDrive\09 Data\Fridge Data\Qubit\20241031_DR5_FQV1+NCU-1\Qblox\QD_backup\2024_11_3\DRKE#242_SumInfo.pkl"
     qs = ['q0']
     qs = 'q0'
     sort_mode = 'time' # 'idx' or 'time'
-    T1_guess_parameter=10e-6
+    T1_guess_parameter=100e-6
     T2_guess_parameter=15e-6
 
     QD_agent = QDmanager(QD_file_path)

@@ -137,7 +137,7 @@ if __name__ == '__main__':
     """ Fill in """
     execute:bool = False
     repeat:int = 1
-    DRandIP = {"dr":"dr4","last_ip":"81"}
+    DRandIP = {"dr":"dr1","last_ip":"11"}
     ro_elements = {'q0':{"roAmp_factor":1}}
     couplers = []
     delay_taus = [0,0.5,1,2,3,4,5,6,7,8,9,10,12,14,16,18,20,22,24,26,28,30,35,40] 

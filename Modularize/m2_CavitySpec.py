@@ -177,7 +177,7 @@ if __name__ == "__main__":
     """ fill in part """
     # Basic info of measuring instrument, chip
     # e.g. QD_path, dr, ip, mode, chip_name, chip_type = '', 'dr3', '13', 'n','20240430_8_5Q4C', '5Q4C'
-    QD_path, dr, mode, chip_name, chip_type = '', 'dr4', 'n','20240923_5Q4C', '5Q4C'
+    QD_path, dr, mode, chip_name, chip_type = '', 'dr1', 'n','20240923_5Q4C', '5Q4C'
     execution:bool = 1
     chip_info_restore:bool = 0
     # RO attenuation
@@ -194,18 +194,22 @@ if __name__ == "__main__":
         # q1=6.119e9,
         # q2=5.9226e9,
         
-        q0=4.5382e9,
-        # q1=4.6347e9,
-        q1=4.7290e9,
+        q0=6.15459e9,#Q3
+        q1=6.05354e9,#Q4
+         
+
+
         # q3=4.8247e9
+     
+
 
     )
 
     """ Optional paras """ 
-    coupler_number:int = 2
-    qubit_num:int = 3
+    coupler_number:int = 4
+    qubit_num:int = 5
     freq_data_points = 201
-    half_freq_window_Hz = 3e6
+    half_freq_window_Hz = 7e6
     n_avg: int = 500#100
 
 

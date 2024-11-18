@@ -184,16 +184,16 @@ if __name__ == "__main__":
     chip_info_restore:bool = 0
     update:bool = 1
     #
-    DRandIP = {"dr":"dr4","last_ip":"81"}
+    DRandIP = {"dr":"dr1","last_ip":"11"}
     #
     ro_elements = {
-        "q1":{"xyf_guess":[3.4e9],"xyl_guess":[0.07],"g_guess":45.9e6, "tune_bias":0} # g you can try a single value about 90e6 for a 5Q4C chip.
+        "q1":{"xyf_guess":[4e9],"xyl_guess":[0.1],"g_guess":83e6, "tune_bias":0} # g you can try a single value about 90e6 for a 5Q4C chip.
     }                                                                            # tune_bias is the voltage away from sweet spot. If it was given, here will calculate a ROF according to that z-bias and store it in Notebook.
     couplers = []
 
     """ Optional paras """
     drive_read_overlap:bool = 0
-    xy_IF = 100e6#100e6
+    xy_IF = 100e6
     xyf_range = 500e6
     fpts:int = 100
     avg_n:int = 1000
