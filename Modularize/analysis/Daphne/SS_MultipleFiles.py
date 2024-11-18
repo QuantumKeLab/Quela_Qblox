@@ -8,14 +8,14 @@ from Modularize.analysis.OneShotAna import a_OSdata_analPlot
 
 def analyze_and_plot(Qmanager, target_q, folder_path, show_each_plot, save_folder):
     """針對特定資料夾中的 .nc 檔案進行分析並生成 histogram 圖"""
-    results = {'p01': [], 'effT_mK': [], 'RO_fidelity_percentage':[], 'p10':[],'snr':[],'power_snr_dB':[]}
+    results = {'p01': [], 'effT_mK': [], 'RO_fidelity_percentage':[], 'p10':[],'snr':[],'power_snr_dB':[],'dis':[],'sigma':[]}
     
     for file in os.listdir(folder_path):
         if file.endswith('.nc'):  # 確認檔案副檔名為 .nc
             nc_path = os.path.join(folder_path, file)
-            p01, effT_mK, RO_fidelity_percentage, p10,snr,power_snr_dB = a_OSdata_analPlot(Qmanager, target_q, nc_path, plot=show_each_plot)#
+            p01, effT_mK, RO_fidelity_percentage, p10,snr,power_snr_dB,dis,sigma = a_OSdata_analPlot(Qmanager, target_q, nc_path, plot=show_each_plot)#
             
-            # 檢查 p01 和 effT_mK 是否為有效值
+            # 檢查是否為有效值
             if not (np.isnan(p01) or p01 < 0):  
                 results['p01'].append(p01)
             if not (np.isnan(effT_mK) or effT_mK < 0): 
@@ -28,6 +28,10 @@ def analyze_and_plot(Qmanager, target_q, folder_path, show_each_plot, save_folde
                 results['snr'].append(snr)
             if not (np.isnan(power_snr_dB) or power_snr_dB < 0): 
                 results['power_snr_dB'].append(power_snr_dB)  
+            if not (np.isnan(dis) or dis < 0): 
+                results['dis'].append(dis)   
+            if not (np.isnan(sigma) or sigma < 0):  
+                results['sigma'].append(sigma)
             #It is "if", not "elif" (if you want to add more) 
 
     # 計算平均值和標準差
@@ -37,6 +41,8 @@ def analyze_and_plot(Qmanager, target_q, folder_path, show_each_plot, save_folde
     p10_mean, p10_std = np.mean(results['p10']), np.std(results['p10'])
     snr_mean, snr_std = np.mean(results['snr']), np.std(results['snr'])
     power_snr_dB_mean, power_snr_dB_std = np.mean(results['power_snr_dB']), np.std(results['power_snr_dB'])
+    dis_mean, dis_std = np.mean(results['dis']), np.std(results['dis'])
+    sigma_mean, sigma_std = np.mean(results['sigma']), np.std(results['sigma'])
 
     # Convert results to a dictionary format suitable for plotting
     result_dict = {q: np.array(v) for q, v in results.items()}
@@ -49,16 +55,16 @@ def analyze_and_plot(Qmanager, target_q, folder_path, show_each_plot, save_folde
     # Data_manager().save_histo_pic(Qmanager, result_dict, 'snr', mode="snr", save_fig=True, pic_folder=save_folder)
     # Data_manager().save_histo_pic(Qmanager, result_dict, 'power_snr_dB', mode="powersnr", save_fig=True, pic_folder=save_folder)
     
-    return folder_path, p01_mean, p01_std, effT_mean, effT_std, RO_fidelity_percentage_mean, RO_fidelity_percentage_std, p10_mean, p10_std,snr_mean, snr_std, power_snr_dB_mean, power_snr_dB_std
+    return folder_path, p01_mean, p01_std, effT_mean, effT_std, RO_fidelity_percentage_mean, RO_fidelity_percentage_std, p10_mean, p10_std,snr_mean, snr_std, power_snr_dB_mean, power_snr_dB_std, sigma_mean, sigma_std, dis_mean, dis_std
 
 if __name__ == "__main__":
 
     """Fill in"""
-    QD_agent_path = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_24\DRKE#242_SumInfo.pkl"
+    QD_agent_path = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_26\DRKE#242_SumInfo.pkl"
     target_q = 'q0'
-    main_folder = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\2024_10_25"
+    main_folder = r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\2024_10_26"
     show_each_plot = False
-    specific_folder_name="SS_30aveg"#"SS" #
+    specific_folder_name="SS_"#"SS" #"SS_30aveg"
 
     """Running"""
     # 初始化 Qmanager
@@ -79,14 +85,16 @@ if __name__ == "__main__":
     # 統一列印所有資料夾的結果
     print("\nAll Folder Analysis Results:")
     for result in analysis_results:
-        folder, p01_mean, p01_std, effT_mean, effT_std, RO_fidelity_percentage_mean, RO_fidelity_percentage_std, p10_mean, p10_std, snr_mean, snr_std, power_snr_dB_mean, power_snr_dB_std= result
+        folder, p01_mean, p01_std, effT_mean, effT_std, RO_fidelity_percentage_mean, RO_fidelity_percentage_std, p10_mean, p10_std, snr_mean, snr_std, power_snr_dB_mean, power_snr_dB_std,sigma_mean, sigma_std, dis_mean, dis_std= result
         print(f"Folder: {folder}")
         print(f"p01 Mean: {p01_mean:.4f}, Std: {p01_std:.5f}")
         print(f"effT Mean: {effT_mean:.4f} mK, Std: {effT_std:.5f} mK")
         print(f"RO_fidelity Mean: {RO_fidelity_percentage_mean:.4f}% , Std: {RO_fidelity_percentage_std:.5f} %")
         print(f"p10 Mean: {p10_mean:.4f}%, Std: {p10_std:.5f}%")
         print(f"SNR Mean: {snr_mean:.4f}, Std: {snr_std:.5f}")
-        print(f"Power SNR Mean: {power_snr_dB_mean:.4f}dB, Std: {power_snr_dB_std:.5f}dB\n")
+        print(f"Power SNR Mean: {power_snr_dB_mean:.4f}dB, Std: {power_snr_dB_std:.5f}dB")
+        print(f"distance Mean: {dis_mean:.4f}, Std: {dis_std:.5f}")
+        print(f"Sigma Mean: {sigma_mean:.4f}, Std: {sigma_std:.5f}\n")
 
 
     print("Analysis done! Check out the histograms in each SS folder.")
