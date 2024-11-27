@@ -12,36 +12,18 @@ from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
 from utils.tutorial_analysis_classes import QubitFluxSpectroscopyAnalysis
 from Modularize.support import init_meas, init_system_atte, shut_down, reset_offset, coupler_zctrl
 from Modularize.support.QuFluxFit import plot_QbFlux
-from Modularize.support.Pulse_schedule_library import Z_gate_two_tone_sche, set_LO_frequency, pulse_preview
+from Modularize.support.Pulse_schedule_library import StarkShift_sche, Z_gate_two_tone_sche, set_LO_frequency, pulse_preview
 import xarray as xr
 import numpy as np
 from quantify_core.data.handling import DataHandler as dh
 
-# def convert_netCDF_2_arrays(CDF_path):
-#     dataset = xr.open_dataset(CDF_path)
-#     dataset_processed = dh.to_gridded_dataset(dataset)
-
-#     # 確保索引唯一
-#     for dim in dataset_processed.dims:
-#         dataset_processed = dataset_processed.drop_duplicates(dim)
-
-#     f = dataset_processed['frequency'].values
-#     z = dataset_processed['Z'].values
-#     i = dataset_processed['I'].values
-#     q = dataset_processed['Q'].values
-
-#     return f, z, i, q
-
-# def plot_QbFlux(QD_agent, nc_path, specific_qubits):
-#     f, z, i, q = convert_netCDF_2_arrays(nc_path)
-#     # 你的繪圖代碼
 
 
-
-def Zgate_two_tone_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,Z_amp_start:float,Z_amp_end:float,IF:int=200e6,xyf:float=0e9,xyf_span_Hz:float=400e6,n_avg:int=1000,RO_z_amp:float=0,Z_points:int=40,f_points:int=60,run:bool=True,q:str='q1',Experi_info={},get_data_path:bool=False,analysis:bool=True):
-    print("Zgate 2tone start")
+def Stark_shift_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,ro_p_min:float,ro_p_max:float,IF:int=200e6,xyf:float=0e9,xyf_span_Hz:float=400e6,n_avg:int=1000,RO_z_amp:float=0,p_points:int=40,f_points:int=60,run:bool=True,q:str='q1',Experi_info={},get_data_path:bool=False,analysis:bool=True):
+    print("Stark shift start")
     trustable = True
-    sche_func = Z_gate_two_tone_sche
+    # sche_func = Z_gate_two_tone_sche
+    sche_func=StarkShift_sche
 
     analysis_result = {}
     qubit_info = QD_agent.quantum_device.get_element(q)
@@ -61,42 +43,52 @@ def Zgate_two_tone_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,Z_amp_st
     freq = ManualParameter(name="freq", unit="Hz", label="Frequency")
     freq.batched = True
     
-    Z_bias = ManualParameter(name="Z", unit="V", label="Z bias")
-    Z_bias.batched = False
+    # Z_bias = ManualParameter(name="Z", unit="V", label="Z bias")#
+    # Z_bias.batched = False#
     
-    # temperature quard
-    if Z_amp_end > 0.4:
-        Z_amp_end = 0.4
-    elif Z_amp_end < -0.4:
-        Z_amp_end = -0.4
-    else:
-        pass
-
-    if Z_amp_start > 0.4:
-        Z_amp_start = 0.4
-    elif Z_amp_start < -0.4:
-        Z_amp_start = -0.4
-    else:
-        pass 
-
-    Z_samples = linspace(Z_amp_start,Z_amp_end,Z_points)
+    ro_pulse_amp = ManualParameter(name="ro_amp", unit="", label="Readout pulse amplitude")
+    ro_pulse_amp.batched = False
     
+    # # temperature quard
+    # if Z_amp_end > 0.4:
+    #     Z_amp_end = 0.4
+    # elif Z_amp_end < -0.4:
+    #     Z_amp_end = -0.4
+    # else:
+    #     pass
+
+    # if Z_amp_start > 0.4:
+    #     Z_amp_start = 0.4
+    # elif Z_amp_start < -0.4:
+    #     Z_amp_start = -0.4
+    # else:
+    #     pass 
+
+
+    ro_p_samples = linspace(ro_p_min,ro_p_max,p_points)
+    
+    # Z_samples = linspace(Z_amp_start,Z_amp_end,Z_points)
     spec_sched_kwargs = dict(   
         frequencies=freq,
         q=q,
-        Z_amp=Z_bias,
-        spec_amp=QD_agent.Notewriter.get_2tone_piampFor(q),
-        spec_Du=50*1e-6,
-        R_amp={str(q):qubit_info.measure.pulse_amp()},
+        # Z_amp=Z_bias,#
+        R_amp_2=ro_pulse_amp,
+        spec_amp=QD_agent.Notewriter.get_2tone_piampFor(q),#
+        spec_Du=50*1e-6,#
+        pi_amp={str(q):qubit_info.rxy.amp180()},
+        pi_dura=qubit_info.rxy.duration(),
+        R_amp={str(q):qubit_info.measure.pulse_amp()},#
         R_duration={str(q):qubit_info.measure.pulse_duration()},
         R_integration={str(q):qubit_info.measure.integration_time()},
         R_inte_delay=qubit_info.measure.acq_delay(),
-        Z_ro_amp=RO_z_amp,
+        # correlate_delay:float=1200e-9, # 
+        # Z_ro_amp=RO_z_amp,#
+
     )
-    exp_kwargs= dict(sweep_F=['start '+'%E' %f01_samples[0],'end '+'%E' %f01_samples[-1]],
-                     Z_amp=['start '+'%E' %Z_samples[0],'end '+'%E' %Z_samples[-1]],
-                     spec_amp='%E' %spec_sched_kwargs['spec_amp'],
-                     spec_Du='%E' %spec_sched_kwargs['spec_Du'])
+    # exp_kwargs= dict(sweep_F=['start '+'%E' %f01_samples[0],'end '+'%E' %f01_samples[-1]],
+    #                  Z_amp=['start '+'%E' %ro_p_samples[0],'end '+'%E' %ro_p_samples[-1]],
+    #                  spec_amp='%E' %spec_sched_kwargs['spec_amp'],
+    #                  spec_Du='%E' %spec_sched_kwargs['spec_Du'])
     if run:
         gettable = ScheduleGettable(
             QD_agent.quantum_device,
@@ -107,8 +99,8 @@ def Zgate_two_tone_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,Z_amp_st
         )
         QD_agent.quantum_device.cfg_sched_repetitions(n_avg)
         meas_ctrl.gettables(gettable)
-        meas_ctrl.settables([freq,Z_bias])
-        meas_ctrl.setpoints_grid((f01_samples,Z_samples))
+        meas_ctrl.settables([freq,ro_pulse_amp])
+        meas_ctrl.setpoints_grid((f01_samples,ro_p_samples))
         qs_ds = meas_ctrl.run("Zgate-two-tone")
         
         # Save the raw data into netCDF
@@ -127,20 +119,22 @@ def Zgate_two_tone_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,Z_amp_st
                 trustable = False
         
         
-        show_args(exp_kwargs, title="Zgate_two_tone_kwargs: Meas.qubit="+q)
+        # show_args(exp_kwargs, title="Zgate_two_tone_kwargs: Meas.qubit="+q)
         if Experi_info != {}:
             show_args(Experi_info(q))
         
     else:
         n_s = 2
         sweep_para1= array(f01_samples[:n_s])
-        sweep_para2= array(Z_samples[:2])
+        sweep_para2= array(ro_p_samples[:2])
         spec_sched_kwargs['frequencies']= sweep_para1.reshape(sweep_para1.shape or (1,))
-        spec_sched_kwargs['Z_amp']= sweep_para2.reshape(sweep_para2.shape or (1,))[1]
+        # spec_sched_kwargs['Z_amp']= sweep_para2.reshape(sweep_para2.shape or (1,))[1]
+        spec_sched_kwargs['R_amp_2']= sweep_para2.reshape(sweep_para2.shape or (1,))[1]
+        
         pulse_preview(QD_agent.quantum_device,sche_func,spec_sched_kwargs)
         
         
-        show_args(exp_kwargs, title="Zgate_two_tone_kwargs: Meas.qubit="+q)
+        # show_args(exp_kwargs, title="Zgate_two_tone_kwargs: Meas.qubit="+q)
         if Experi_info != {}:
             show_args(Experi_info(q))
         path = ''
@@ -168,7 +162,7 @@ def fluxQubit_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,specific_
     if run:
         
         Fctrl[specific_qubits](center)
-        results, nc_path, trustable= Zgate_two_tone_spec(QD_agent,meas_ctrl,Z_amp_start=-partial_period+z_shifter,Z_points=zpts,f_points=fpts,Z_amp_end=partial_period+z_shifter,q=specific_qubits,run=True,get_data_path=True,xyf_span_Hz=f_sapn_Hz,IF=xy_IF,n_avg=avg_times)
+        results, nc_path, trustable= Stark_shift_spec(QD_agent,meas_ctrl,ro_p_min=ro_p_min,ro_p_max=ro_p_max,p_points=p_points,f_points=fpts,q=specific_qubits,run=True,get_data_path=True,xyf_span_Hz=f_sapn_Hz,IF=xy_IF,n_avg=avg_times)
         reset_offset(Fctrl)
         if trustable:
             plot_QbFlux(QD_agent,nc_path,specific_qubits)
@@ -183,7 +177,7 @@ def fluxQubit_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,specific_
             return False, {}
 
     else:
-        results, _, trustable= Zgate_two_tone_spec(QD_agent,meas_ctrl,Z_amp_start=center-partial_period+z_shifter,Z_points=10,Z_amp_end=center+partial_period+z_shifter,q=specific_qubits,run=False)
+        results, _, trustable=  results, nc_path, trustable= Stark_shift_spec(QD_agent,meas_ctrl,ro_p_min=ro_p_min,ro_p_max=ro_p_max,p_points=p_points,f_points=fpts,q=specific_qubits,run=True,get_data_path=True,xyf_span_Hz=f_sapn_Hz,IF=xy_IF,n_avg=avg_times)
         return False, {}
 
 
@@ -206,6 +200,10 @@ if __name__ == "__main__":
     sweet_flux_shifter:float = 0
     xy_IF = 100e6
     avg_n:int = 100
+    
+    ro_p_min=0
+    ro_p_max=0.6
+    p_points=6
 
 
 

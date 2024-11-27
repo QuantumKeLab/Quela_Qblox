@@ -142,10 +142,10 @@ def SS_executor(QD_agent: QDmanager, cluster: Cluster, Fctrl: dict, target_q: st
 if __name__ == '__main__':
 
     """ Fill in """
-    execute:bool = 1
-    repeat:int = 1
-    DRandIP = {"dr":"dr4","last_ip":"81"}
-    ro_elements = {'q1':{"roAmp_factor":1}}
+    execute: bool = 1
+    repeat: int = 1
+    DRandIP = {"dr": "dr4", "last_ip": "81"}
+    ro_elements = {'q1': {"roAmp_factor": 1}}
     couplers = []
 
     """ Optional paras (don't use is better) """

@@ -311,6 +311,10 @@ def Spec_pulse(sche,amp,Du,q,ref_pulse_sche,freeDu, ref_point:str="start"):
     delay_c= -Du-freeDu
     return sche.add(SquarePulse(duration=Du,amp=amp, port=q+":mw", clock=q+".01"),rel_time=delay_c,ref_op=ref_pulse_sche,ref_pt=ref_point,)
 
+def Spec_pulse_2(sche,amp,Du,q,ref_pulse_sche,freeDu, ref_point:str="start"):
+    delay_c= -Du-freeDu
+    return sche.add(SquarePulse(duration=Du,amp=amp, port=q+":mw", clock=q+".01"),rel_time=delay_c,ref_op=ref_pulse_sche,ref_pt=ref_point,)
+
 def X_theta(sche,amp,Du,q,ref_pulse_sche,freeDu):
 
     if Du!=0:
@@ -550,6 +554,61 @@ def Z_gate_two_tone_sche(
     return sched
 
 
+def StarkShift_sche(
+    frequencies: np.ndarray,
+    q:str,
+    # Z_amp:any,#go to R_amp_2
+    spec_amp:float,
+    spec_Du:float,
+    pi_amp: dict,##
+    pi_dura:dict,##
+    R_amp: dict,
+    R_amp_2: dict,##
+    R_duration: dict,
+    R_integration:dict,
+    R_inte_delay:dict,
+    powerDep:bool,##
+    repetitions:int=1,  
+    ref_pt:str='start',#
+    ref_pt_2:str='start',#
+    correlate_delay:float=1200e-9, # 
+    Z_ro_amp:float =0 
+
+) -> Schedule:
+    
+    qubits2read = list(frequencies.keys())#?
+    sameple_idx = array(frequencies[qubits2read[0]]).shape[0]#?
+    
+    sched = Schedule("Stark Shift",repetitions=repetitions)
+
+    for acq_idx in range(sameple_idx):    
+
+        for qubit_idx, q in enumerate(qubits2read):
+            freq = frequencies[q][acq_idx]#?
+            if acq_idx == 0:
+                sched.add_resource(ClockResource(name=q+ ".01", freq=array(frequencies[q]).flat[0]))
+            sched.add(Reset(q))
+            sched.add(SetClockFrequency(clock=q+ ".01", clock_freq_new=freq))
+            sched.add(IdlePulse(duration=5000*1e-9), label=f"buffer {qubit_idx} {acq_idx}")
+            
+            if qubit_idx == 0:
+                spec_pulse = Readout(sched,q,R_amp,R_duration,powerDep=False)#power dependence?
+                # spec_pulse_2 = Readout_2(sched,q,spec_pulse,R_amp_2,R_duration,powerDep=False,correlate_delay=-(correlate_delay+R_duration[q]))
+                # X_pi_p(sched,pi_amp,q,pi_dura[q],spec_pulse_2,freeDu=electrical_delay,ref_point=ref_pt_pi)
+                
+                # Integration(sched,q,R_inte_delay[q],R_integration,spec_pulse,acq_index=acq_idx,acq_channel=qubit_idx,single_shot=False,get_trace=False,trace_recordlength=0)
+            # else:
+                # Multi_Readout(sched,q,spec_pulse,R_amp,R_duration,powerDep=powerDep)
+
+    
+            # Spec_pulse_2(sched,spec_amp,spec_Du,q,spec_pulse_2,electrical_delay, ref_point=ref_pt_2)#?
+            spec_pulse_pi=X_pi_p(sched,pi_amp,q,pi_dura[q],spec_pulse,freeDu=correlate_delay+electrical_delay,ref_point=ref_pt)
+            # Spec_pulse(sched,spec_amp,spec_Du,q,spec_pulse_pi,electrical_delay, ref_point=ref_pt_pi)#electrical_delay or freeDu?
+            Readout_2(sched,q,spec_pulse_pi,R_amp_2,R_duration,powerDep=False,correlate_delay=-(correlate_delay+R_duration[q]))
+                
+            Integration(sched,q,R_inte_delay[q],R_integration,spec_pulse,acq_index=acq_idx,acq_channel=qubit_idx,single_shot=False,get_trace=False,trace_recordlength=0)
+            
+    return sched
 
 def Qubit_state_heterodyne_spec_sched_nco(
     frequencies: np.ndarray,
