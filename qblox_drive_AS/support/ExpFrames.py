@@ -13,6 +13,7 @@ from qblox_drive_AS.support import init_meas, init_system_atte, shut_down, coupl
 from qblox_drive_AS.support.Pulse_schedule_library import set_LO_frequency, QS_fit_analysis
 from quantify_scheduler.helpers.collections import find_port_clock_path
 from qblox_drive_AS.analysis.raw_data_demolisher import ZgateT1_dataReducer
+from qblox_drive_AS.analysis.TimeTraceAna import time_monitor_data_ana
 
 
 class ExpGovernment(ABC):
@@ -88,21 +89,29 @@ class BroadBand_CavitySearching(ExpGovernment):
         self.counter -= 1
 
 
-    def RunAnalysis(self,new_QD_dir:str=None):
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
         """ User callable analysis function pack """
         from qblox_drive_AS.SOP.wideCS import plot_S21
-        ds = open_dataset(self.__raw_data_location)
-
-        QD_savior = QDmanager(self.QD_path)
-        QD_savior.QD_loader()
-        if new_QD_dir is None:
-            new_QD_dir = self.QD_path
+        if new_QD_path is None:
+            QD_file = self.QD_path
         else:
-            new_QD_dir = os.path.join(new_QD_dir,os.path.split(self.QD_path)[-1])
+            QD_file = new_QD_path
 
-        plot_S21(ds,self.save_fig_path)
+        if new_file_path is None:
+            file_path = self.__raw_data_location
+            fig_path = self.save_fig_path
+        else:
+            file_path = new_file_path
+            fig_path = os.path.join(os.path.split(new_file_path)[0],os.path.split(self.save_fig_path)[-1])
+
+        QD_savior = QDmanager(QD_file)
+        QD_savior.QD_loader()
+
+        ds = open_dataset(file_path)
+
+        plot_S21(ds,fig_path)
         ds.close()
-        QD_savior.QD_keeper(new_QD_dir)
+        QD_savior.QD_keeper()
 
 
     def WorkFlow(self):
@@ -161,22 +170,30 @@ class Zoom_CavitySearching(ExpGovernment):
         shut_down(self.cluster,self.Fctrl)
 
 
-    def RunAnalysis(self,new_QD_dir:str=None):
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
         """ User callable analysis function pack """
         from qblox_drive_AS.SOP.CavitySpec import CS_ana
         if self.execution:
-            ds = open_dataset(self.__raw_data_location)
-
-            QD_savior = QDmanager(self.QD_path)
-            QD_savior.QD_loader()
-            if new_QD_dir is None:
-                new_QD_dir = self.QD_path
+            if new_QD_path is None:
+                QD_file = self.QD_path
             else:
-                new_QD_dir = os.path.join(new_QD_dir,os.path.split(self.QD_path)[-1])
+                QD_file = new_QD_path
 
-            CS_ana(QD_savior,ds,self.save_dir)
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            ds = open_dataset(file_path)
+
+            CS_ana(QD_savior,ds,fig_path)
             ds.close()
-            QD_savior.QD_keeper(new_QD_dir)
+            QD_savior.QD_keeper()
 
 
     def WorkFlow(self):
@@ -245,22 +262,30 @@ class PowerCavity(ExpGovernment):
         shut_down(self.cluster,self.Fctrl)
 
 
-    def RunAnalysis(self,new_QD_dir:str=None):
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
         """ User callable analysis function pack """
         from qblox_drive_AS.SOP.PowCavSpec import plot_powerCavity_S21
         if self.execution:
-            ds = open_dataset(self.__raw_data_location)
-
-            QD_savior = QDmanager(self.QD_path)
-            QD_savior.QD_loader()
-            if new_QD_dir is None:
-                new_QD_dir = self.QD_path
+            if new_QD_path is None:
+                QD_file = self.QD_path
             else:
-                new_QD_dir = os.path.join(new_QD_dir,os.path.split(self.QD_path)[-1])
+                QD_file = new_QD_path
 
-            plot_powerCavity_S21(ds,QD_savior,self.save_dir)
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            ds = open_dataset(file_path)
+
+            plot_powerCavity_S21(ds,QD_savior,fig_path)
             ds.close()
-        # QD_savior.QD_keeper(new_QD_dir)
+        # QD_savior.QD_keeper()
 
 
     def WorkFlow(self):
@@ -324,23 +349,31 @@ class Dressed_CavitySearching(ExpGovernment):
         shut_down(self.cluster,self.Fctrl)
 
 
-    def RunAnalysis(self,new_QD_dir:str=None):
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
         """ User callable analysis function pack """
         from qblox_drive_AS.SOP.CavitySpec import CS_ana
         if self.execution:
-            ds = open_dataset(self.__raw_data_location)
-
-            QD_savior = QDmanager(self.QD_path)
-            QD_savior.QD_loader()
-            if new_QD_dir is None:
-                new_QD_dir = self.QD_path
+            if new_QD_path is None:
+                QD_file = self.QD_path
             else:
-                new_QD_dir = os.path.join(new_QD_dir,os.path.split(self.QD_path)[-1])
+                QD_file = new_QD_path
+
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            ds = open_dataset(file_path)
             for q in self.ro_amp:
                 QD_savior.quantum_device.get_element(q).measure.pulse_amp(self.ro_amp[q])
-            CS_ana(QD_savior,ds,self.save_dir,keep_bare=False)
+            CS_ana(QD_savior,ds,fig_path,keep_bare=False)
             ds.close()
-            QD_savior.QD_keeper(new_QD_dir)
+            QD_savior.QD_keeper()
 
 
     def WorkFlow(self):
@@ -410,16 +443,31 @@ class FluxCoupler(ExpGovernment):
         shut_down(self.cluster,self.Fctrl)
 
 
-    def RunAnalysis(self,new_QD_dir:str=None):
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
         """ User callable analysis function pack """
         if self.execution:
-            ds = open_dataset(self.__raw_data_location)
+            if new_QD_path is None:
+                QD_file = self.QD_path
+            else:
+                QD_file = new_QD_path
+
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            ds = open_dataset(file_path)
             for var in ds.data_vars:
                 ANA = Multiplex_analyzer("m5")
                 if var.split("_")[-1] != 'freq':
                     ANA._import_data(ds,2)
                     ANA._start_analysis(var_name=var)
-                    ANA._export_result(self.save_dir)
+                    ANA._export_result(fig_path)
             ds.close()
 
 
@@ -475,6 +523,7 @@ class FluxCavity(ExpGovernment):
         for q in self.tempor_freq[0]:
             rof = self.QD_agent.quantum_device.get_element(q).clock_freqs.readout()
             self.freq_range[q] = linspace(rof+self.tempor_freq[0][q][0],rof+self.tempor_freq[0][q][1],self.tempor_freq[1])
+            
         QD_RO_init(self.QD_agent,self.freq_range)
         dataset = FluxCav_spec(self.QD_agent,self.meas_ctrl,self.Fctrl,self.freq_range,self.flux_samples,self.avg_n,self.execution)
         if self.execution:
@@ -490,35 +539,44 @@ class FluxCavity(ExpGovernment):
         shut_down(self.cluster,self.Fctrl)
 
 
-    def RunAnalysis(self,new_QD_dir:str=None):
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
         """ User callable analysis function pack """
         from qblox_drive_AS.SOP.FluxCavSpec import update_flux_info_in_results_for
         if self.execution:
-            QD_savior = QDmanager(self.QD_path)
-            QD_savior.QD_loader()
-            if new_QD_dir is None:
-                new_QD_dir = self.QD_path
+            
+            if new_QD_path is None:
+                QD_file = self.QD_path
             else:
-                new_QD_dir = os.path.join(new_QD_dir,os.path.split(self.QD_path)[-1])
+                QD_file = new_QD_path
 
-            ds = open_dataset(self.__raw_data_location)
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            ds = open_dataset(file_path)
             answer = {}
             for var in ds.data_vars:
                 if str(var).split("_")[-1] != 'freq':
                     ANA = Multiplex_analyzer("m6")
                     ANA._import_data(ds,2)
                     ANA._start_analysis(var_name=var)
-                    ANA._export_result(self.save_dir)
+                    ANA._export_result(fig_path)
                     answer[var] = ANA.fit_packs
             ds.close()
             permi = mark_input(f"What qubit can be updated ? {list(answer.keys())}/ all/ no ").lower()
             if permi in list(answer.keys()):
                 update_flux_info_in_results_for(QD_savior,permi,answer[permi])
-                QD_savior.QD_keeper(new_QD_dir)
+                QD_savior.QD_keeper()
             elif permi in ["all",'y','yes']:
                 for q in list(answer.keys()):
                     update_flux_info_in_results_for(QD_savior,q,answer[q])
-                QD_savior.QD_keeper(new_QD_dir)
+                QD_savior.QD_keeper()
             else:
                 print("Updating got denied ~")
 
@@ -586,35 +644,44 @@ class IQ_references(ExpGovernment):
         shut_down(self.cluster,self.Fctrl)
 
 
-    def RunAnalysis(self,new_QD_dir:str=None):
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
         """ User callable analysis function pack """
         from qblox_drive_AS.SOP.RefIQ import IQ_ref_ana
         if self.execution:
-            ds = open_dataset(self.__raw_data_location)
-
-            QD_savior = QDmanager(self.QD_path)
-            QD_savior.QD_loader()
-            if new_QD_dir is None:
-                new_QD_dir = self.QD_path
+            if new_QD_path is None:
+                QD_file = self.QD_path
             else:
-                new_QD_dir = os.path.join(new_QD_dir,os.path.split(self.QD_path)[-1])
+                QD_file = new_QD_path
+
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            ds = open_dataset(file_path)
             
             answer = {}
             for q in ds.data_vars:
-                answer[q] = IQ_ref_ana(ds,q,self.save_dir)
+                answer[q] = IQ_ref_ana(ds,q,fig_path)
             ds.close()
             if self.ask_save:
                 permi = mark_input(f"What qubit can be updated ? {list(answer.keys())}/ all/ no ").lower()
                 if permi in list(answer.keys()):
                     QD_savior.memo_refIQ({permi:answer[permi]})
-                    QD_savior.QD_keeper(new_QD_dir)
+                    QD_savior.QD_keeper()
                 elif permi in ["all",'y','yes']:
                     QD_savior.memo_refIQ(answer)
-                    QD_savior.QD_keeper(new_QD_dir)
+                    QD_savior.QD_keeper()
                 else:
                     print("Updating got denied ~")
             else:
-                QD_savior.QD_keeper(new_QD_dir)
+                QD_savior.memo_refIQ(answer)
+                QD_savior.QD_keeper()
 
 
     def WorkFlow(self):
@@ -704,29 +771,37 @@ class PowerConti2tone(ExpGovernment):
     def CloseMeasurement(self):
         shut_down(self.cluster,self.Fctrl)
 
-    def RunAnalysis(self,new_QD_dir:str=None):
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
         """ User callable analysis function pack """
         from qblox_drive_AS.SOP.Cnti2Tone import update_2toneResults_for
         if self.execution:
-            QD_savior = QDmanager(self.QD_path)
-            QD_savior.QD_loader()
-            if new_QD_dir is None:
-                new_QD_dir = self.QD_path
+            if new_QD_path is None:
+                QD_file = self.QD_path
             else:
-                new_QD_dir = os.path.join(new_QD_dir,os.path.split(self.QD_path)[-1])
+                QD_file = new_QD_path
 
-            ds = open_dataset(self.__raw_data_location)
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            ds = open_dataset(file_path)
             for var in ds.data_vars:
                 if str(var).split("_")[-1] != 'freq':
                     ANA = Multiplex_analyzer("m8")     
-                    ANA._import_data(ds,2,self.QD_agent.refIQ[var] if self.QD_agent.rotate_angle[var] == 0 else [self.QD_agent.rotate_angle[var]],QS_fit_analysis)
+                    ANA._import_data(ds,2,QD_savior.refIQ[var],QS_fit_analysis)
                     ANA._start_analysis(var_name=var)
-                    ANA._export_result(self.save_dir)
+                    ANA._export_result(fig_path)
                     if ANA.fit_packs != {}:
                         analysis_result = QS_fit_analysis(ANA.fit_packs[var]["contrast"],f=ANA.fit_packs[var]["xyf_data"])
                         update_2toneResults_for(QD_savior,var,{str(var):analysis_result},ANA.xyl[0])
             ds.close()
-            QD_savior.QD_keeper(new_QD_dir)
+            QD_savior.QD_keeper()
 
     def WorkFlow(self):
     
@@ -806,35 +881,43 @@ class FluxQubit(ExpGovernment):
         shut_down(self.cluster,self.Fctrl)
 
 
-    def RunAnalysis(self,new_QD_dir:str=None):
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
         """ User callable analysis function pack """
         from qblox_drive_AS.SOP.FluxQubit import update_by_fluxQubit
         if self.execution:
-            QD_savior = QDmanager(self.QD_path)
-            QD_savior.QD_loader()
-            if new_QD_dir is None:
-                new_QD_dir = self.QD_path
+            if new_QD_path is None:
+                QD_file = self.QD_path
             else:
-                new_QD_dir = os.path.join(new_QD_dir,os.path.split(self.QD_path)[-1])
+                QD_file = new_QD_path
 
-            ds = open_dataset(self.__raw_data_location)
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            ds = open_dataset(file_path)
             answer = {}
             for var in ds.data_vars:
                 if str(var).split("_")[-1] != 'freq':
                     ANA = Multiplex_analyzer("m9") 
                     ANA._import_data(ds,2,QD_savior.refIQ[var],QS_fit_analysis)
                     ANA._start_analysis(var_name=var)
-                    ANA._export_result(self.save_dir)
+                    ANA._export_result(fig_path)
                     if len(list(ANA.fit_packs.keys())) != 0: answer[var] = ANA.fit_packs        
             ds.close()
             permi = mark_input(f"What qubit can be updated ? {list(answer.keys())}/ all/ no :").lower()
             if permi in list(answer.keys()):
                 update_by_fluxQubit(QD_savior,answer[q],q)
-                QD_savior.QD_keeper(new_QD_dir)
+                QD_savior.QD_keeper()
             elif permi in ["all",'y','yes']:
                 for q in list(answer.keys()):
                     update_by_fluxQubit(QD_savior,answer[q],q)
-                QD_savior.QD_keeper(new_QD_dir)
+                QD_savior.QD_keeper()
             else:
                 print("Updating got denied ~")
 
@@ -913,28 +996,36 @@ class PowerRabiOsci(ExpGovernment):
         shut_down(self.cluster,self.Fctrl)
 
 
-    def RunAnalysis(self,new_QD_dir:str=None):
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
         """ User callable analysis function pack """
         from qblox_drive_AS.SOP.RabiOsci import conditional_update_qubitInfo
         if self.execution:
-            QD_savior = QDmanager(self.QD_path)
-            QD_savior.QD_loader()
-            if new_QD_dir is None:
-                new_QD_dir = self.QD_path
+            if new_QD_path is None:
+                QD_file = self.QD_path
             else:
-                new_QD_dir = os.path.join(new_QD_dir,os.path.split(self.QD_path)[-1])
+                QD_file = new_QD_path
 
-            ds = open_dataset(self.__raw_data_location)
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            ds = open_dataset(file_path)
             for var in ds.data_vars:
                 if str(var).split("_")[-1] != 'piamp':
                     ANA = Multiplex_analyzer("m11")      
-                    ANA._import_data(ds,1,self.QD_agent.refIQ[var] if self.QD_agent.rotate_angle[var][0] == 0 else self.QD_agent.rotate_angle[var])
+                    ANA._import_data(ds,1,QD_savior.refIQ[var] if QD_savior.rotate_angle[var][0] == 0 else QD_savior.rotate_angle[var])
                     ANA._start_analysis(var_name=var)
-                    ANA._export_result(self.save_dir)
+                    ANA._export_result(fig_path)
                     conditional_update_qubitInfo(QD_savior,ANA.fit_packs,var)  
 
             ds.close()
-            QD_savior.QD_keeper(new_QD_dir)
+            QD_savior.QD_keeper()
             
 
 
@@ -966,7 +1057,7 @@ class TimeRabiOsci(ExpGovernment):
             * pi_dura_sampling_func (str): 'linspace', 'arange', 'logspace'\n
             * pi_dura_pts_or_step: Depends on what sampling func you use, `linspace` or `logspace` set pts, `arange` set step. 
         """
-        from qblox_drive_AS.SOP.RabiOsci import round_to_nearest_multiple_of_multipleNS
+        from qblox_drive_AS.SOP.RabiOsci import sort_elements_2_multiples_of
         if pi_dura_sampling_func in ['linspace','logspace','arange']:
             sampling_func:callable = eval(pi_dura_sampling_func)
         else:
@@ -974,9 +1065,7 @@ class TimeRabiOsci(ExpGovernment):
         
         self.pi_dura_samples = {}
         for q in pi_dura:
-            time_sample_sec = list(set([round_to_nearest_multiple_of_multipleNS(x) for x in sampling_func(*pi_dura[q],pi_dura_pts_or_step)*1e9]))
-            time_sample_sec.sort()
-            self.pi_dura_samples[q] = array(time_sample_sec)*1e-9
+            self.pi_dura_samples[q] = sort_elements_2_multiples_of(sampling_func(*pi_dura[q],pi_dura_pts_or_step)*1e9,4)*1e-9
     
 
         self.pi_amp = pi_amp
@@ -1015,24 +1104,32 @@ class TimeRabiOsci(ExpGovernment):
         shut_down(self.cluster,self.Fctrl)
 
 
-    def RunAnalysis(self,new_QD_dir:str=None):
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
         """ User callable analysis function pack """
         from qblox_drive_AS.SOP.RabiOsci import conditional_update_qubitInfo
         if self.execution:
-            QD_savior = QDmanager(self.QD_path)
-            QD_savior.QD_loader()
-            if new_QD_dir is None:
-                new_QD_dir = self.QD_path
+            if new_QD_path is None:
+                QD_file = self.QD_path
             else:
-                new_QD_dir = os.path.join(new_QD_dir,os.path.split(self.QD_path)[-1])
+                QD_file = new_QD_path
 
-            ds = open_dataset(self.__raw_data_location)
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            ds = open_dataset(file_path)
             for var in ds.data_vars:
                 if str(var).split("_")[-1] != 'pidura':
                     ANA = Multiplex_analyzer("m11")      
-                    ANA._import_data(ds,1,self.QD_agent.refIQ[var] if self.QD_agent.rotate_angle[var][0] == 0 else self.QD_agent.rotate_angle[var])
+                    ANA._import_data(ds,1,QD_savior.refIQ[var] if QD_savior.rotate_angle[var][0] == 0 else QD_savior.rotate_angle[var])
                     ANA._start_analysis(var_name=var)
-                    ANA._export_result(self.save_dir)
+                    ANA._export_result(fig_path)
                     conditional_update_qubitInfo(QD_savior,ANA.fit_packs,var)  
                     
             ds.close()
@@ -1112,32 +1209,42 @@ class SingleShot(ExpGovernment):
         shut_down(self.cluster,self.Fctrl)
 
 
-    def RunAnalysis(self,new_QD_dir:str=None,histo_ana:bool=False):
-        """ User callable analysis function pack """
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None,histo_ana:bool=False):
+        """ if histo_ana, it will check all the data in the same folder with the given new_file_path """
     
         if self.execution:
-            QD_savior = QDmanager(self.QD_path)
-            QD_savior.QD_loader()
-            if new_QD_dir is None:
-                new_QD_dir = self.QD_path
+            if new_QD_path is None:
+                QD_file = self.QD_path
             else:
-                new_QD_dir = os.path.join(new_QD_dir,os.path.split(self.QD_path)[-1])
+                QD_file = new_QD_path
+
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
             if not histo_ana:
-                ds = open_dataset(self.__raw_data_location)
+                ds = open_dataset(file_path)
                 for var in ds.data_vars:
                     ANA = Multiplex_analyzer("m14")
                     ANA._import_data(ds[var]*1000,var_dimension=0,fq_Hz=QD_savior.quantum_device.get_element(var).clock_freqs.f01())
                     ANA._start_analysis()
-                    pic_path = os.path.join(self.save_dir,f"{var}_SingleShot_{datetime.now().strftime('%Y%m%d%H%M%S') if self.JOBID is None else self.JOBID}")
+                    pic_path = os.path.join(fig_path,f"{var}_SingleShot_{datetime.now().strftime('%Y%m%d%H%M%S') if self.JOBID is None else self.JOBID}")
                     ANA._export_result(pic_path)
                     highlight_print(f"{var} rotate angle = {round(ANA.fit_packs['RO_rotation_angle'],2)} in degree.")
                     QD_savior.rotate_angle[var] = [ANA.fit_packs["RO_rotation_angle"]]
                 ds.close()
                 
-                QD_savior.QD_keeper(new_QD_dir)
+                QD_savior.QD_keeper()
             else:
+
                 eff_T, thermal_pop = {}, {}
-                files = sort_timeLabel([os.path.join(self.save_dir,name) for name in os.listdir(self.save_dir) if (os.path.isfile(os.path.join(self.save_dir,name)) and name.split(".")[-1]=='nc')])
+                files = sort_timeLabel([os.path.join(fig_path,name) for name in os.listdir(fig_path) if (os.path.isfile(os.path.join(fig_path,name)) and name.split(".")[-1]=='nc')])
                 for nc_idx, nc_file in enumerate(files):
                     ds = open_dataset(nc_file)
                     for var in ds.data_vars:
@@ -1150,8 +1257,8 @@ class SingleShot(ExpGovernment):
                 
                 for qubit in eff_T:
                     highlight_print(f"{qubit}: {round(median(array(eff_T[qubit])),1)} +/- {round(std(array(eff_T[qubit])),1)} mK")
-                    Data_manager().save_histo_pic(QD_savior,eff_T,qubit,mode="ss",pic_folder=self.save_dir)
-                    Data_manager().save_histo_pic(QD_savior,thermal_pop,qubit,mode="pop",pic_folder=self.save_dir)
+                    Data_manager().save_histo_pic(QD_savior,eff_T,qubit,mode="ss",pic_folder=fig_path)
+                    Data_manager().save_histo_pic(QD_savior,thermal_pop,qubit,mode="pop",pic_folder=fig_path)
 
     def WorkFlow(self):
         for i in range(self.histos):
@@ -1182,7 +1289,7 @@ class Ramsey(ExpGovernment):
             * time_sampling_func (str): 'linspace', 'arange', 'logspace'\n
             * time_pts_or_step: Depends on what sampling func you use, `linspace` or `logspace` set pts, `arange` set step. 
         """
-        from qblox_drive_AS.SOP.RabiOsci import round_to_nearest_multiple_of_multipleNS
+        from qblox_drive_AS.SOP.RabiOsci import sort_elements_2_multiples_of
         if time_sampling_func in ['linspace','logspace','arange']:
             sampling_func:callable = eval(time_sampling_func)
         else:
@@ -1191,7 +1298,7 @@ class Ramsey(ExpGovernment):
         self.time_samples = {}
         if sampling_func in [linspace, logspace]:
             for q in time_range:
-                self.time_samples[q] = sort(array(list(set([round_to_nearest_multiple_of_multipleNS(x,4) for x in sampling_func(*time_range[q],time_pts_or_step)*1e9])))*1e-9)
+                self.time_samples[q] = sort_elements_2_multiples_of(sampling_func(*time_range[q],time_pts_or_step)*1e9,4)*1e-9
         else:
             for q in time_range:
                 self.time_samples[q] = sampling_func(*time_range[q],time_pts_or_step)
@@ -1240,18 +1347,26 @@ class Ramsey(ExpGovernment):
         shut_down(self.cluster,self.Fctrl)
 
 
-    def RunAnalysis(self,new_QD_dir:str=None):
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
         """ User callable analysis function pack """
         
         if self.execution:
-            QD_savior = QDmanager(self.QD_path)
-            QD_savior.QD_loader()
-            if new_QD_dir is None:
-                new_QD_dir = self.QD_path
+            if new_QD_path is None:
+                QD_file = self.QD_path
             else:
-                new_QD_dir = os.path.join(new_QD_dir,os.path.split(self.QD_path)[-1])
+                QD_file = new_QD_path
 
-            ds = open_dataset(self.__raw_data_location)
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            ds = open_dataset(file_path)
         
             for var in ds.data_vars:
                 if var.split("_")[-1] != 'x':
@@ -1263,14 +1378,14 @@ class Ramsey(ExpGovernment):
                         ref = QD_savior.refIQ[var]
                     ANA._import_data(ds,var_dimension=2,refIQ= ref)
                     ANA._start_analysis(var_name=var)
-                    ANA._export_result(self.save_dir)
+                    ANA._export_result(fig_path)
 
                     """ Storing """
                     if self.histos >= 50:
                         QD_savior.Notewriter.save_T2_for(ANA.fit_packs["median_T2"],var)
                    
             ds.close()
-            QD_savior.QD_keeper(new_QD_dir)
+            QD_savior.QD_keeper()
             
 
     def WorkFlow(self,freq_detune_Hz:float=None):
@@ -1306,7 +1421,7 @@ class SpinEcho(ExpGovernment):
             * time_sampling_func (str): 'linspace', 'arange', 'logspace'\n
             * time_pts_or_step: Depends on what sampling func you use, `linspace` or `logspace` set pts, `arange` set step. 
         """
-        from qblox_drive_AS.SOP.RabiOsci import round_to_nearest_multiple_of_multipleNS
+        from qblox_drive_AS.SOP.RabiOsci import sort_elements_2_multiples_of
         if time_sampling_func in ['linspace','logspace','arange']:
             sampling_func:callable = eval(time_sampling_func)
         else:
@@ -1316,7 +1431,7 @@ class SpinEcho(ExpGovernment):
         self.spin_num = {}
         if sampling_func in [linspace, logspace]:
             for q in time_range:
-                self.time_samples[q] = sort(array(list(set([round_to_nearest_multiple_of_multipleNS(x,8) for x in sampling_func(*time_range[q],time_pts_or_step)*1e9])))*1e-9)
+                self.time_samples[q] = sort_elements_2_multiples_of(sampling_func(*time_range[q],time_pts_or_step)*1e9,8)*1e-9
         else:
             for q in time_range:
                 self.time_samples[q] = sampling_func(*time_range[q],time_pts_or_step)
@@ -1366,18 +1481,26 @@ class SpinEcho(ExpGovernment):
         shut_down(self.cluster,self.Fctrl)
 
 
-    def RunAnalysis(self,new_QD_dir:str=None):
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
         """ User callable analysis function pack """
         
         if self.execution:
-            QD_savior = QDmanager(self.QD_path)
-            QD_savior.QD_loader()
-            if new_QD_dir is None:
-                new_QD_dir = self.QD_path
+            if new_QD_path is None:
+                QD_file = self.QD_path
             else:
-                new_QD_dir = os.path.join(new_QD_dir,os.path.split(self.QD_path)[-1])
+                QD_file = new_QD_path
 
-            ds = open_dataset(self.__raw_data_location)
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            ds = open_dataset(file_path)
         
             for var in ds.data_vars:
                 if var.split("_")[-1] != 'x':
@@ -1389,14 +1512,14 @@ class SpinEcho(ExpGovernment):
                         ref = QD_savior.refIQ[var]
                     ANA._import_data(ds,var_dimension=2,refIQ=ref)
                     ANA._start_analysis(var_name=var)
-                    ANA._export_result(self.save_dir)
+                    ANA._export_result(fig_path)
 
                     """ Storing """
                     if self.histos >= 50:
                         QD_savior.Notewriter.save_echoT2_for(ANA.fit_packs["median_T2"],var)
                    
             ds.close()
-            QD_savior.QD_keeper(new_QD_dir)
+            QD_savior.QD_keeper()
             
 
     def WorkFlow(self):
@@ -1429,7 +1552,7 @@ class CPMG(ExpGovernment):
             * time_sampling_func (str): 'linspace', 'arange', 'logspace'\n
             * time_pts_or_step: Depends on what sampling func you use, `linspace` or `logspace` set pts, `arange` set step. 
         """
-        from qblox_drive_AS.SOP.RabiOsci import round_to_nearest_multiple_of_multipleNS
+        from qblox_drive_AS.SOP.RabiOsci import sort_elements_2_multiples_of
         if time_sampling_func in ['linspace','logspace','arange']:
             sampling_func:callable = eval(time_sampling_func)
         else:
@@ -1439,11 +1562,11 @@ class CPMG(ExpGovernment):
         self.spin_num = pi_num
         if sampling_func in [linspace, logspace]:
             for q in time_range:
-                self.time_samples[q] = sort(array(list(set([round_to_nearest_multiple_of_multipleNS(x,(1+int(pi_num[q]))*4) for x in sampling_func(*time_range[q],time_pts_or_step)*1e9])))*1e-9)
+                self.time_samples[q] = sort_elements_2_multiples_of(sampling_func(*time_range[q],time_pts_or_step)*1e9,(1+int(pi_num[q]))*4)*1e-9
         else:
             for q in time_range:
                 self.time_samples[q] = sampling_func(*time_range[q],time_pts_or_step)
-
+        
         self.avg_n = avg_n
 
         if histo_counts <= 100:
@@ -1488,18 +1611,26 @@ class CPMG(ExpGovernment):
         shut_down(self.cluster,self.Fctrl)
 
 
-    def RunAnalysis(self,new_QD_dir:str=None):
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
         """ User callable analysis function pack """
         
         if self.execution:
-            QD_savior = QDmanager(self.QD_path)
-            QD_savior.QD_loader()
-            if new_QD_dir is None:
-                new_QD_dir = self.QD_path
+            if new_QD_path is None:
+                QD_file = self.QD_path
             else:
-                new_QD_dir = os.path.join(new_QD_dir,os.path.split(self.QD_path)[-1])
+                QD_file = new_QD_path
 
-            ds = open_dataset(self.__raw_data_location)
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            ds = open_dataset(file_path)
         
             for var in ds.data_vars:
                 if var.split("_")[-1] != 'x':
@@ -1511,14 +1642,14 @@ class CPMG(ExpGovernment):
                         ref = QD_savior.refIQ[var]
                     ANA._import_data(ds,var_dimension=2,refIQ=ref)
                     ANA._start_analysis(var_name=var)
-                    ANA._export_result(self.save_dir)
+                    ANA._export_result(fig_path)
 
                     """ Storing """
                     if self.histos >= 50:
                         QD_savior.Notewriter.save_echoT2_for(ANA.fit_packs["median_T2"],var)
                    
             ds.close()
-            QD_savior.QD_keeper(new_QD_dir)
+            QD_savior.QD_keeper()
             
 
     def WorkFlow(self, freq_detune_Hz:float=None):
@@ -1554,7 +1685,7 @@ class EnergyRelaxation(ExpGovernment):
             * time_sampling_func (str): 'linspace', 'arange', 'logspace'\n
             * time_pts_or_step: Depends on what sampling func you use, `linspace` or `logspace` set pts, `arange` set step. 
         """
-        from qblox_drive_AS.SOP.RabiOsci import round_to_nearest_multiple_of_multipleNS
+        from qblox_drive_AS.SOP.RabiOsci import sort_elements_2_multiples_of
         if time_sampling_func in ['linspace','logspace','arange']:
             sampling_func:callable = eval(time_sampling_func)
         else:
@@ -1563,7 +1694,7 @@ class EnergyRelaxation(ExpGovernment):
         self.time_samples = {}
         if sampling_func in [linspace, logspace]:
             for q in time_range:
-                self.time_samples[q] = sort(array(list(set([round_to_nearest_multiple_of_multipleNS(x,4) for x in sampling_func(*time_range[q],time_pts_or_step)*1e9])))*1e-9)
+                self.time_samples[q] = sort_elements_2_multiples_of(sampling_func(*time_range[q],time_pts_or_step)*1e9,4)*1e-9
         else:
             for q in time_range:
                 self.time_samples[q] = sampling_func(*time_range[q],time_pts_or_step)
@@ -1611,18 +1742,26 @@ class EnergyRelaxation(ExpGovernment):
         shut_down(self.cluster,self.Fctrl)
 
 
-    def RunAnalysis(self,new_QD_dir:str=None):
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
         """ User callable analysis function pack """
         
         if self.execution:
-            QD_savior = QDmanager(self.QD_path)
-            QD_savior.QD_loader()
-            if new_QD_dir is None:
-                new_QD_dir = self.QD_path
+            if new_QD_path is None:
+                QD_file = self.QD_path
             else:
-                new_QD_dir = os.path.join(new_QD_dir,os.path.split(self.QD_path)[-1])
+                QD_file = new_QD_path
 
-            ds = open_dataset(self.__raw_data_location)
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            ds = open_dataset(file_path)
         
             for var in ds.data_vars:
                 if var.split("_")[-1] != 'x':
@@ -1634,14 +1773,14 @@ class EnergyRelaxation(ExpGovernment):
                         ref = QD_savior.refIQ[var]
                     ANA._import_data(ds,var_dimension=2,refIQ=ref)
                     ANA._start_analysis(var_name=var)
-                    ANA._export_result(self.save_dir)
+                    ANA._export_result(fig_path)
 
                     """ Storing """
                     if self.histos >= 50:
                         QD_savior.Notewriter.save_T1_for(ANA.fit_packs["median_T1"],var)
 
             ds.close()
-            QD_savior.QD_keeper(new_QD_dir)
+            QD_savior.QD_keeper()
             
 
     def WorkFlow(self):
@@ -1666,17 +1805,16 @@ class XYFcali(ExpGovernment):
     def RawDataPath(self):
         return self.__raw_data_location
 
-    def SetParameters(self, target_qs:list, evo_time:float=0.5e-6, detune:float=10e6, avg_n:int=100, execution:bool=True, OSmode:bool=False)->None:
+    def SetParameters(self, target_qs:list, evo_time:float=0.5e-6, detu:float=0, avg_n:int=100, execution:bool=True, OSmode:bool=False)->None:
         """ ### Args:
             * target_qs: ["q0", "q1", ...]\n
         """
-        from qblox_drive_AS.SOP.RabiOsci import round_to_nearest_multiple_of_multipleNS
+        from qblox_drive_AS.SOP.RabiOsci import sort_elements_2_multiples_of
     
         self.time_samples = {}
-        self.detune = detune
         for q in target_qs:
-            self.time_samples[q] = sort(array(list(set([round_to_nearest_multiple_of_multipleNS(x,4) for x in  linspace(0,evo_time,100)*1e9])))*1e-9)
-
+            self.time_samples[q] = sort_elements_2_multiples_of(linspace(40e-9,evo_time,100)*1e9,4)*1e-9
+        self.detu = detu
         self.avg_n = avg_n
         self.execution = execution
         self.OSmode = OSmode
@@ -1692,15 +1830,15 @@ class XYFcali(ExpGovernment):
         for q in self.target_qs:
             self.Fctrl[q](self.QD_agent.Fluxmanager.get_proper_zbiasFor(target_q=q))
             IF_minus = self.QD_agent.Notewriter.get_xyIFFor(q)
-            self.QD_agent.quantum_device.get_element(q).clock_freqs.f01(self.QD_agent.quantum_device.get_element(q).clock_freqs.f01()+self.detune)
-            xyf = self.QD_agent.quantum_device.get_element(q).clock_freqs.f01()
+            xyf = self.QD_agent.quantum_device.get_element(q).clock_freqs.f01()+self.detu
+            self.QD_agent.quantum_device.get_element(q).clock_freqs.f01(xyf)
             set_LO_frequency(self.QD_agent.quantum_device,q=q,module_type='drive',LO_frequency=xyf-IF_minus)
             init_system_atte(self.QD_agent.quantum_device,[q],ro_out_att=self.QD_agent.Notewriter.get_DigiAtteFor(q, 'ro'), xy_out_att=self.QD_agent.Notewriter.get_DigiAtteFor(q,'xy'))
         
     def RunMeasurement(self):
         from qblox_drive_AS.SOP.T2 import Ramsey
     
-        dataset = Ramsey(self.QD_agent,self.meas_ctrl,self.time_samples,self.spin_num,1,self.avg_n,self.execution)
+        dataset = Ramsey(self.QD_agent,self.meas_ctrl,self.time_samples,self.spin_num,1,self.avg_n,self.execution,second_phase='y')
         if self.execution:
             if self.save_dir is not None:
                 self.save_path = os.path.join(self.save_dir,f"XYFcali_{datetime.now().strftime('%Y%m%d%H%M%S') if self.JOBID is None else self.JOBID}")
@@ -1714,18 +1852,26 @@ class XYFcali(ExpGovernment):
         shut_down(self.cluster,self.Fctrl)
 
 
-    def RunAnalysis(self,new_QD_dir:str=None):
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
         """ User callable analysis function pack """
         
         if self.execution:
-            QD_savior = QDmanager(self.QD_path)
-            QD_savior.QD_loader()
-            if new_QD_dir is None:
-                new_QD_dir = self.QD_path
+            if new_QD_path is None:
+                QD_file = self.QD_path
             else:
-                new_QD_dir = os.path.join(new_QD_dir,os.path.split(self.QD_path)[-1])
+                QD_file = new_QD_path
 
-            ds = open_dataset(self.__raw_data_location)
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            ds = open_dataset(file_path)
             answer = {}
             for var in ds.data_vars:
                 if var.split("_")[-1] != 'x':
@@ -1738,25 +1884,27 @@ class XYFcali(ExpGovernment):
                     
                     ANA._import_data(ds,var_dimension=2,refIQ=ref)
                     ANA._start_analysis(var_name=var)
-                    ANA._export_result(self.save_dir)
-                     
-                    answer[var] = self.detune-ANA.fit_packs['freq']
+                    ANA._export_result(fig_path)
+
+                    if ANA.fit_packs['phase'] > 180:
+                        sign = -1
+                    else:
+                        sign = 1
+                    
+                    answer[var] = sign*ANA.fit_packs['freq']
                     highlight_print(f"{var}: actual detune = {round(answer[var]*1e-6,4)} MHz")
             ds.close()
 
             permi = mark_input(f"What qubit can be updated ? {list(answer.keys())}/ all/ no ").lower()
             if permi in list(answer.keys()):
-                QD_savior.quantum_device.get_element(permi).clock_freqs.f01(QD_savior.quantum_device.get_element(permi).clock_freqs.f01()+answer[permi])
-                QD_savior.QD_keeper(new_QD_dir)
+                QD_savior.quantum_device.get_element(permi).clock_freqs.f01(QD_savior.quantum_device.get_element(permi).clock_freqs.f01()-answer[permi])
+                QD_savior.QD_keeper()
             elif permi in ["all",'y','yes']:
                 for q in answer:
-                    QD_savior.quantum_device.get_element(q).clock_freqs.f01(QD_savior.quantum_device.get_element(q).clock_freqs.f01()+answer[q])
-                QD_savior.QD_keeper(new_QD_dir)
+                    QD_savior.quantum_device.get_element(q).clock_freqs.f01(QD_savior.quantum_device.get_element(q).clock_freqs.f01()-answer[q])
+                QD_savior.QD_keeper()
             else:
                 print("Updating got denied ~")
-
-            QD_savior.QD_keeper(new_QD_dir)
-            
 
     def WorkFlow(self):
         
@@ -1823,36 +1971,44 @@ class ROFcali(ExpGovernment):
         shut_down(self.cluster,self.Fctrl)
 
 
-    def RunAnalysis(self,new_QD_dir:str=None):
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
         """ User callable analysis function pack """
         
         if self.execution:
-            QD_savior = QDmanager(self.QD_path)
-            QD_savior.QD_loader()
-            if new_QD_dir is None:
-                new_QD_dir = self.QD_path
+            if new_QD_path is None:
+                QD_file = self.QD_path
             else:
-                new_QD_dir = os.path.join(new_QD_dir,os.path.split(self.QD_path)[-1])
+                QD_file = new_QD_path
 
-            ds = open_dataset(self.__raw_data_location)
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            ds = open_dataset(file_path)
             answer = {}
             for var in ds.data_vars:
                 if var.split("_")[-1] != 'rof':
                     ANA = Multiplex_analyzer("c1")
                     ANA._import_data(ds,var_dimension=1)
                     ANA._start_analysis(var_name = var)
-                    ANA._export_result(self.save_dir)
+                    ANA._export_result(fig_path)
                     answer[var] = ANA.fit_packs[var]["optimal_rof"]
             ds.close()
 
             permi = mark_input(f"What qubit can be updated ? {list(answer.keys())}/ all/ no ").lower()
             if permi in list(answer.keys()):
                 QD_savior.quantum_device.get_element(permi).clock_freqs.readout(answer[permi])
-                QD_savior.QD_keeper(new_QD_dir)
+                QD_savior.QD_keeper()
             elif permi in ["all",'y','yes']:
                 for q in answer:
                     QD_savior.quantum_device.get_element(q).clock_freqs.readout(answer[q])
-                QD_savior.QD_keeper(new_QD_dir)
+                QD_savior.QD_keeper()
             else:
                 print("Updating got denied ~")
 
@@ -1928,19 +2084,27 @@ class PiAcali(ExpGovernment):
         shut_down(self.cluster,self.Fctrl)
 
 
-    def RunAnalysis(self,new_QD_dir:str=None):
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
         """ User callable analysis function pack """
         
         if self.execution:
-            QD_savior = QDmanager(self.QD_path)
-            QD_savior.QD_loader()
-            if new_QD_dir is None:
-                new_QD_dir = self.QD_path
+            if new_QD_path is None:
+                QD_file = self.QD_path
             else:
-                new_QD_dir = os.path.join(new_QD_dir,os.path.split(self.QD_path)[-1])
+                QD_file = new_QD_path
 
-            ds = open_dataset(self.__raw_data_location)
-            
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            ds = open_dataset(file_path)
+            answer = {}
             for var in ds.data_vars:
                 if var.split("_")[-1] != 'PIcoef':
                     if QD_savior.rotate_angle[var][0] != 0:
@@ -1951,10 +2115,20 @@ class PiAcali(ExpGovernment):
                     ANA = Multiplex_analyzer("c3")
                     ANA._import_data(ds,var_dimension=1,refIQ=ref)
                     ANA._start_analysis(var_name = var)
-                    fit_pic_folder = Data_manager().get_today_picFolder()
-                    ANA._export_result(fit_pic_folder)
-                    fit_packs = ANA.fit_packs
+                    ANA._export_result(fig_path)
+                    answer[var] = ANA.fit_packs["ans"]
             ds.close()
+
+            permi = mark_input(f"What qubit can be updated ? {list(answer.keys())}/ all/ no ").lower()
+            if permi in list(answer.keys()):
+                QD_savior.quantum_device.get_element(permi).rxy.amp180(QD_savior.quantum_device.get_element(permi).rxy.amp180()*answer[permi])
+                QD_savior.QD_keeper()
+            elif permi in ["all",'y','yes']:
+                for q in answer:
+                    QD_savior.quantum_device.get_element(q).rxy.amp180(QD_savior.quantum_device.get_element(q).rxy.amp180()*answer[q])
+                QD_savior.QD_keeper()
+            else:
+                print("Updating got denied ~")
 
     def WorkFlow(self):
         
@@ -1978,7 +2152,7 @@ class hPiAcali(ExpGovernment):
 
     def SetParameters(self, piamp_coef_range:dict, amp_sampling_funct:str, coef_ptsORstep:int=100, halfPi_pair_num:list=[3,5], avg_n:int=100, execution:bool=True, OSmode:bool=False)->None:
         """ ### Args:
-            * piamp_coef_range: {"q0":[0.4, 0.6], "q1":[0.45, 0.55], ...], must be close to 0.5 because it's a half pi-pulse.\n
+            * piamp_coef_range: {"q0":[0.9, 1.1], "q1":[...], ...], this is the coef tiles to QDmanager.Waveformer.__xylog[q]["halfPI_ratio"].\n
             * amp_sampling_funct: str, `linspace` or `arange`.\n
             * pi_pair_num: list, like [3, 5] will try 2 exp, the first uses 3\*4 half pi-pulse, and the second exp uses 5*4 half pi-pulse
         """
@@ -2027,19 +2201,27 @@ class hPiAcali(ExpGovernment):
         shut_down(self.cluster,self.Fctrl)
 
 
-    def RunAnalysis(self,new_QD_dir:str=None):
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
         """ User callable analysis function pack """
         
         if self.execution:
-            QD_savior = QDmanager(self.QD_path)
-            QD_savior.QD_loader()
-            if new_QD_dir is None:
-                new_QD_dir = self.QD_path
+            if new_QD_path is None:
+                QD_file = self.QD_path
             else:
-                new_QD_dir = os.path.join(new_QD_dir,os.path.split(self.QD_path)[-1])
+                QD_file = new_QD_path
 
-            ds = open_dataset(self.__raw_data_location)
-            
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            ds = open_dataset(file_path)
+            answer = {}
             for var in ds.data_vars:
                 if var.split("_")[-1] != 'HalfPIcoef':
                     if QD_savior.rotate_angle[var][0] != 0:
@@ -2049,12 +2231,21 @@ class hPiAcali(ExpGovernment):
                         ref = QD_savior.refIQ[var]
                     ANA = Multiplex_analyzer("c4")
                     ANA._import_data(ds,var_dimension=1,refIQ=ref)
-                    ANA._start_analysis(var_name = var)
-                    ANA._export_result(self.save_dir)
-                    fit_packs = ANA.fit_packs
+                    ANA._start_analysis(var_name = var) 
+                    ANA._export_result(fig_path)
+                    answer[var] = ANA.fit_packs["ans"]
 
             ds.close()
-
+            permi = mark_input(f"What qubit can be updated ? {list(answer.keys())}/ all/ no ").lower()
+            if permi in list(answer.keys()):
+                QD_savior.Waveformer.set_halfPIratio_for(permi, QD_savior.Waveformer.get_halfPIratio_for(permi)*answer[permi])
+                QD_savior.QD_keeper()
+            elif permi in ["all",'y','yes']:
+                for q in answer:
+                    QD_savior.Waveformer.set_halfPIratio_for(q, QD_savior.Waveformer.get_halfPIratio_for(q)*answer[q])
+                QD_savior.QD_keeper()
+            else:
+                print("Updating got denied ~")
     def WorkFlow(self):
         
         self.PrepareHardware()
@@ -2125,25 +2316,33 @@ class ROLcali(ExpGovernment):
         shut_down(self.cluster,self.Fctrl)
 
 
-    def RunAnalysis(self,new_QD_dir:str=None):
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
         """ User callable analysis function pack """
         
         if self.execution:
-            QD_savior = QDmanager(self.QD_path)
-            QD_savior.QD_loader()
-            if new_QD_dir is None:
-                new_QD_dir = self.QD_path
+            if new_QD_path is None:
+                QD_file = self.QD_path
             else:
-                new_QD_dir = os.path.join(new_QD_dir,os.path.split(self.QD_path)[-1])
+                QD_file = new_QD_path
 
-            ds = open_dataset(self.__raw_data_location)
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            ds = open_dataset(file_path)
             
             for var in ds.data_vars:
                 if var.split("_")[-1] != 'rol':
                     ANA = Multiplex_analyzer("c5")
                     ANA._import_data(ds,var_dimension=1)
                     ANA._start_analysis(var_name = var)
-                    ANA._export_result(self.save_dir)
+                    ANA._export_result(fig_path)
                     
             ds.close()
 
@@ -2177,7 +2376,7 @@ class ZgateEnergyRelaxation(ExpGovernment):
             * bias_range:list, [z_amp_start, z_amp_end, pts/step]\n
             * bias_sampling_func:str, `linspace`(default) or `arange`. 
         """
-        from qblox_drive_AS.SOP.RabiOsci import round_to_nearest_multiple_of_multipleNS
+        from qblox_drive_AS.SOP.RabiOsci import sort_elements_2_multiples_of
         if time_sampling_func in ['linspace','logspace','arange']:
             sampling_func:callable = eval(time_sampling_func)
         else:
@@ -2186,7 +2385,7 @@ class ZgateEnergyRelaxation(ExpGovernment):
         self.time_samples = {}
         if sampling_func in [linspace, logspace]:
             for q in time_range:
-                self.time_samples[q] = sort(array(list(set([round_to_nearest_multiple_of_multipleNS(x,4) for x in sampling_func(*time_range[q],time_pts_or_step)*1e9])))*1e-9)
+                self.time_samples[q] = sort_elements_2_multiples_of(sampling_func(*time_range[q],time_pts_or_step)*1e9,4)*1e-9
         else:
             for q in time_range:
                 self.time_samples[q] = sampling_func(*time_range[q],time_pts_or_step)
@@ -2221,6 +2420,8 @@ class ZgateEnergyRelaxation(ExpGovernment):
         dataset = Zgate_T1(self.QD_agent,self.meas_ctrl,self.time_samples,self.bias_samples,self.avg_n,self.execution,no_pi_pulse= not self.prepare_1)
         if self.execution:
             if self.save_dir is not None:
+                if self.want_while:
+                    self.JOBID = None
                 self.save_path = os.path.join(self.save_dir,f"zgateT1_{datetime.now().strftime('%Y%m%d%H%M%S') if self.JOBID is None else self.JOBID}")
                 self.__raw_data_location = self.save_path + ".nc"
                 dataset.to_netcdf(self.__raw_data_location)
@@ -2232,18 +2433,27 @@ class ZgateEnergyRelaxation(ExpGovernment):
         shut_down(self.cluster,self.Fctrl)
 
 
-    def RunAnalysis(self, new_QD_dir:str=None, time_dep_plot:bool=False):
-        """ User callable analysis function pack """
+    def RunAnalysis(self, new_QD_path:str=None,new_file_path:str=None, time_dep_plot:bool=False):
+        """ If new file path was given, check all the data in that folder. """
         
         if self.execution:
-            QD_savior = QDmanager(self.QD_path)
-            QD_savior.QD_loader()
-            if new_QD_dir is None:
-                new_QD_dir = self.QD_path
+            if new_QD_path is None:
+                QD_file = self.QD_path
             else:
-                new_QD_dir = os.path.join(new_QD_dir,os.path.split(self.QD_path)[-1])
+                QD_file = new_QD_path
 
-            nc_paths = ZgateT1_dataReducer(self.save_dir)
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+
+            nc_paths = ZgateT1_dataReducer(fig_path)
             for q in nc_paths:
                 if QD_savior.rotate_angle[q][0] != 0:
                     ref = QD_savior.rotate_angle[q]
@@ -2275,3 +2485,289 @@ class ZgateEnergyRelaxation(ExpGovernment):
             if not self.want_while:
                 break
                 
+class QubitMonitor():
+    def __init__(self, QD_path:str, save_dir:str, execution:bool=True):
+        self.QD_path = QD_path
+        self.save_dir = save_dir
+        self.Execution = execution
+        self.T1_time_range:dict = {}
+        self.T2_time_range:dict = {}
+        self.OS_target_qs:list = []
+        self.echo_pi_num:int = 0
+        self.a_little_detune_Hz:float = 0.1e6
+        self.time_sampling_func = 'linspace'
+        self.time_ptsORstep:int|float = 100
+        self.OS_shots:int = 10000
+        self.AVG:int = 300
+        self.idx = 0
+
+    def StartMonitoring(self):
+        start_time = datetime.now()
+        pi_num_dict = {}
+        if self.T2_time_range is not None:
+            for q in self.T2_time_range:
+                pi_num_dict[q] = self.echo_pi_num
+        while True:
+            if self.T1_time_range is not None:
+                if len(list(self.T1_time_range.keys())) != 0:
+                    EXP = EnergyRelaxation(QD_path=self.QD_path,data_folder=self.save_dir)
+                    EXP.SetParameters(self.T1_time_range,self.time_sampling_func,self.time_ptsORstep,1,self.AVG,self.Execution)
+                    EXP.WorkFlow()
+
+            if self.T2_time_range is not None:
+                if len(list(self.T2_time_range.keys())) != 0:
+                    EXP = CPMG(QD_path=self.QD_path,data_folder=self.save_dir)
+                    EXP.SetParameters(self.T2_time_range,pi_num_dict,self.time_sampling_func,self.time_ptsORstep,1,self.AVG,self.Execution)
+                    EXP.WorkFlow(freq_detune_Hz=self.a_little_detune_Hz)
+
+            if self.OS_target_qs is not None:
+                if  self.OS_shots != 0:
+                    if len(self.OS_target_qs) == 0:
+                        self.OS_target_qs = list(set(list(self.T1_time_range.keys())+list(self.T2_time_range.keys())))
+                    EXP = SingleShot(QD_path=self.QD_path,data_folder=self.save_dir)
+                    EXP.SetParameters(self.OS_target_qs,1,self.OS_shots,self.Execution)
+                    EXP.WorkFlow()
+            slightly_print(f"It's the {self.idx}-th measurement, about {round((datetime.now() - start_time).total_seconds()/3600,2)} hrs recorded.")
+            self.idx += 1
+
+    def TimeMonitor_analysis(self,New_QD_path:str=None,New_data_file:str=None,save_all_fit_fig:bool=False):
+        if New_QD_path is not None:
+            self.QD_path = New_QD_path
+        if New_data_file is not None:
+            self.save_dir = os.path.split(New_data_file)[0]
+
+        QD_agent = QDmanager(self.QD_path)
+        QD_agent.QD_loader()
+        time_monitor_data_ana(QD_agent,self.save_dir,save_all_fit_fig)
+
+
+class DragCali(ExpGovernment):
+    def __init__(self,QD_path:str,data_folder:str=None,JOBID:str=None):
+        super().__init__()
+        self.QD_path = QD_path
+        self.save_dir = data_folder
+        self.__raw_data_location:str = ""
+        self.JOBID = JOBID
+
+    @property
+    def RawDataPath(self):
+        return self.__raw_data_location
+
+    def SetParameters(self, drag_coef_range:dict, coef_sampling_funct:str, coef_ptsORstep:int=100, avg_n:int=100, execution:bool=True, OSmode:bool=False)->None:
+        """ ### Args:
+            * piamp_coef_range: {"q0":[0.9, 1.1], "q1":[0.95, 1.15], ...]\n
+            * amp_sampling_funct: str, `linspace` or `arange`.\n
+            * pi_pair_num: list, like [2, 3] will try 2 exp, the first uses 2\*2 pi-pulse, and the second exp uses 3*2 pi-pulse
+        """
+        if coef_sampling_funct in ['linspace','logspace','arange']:
+            sampling_func:callable = eval(coef_sampling_funct)
+        else:
+            raise ValueError(f"Can't recognize the given sampling function name = {coef_sampling_funct}")
+        
+        self.drag_coef_samples = {}
+        for q in drag_coef_range:
+           self.drag_coef_samples[q] = sampling_func(*drag_coef_range[q],coef_ptsORstep)
+        self.avg_n = avg_n
+        self.execution = execution
+        self.OSmode = OSmode
+        self.target_qs = list(self.drag_coef_samples.keys())
+        
+
+    def PrepareHardware(self):
+        self.QD_agent, self.cluster, self.meas_ctrl, self.ic, self.Fctrl = init_meas(QuantumDevice_path=self.QD_path)
+        # bias coupler
+        self.Fctrl = coupler_zctrl(self.Fctrl,self.QD_agent.Fluxmanager.build_Cctrl_instructions([cp for cp in self.Fctrl if cp[0]=='c' or cp[:2]=='qc'],'i'))
+        # offset bias, LO and atte
+        for q in self.target_qs:
+            self.Fctrl[q](self.QD_agent.Fluxmanager.get_proper_zbiasFor(target_q=q))
+            IF_minus = self.QD_agent.Notewriter.get_xyIFFor(q)
+            xyf = self.QD_agent.quantum_device.get_element(q).clock_freqs.f01()
+            set_LO_frequency(self.QD_agent.quantum_device,q=q,module_type='drive',LO_frequency=xyf-IF_minus)
+            init_system_atte(self.QD_agent.quantum_device,[q],ro_out_att=self.QD_agent.Notewriter.get_DigiAtteFor(q, 'ro'), xy_out_att=self.QD_agent.Notewriter.get_DigiAtteFor(q,'xy'))
+
+        
+    def RunMeasurement(self):
+        from qblox_drive_AS.Calibration_exp.DRAGcali import drag_cali 
+    
+        dataset = drag_cali(self.QD_agent,self.meas_ctrl,self.drag_coef_samples,self.avg_n,self.execution)
+        if self.execution:
+            if self.save_dir is not None:
+                self.save_path = os.path.join(self.save_dir,f"DragCali_{datetime.now().strftime('%Y%m%d%H%M%S') if self.JOBID is None else self.JOBID}")
+                self.__raw_data_location = self.save_path + ".nc"
+                dataset.to_netcdf(self.__raw_data_location)
+                
+            else:
+                self.save_fig_path = None
+        
+    def CloseMeasurement(self):
+        shut_down(self.cluster,self.Fctrl)
+
+
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
+        """ User callable analysis function pack """
+        
+        if self.execution:
+            if new_QD_path is None:
+                QD_file = self.QD_path
+            else:
+                QD_file = new_QD_path
+
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            ds = open_dataset(file_path)
+            answer = {}
+            for var in ds.data_vars:
+                if var.split("_")[-1] != 'dragcoef':
+                    if QD_savior.rotate_angle[var][0] != 0:
+                        ref = QD_savior.rotate_angle[var]
+                    else:
+                        eyeson_print(f"{var} rotation angle is 0, use contrast to analyze.")
+                        ref = QD_savior.refIQ[var]
+                    ANA = Multiplex_analyzer("c6")
+                    ANA._import_data(ds,var_dimension=1,refIQ=ref)
+                    ANA._start_analysis(var_name = var)
+                    ANA._export_result(fig_path)
+                    answer[var] = ANA.fit_packs
+            
+            ds.close()
+
+            permi = mark_input(f"What qubit can be updated ? {list(answer.keys())}/ all/ no ").lower()
+            if permi in list(answer.keys()):
+                QD_savior.Waveformer.set_dragRatio_for(permi,answer[permi]["optimal_drag_coef"])
+                QD_savior.QD_keeper()
+            elif permi in ["all",'y','yes']:
+                for q in answer:
+                    QD_savior.Waveformer.set_dragRatio_for(q, answer[q]["optimal_drag_coef"])
+                QD_savior.QD_keeper()
+            else:
+                print("Updating got denied ~")
+
+    def WorkFlow(self):
+        
+        self.PrepareHardware()
+
+        self.RunMeasurement()
+
+        self.CloseMeasurement() 
+
+
+class XGateErrorTest(ExpGovernment):
+    """ Helps you get the **Dressed** cavities. """
+    def __init__(self,QD_path:str,data_folder:str=None,JOBID:str=None):
+        super().__init__()
+        self.QD_path = QD_path
+        self.save_dir = data_folder
+        self.__raw_data_location:str = ""
+        self.JOBID = JOBID
+
+    @property
+    def RawDataPath(self):
+        return self.__raw_data_location
+    
+    @RawDataPath.setter
+    def RawDataPath(self,path:str):
+        self.__raw_data_location = path
+
+    def SetParameters(self, target_qs:list, shots:int=10000, MaxGate_num:int=300, execution:bool=True, use_untrained_wf:bool=False):
+        """ 
+        ### Args:\n
+        * target_qs: list, like ["q0", "q1", ...]
+        """
+        self.use_time_label:bool = False
+        self.avg_n = shots
+        self.Max_Gate_num = MaxGate_num
+        self.execution = execution
+        self.use_de4t_wf = use_untrained_wf
+        self.target_qs = target_qs
+        
+
+
+
+    def PrepareHardware(self):
+        self.QD_agent, self.cluster, self.meas_ctrl, self.ic, self.Fctrl = init_meas(QuantumDevice_path=self.QD_path)
+        # bias coupler
+        self.Fctrl = coupler_zctrl(self.Fctrl,self.QD_agent.Fluxmanager.build_Cctrl_instructions([cp for cp in self.Fctrl if cp[0]=='c' or cp[:2]=='qc'],'i'))
+        # offset bias, LO and driving atte
+        for q in self.target_qs:
+            self.Fctrl[q](self.QD_agent.Fluxmanager.get_proper_zbiasFor(target_q=q))
+            IF_minus = self.QD_agent.Notewriter.get_xyIFFor(q)
+            xyf = self.QD_agent.quantum_device.get_element(q).clock_freqs.f01()
+            set_LO_frequency(self.QD_agent.quantum_device,q=q,module_type='drive',LO_frequency=xyf-IF_minus)
+            init_system_atte(self.QD_agent.quantum_device,[q],ro_out_att=self.QD_agent.Notewriter.get_DigiAtteFor(q, 'ro'), xy_out_att=self.QD_agent.Notewriter.get_DigiAtteFor(q,'xy'))
+        
+    
+    def RunMeasurement(self):
+        from qblox_drive_AS.aux_measurement.GateErrorTest import XGateError_single_shot
+       
+
+        dataset = XGateError_single_shot(self.QD_agent,self.target_qs,self.Max_Gate_num,self.avg_n,self.use_de4t_wf,self.execution)
+        if self.execution:
+            if self.save_dir is not None:
+                self.save_path = os.path.join(self.save_dir,f"XGateErrorTest_{datetime.now().strftime('%Y%m%d%H%M%S') if (self.JOBID is None or self.use_time_label) else self.JOBID}")
+                self.__raw_data_location = self.save_path + ".nc"
+                dataset.to_netcdf(self.__raw_data_location)
+            else:
+                self.save_fig_path = None
+        
+    def CloseMeasurement(self):
+        shut_down(self.cluster,self.Fctrl)
+
+
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
+        """ if histo_ana, it will check all the data in the same folder with the given new_file_path """
+    
+        if self.execution:
+            if new_QD_path is None:
+                QD_file = self.QD_path
+            else:
+                QD_file = new_QD_path
+
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            
+            ds = open_dataset(file_path)
+            answer = {}
+            for var in ds.data_vars:
+                ANA = Multiplex_analyzer("t1")
+                ANA._import_data(ds,var_dimension=0,fq_Hz=QD_savior.quantum_device.get_element(var).clock_freqs.f01())
+                ANA._start_analysis(var_name=var)
+                pic_path = os.path.join(fig_path,f"{var}_XGateErrorTest_{datetime.now().strftime('%Y%m%d%H%M%S') if self.JOBID is None else self.JOBID}")
+                ANA._export_result(pic_path)
+
+                answer[var] = ANA.fit_packs 
+                highlight_print(f"{var} X-gate phase error ~ {round(answer[var]['f'], 3)} mrad")
+                
+            ds.close()
+
+    def WorkFlow(self):
+        
+        self.PrepareHardware()
+
+        self.RunMeasurement()
+
+        self.CloseMeasurement() 
+
+
+
+
+if __name__ == "__main__":
+    EXP = XGateErrorTest(QD_path="")
+    EXP.execution = True
+    EXP.RunAnalysis(new_QD_path="qblox_drive_AS/QD_backup/20241128/DR1#11_SumInfo.pkl",new_file_path="qblox_drive_AS/Meas_raw/20241128/H18M28S37/GateErrorTest_20241128183038.nc")
+    

@@ -13,6 +13,12 @@ def set_integration_time(QD_agent:QDmanager, inte_time_s:dict=None):
                 QD_agent.quantum_device.get_element(q).measure.integration_time(inte_time_s[q])
                 QD_agent.quantum_device.get_element(q).measure.pulse_duration(inte_time_s[q])
 
+def set_drag_coef(QD_agent:QDmanager,Coefs:dict={}):
+    if Coefs is not None:
+        if len(list(Coefs.keys())) != 0:
+            for q in Coefs:
+                QD_agent.Waveformer.set_dragRatio_for(q, Coefs[q])
+
 def setGlobally_reset_time(QD_agent:QDmanager, reset_time_s:float=None):
     if reset_time_s is not None:
         for q in QD_agent.quantum_device.elements():
@@ -24,12 +30,32 @@ def set_drivin_IF(QD_agent:QDmanager, driving_IF_Hz:dict=None):
             for q in driving_IF_Hz:
                 QD_agent.Notewriter.save_xyIF_for(q,driving_IF_Hz[q])
 
+def setGlobally_driving_atte(QD_agent:QDmanager,xy_atte:int=None):
+    """ Atte must be multiples of 2 """
+    if xy_atte is not None:
+        slightly_print(f"Setting all qubits xy-attenuation at {xy_atte} dB")
+        for q in QD_agent.quantum_device.elements():
+            QD_agent.Notewriter.save_DigiAtte_For(xy_atte,q,'xy')
+
+def set_ROF(QD_agent:QDmanager, ROFs:dict={}):
+    if ROFs is not None:
+        if len(list(ROFs.keys())) != 0:
+            for q in ROFs:
+                QD_agent.quantum_device.get_element(q).clock_freqs.readout(ROFs[q])
+
+
+def set_sweet_bias(QD_agent:QDmanager, offsets:dict={}):
+    if offsets is not None:
+        if len(list(offsets.keys())) != 0:
+            for q in offsets:
+                QD_agent.Fluxmanager.save_sweetspotBias_for(target_q=q,bias=offsets[q])
+
 def set_roLOfreq(QD_agent:QDmanager,LO_Hz:float,target_q:str='q0'):
     """ ## *Warning*: 
         Set the LO for those qubits who shares the same readout module with the `target_q`.
     """
     if LO_Hz is not None:
-        slightly_print(f"Set {find_port_clock_path(QD_agent.quantum_device.hardware_config(),'q:res',f'{target_q}.ro')[1]} RO-LO = {round(LO_Hz*1e-9),2} GHz")
+        slightly_print(f"Set {find_port_clock_path(QD_agent.quantum_device.hardware_config(),'q:res',f'{target_q}.ro')[1]} RO-LO = {round(LO_Hz*1e-9,2)} GHz")
         set_LO_frequency(QD_agent.quantum_device,target_q,'readout',LO_Hz)
 
 def set_roAtte(QD_agent:QDmanager,ro_atte:int, target_q:str='q0'):
@@ -74,18 +100,24 @@ def update_coupler_bias(QD_agent:QDmanager,cp_elements:dict):
 
 if __name__ == "__main__":
 
-    QD_path = ""
+    QD_path = "qblox_drive_AS/QD_backup/20241128/DR1#11_SumInfo.pkl"
     QD_agent = QDmanager(QD_path)
     QD_agent.QD_loader()
 
     """ Set RO amp by a coef. """
     set_ROamp_by_coef(QD_agent, roAmp_coef_dict={}) # roAmp_coef_dict = {"q0":0.93, "q1":0.96, ...}, set None or {} to bypass 
 
+    """ Set RO freq """
+    set_ROF(QD_agent, ROFs={})                      # ROFs = {"q0":6.0554e9, .....}
+    
     """ Set Integration time """ 
     set_integration_time(QD_agent, inte_time_s={}) # inte_time_s = {"q0":1e-6, "q1":0.75e-6, ...}, set None or {} to bypass 
 
-    """ Set reset time (All qubits global)"""
+    """ Set reset time (All qubits global) """
     setGlobally_reset_time(QD_agent, reset_time_s=None)      # reset_time_s = 250e-6, all the qubit in the quantum_device will share the same value
+
+    """ Set driving attenuation (All qubits blobal) """     # xy_atte = 10 recommended, all qubits are shared with a same value. Must be multiples of 2.
+    setGlobally_driving_atte(QD_agent, xy_atte=None)
 
     """ Set driving IF """
     set_drivin_IF(QD_agent, driving_IF_Hz={})   # driving_IF_Hz = {"q0":-150e6, "q1":-100e6, ...}, set None or {} to bypass  !!! Always be negative !!!
@@ -100,4 +132,11 @@ if __name__ == "__main__":
     """ Set grq for sweet spot """
     set_sweet_g(QD_agent,g_dict={})    # g_dict = {"q0":45e6, "q1":90e6, ...}, set None or {} to bypass 
     
-    QD_agent.QD_keeper()  
+    """ Set sweet spot bias """
+    set_sweet_bias(QD_agent, offsets={})          # offsets = {"q0": 0.08, ....}
+
+    """ Set Darg coef """
+    set_drag_coef(QD_agent, Coefs={})
+
+
+    QD_agent.QD_keeper() 
