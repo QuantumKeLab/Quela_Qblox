@@ -15,7 +15,7 @@ from Modularize.support.QuFluxFit import plot_QbFlux
 from Modularize.support.Pulse_schedule_library import Z_gate_two_tone_sche, set_LO_frequency, pulse_preview
 import xarray as xr
 import numpy as np
-from quantify_core.data.handling import DataHandler as dh
+# from quantify_core.data.handling import DataHandler as dh
 
 # def convert_netCDF_2_arrays(CDF_path):
 #     dataset = xr.open_dataset(CDF_path)

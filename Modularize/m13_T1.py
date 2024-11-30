@@ -124,7 +124,7 @@ if __name__ == "__main__":
     
 
     """ Fill in """
-    execution:bool = 1
+    execution:bool = 0
     chip_info_restore:bool = 1
     DRandIP = {"dr":"dr1","last_ip":"11"}
     ro_elements = {

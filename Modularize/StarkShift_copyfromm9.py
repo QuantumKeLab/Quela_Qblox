@@ -12,17 +12,15 @@ from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
 from utils.tutorial_analysis_classes import QubitFluxSpectroscopyAnalysis
 from Modularize.support import init_meas, init_system_atte, shut_down, reset_offset, coupler_zctrl
 from Modularize.support.QuFluxFit import plot_QbFlux
-from Modularize.support.Pulse_schedule_library import StarkShift_sche, Z_gate_two_tone_sche, set_LO_frequency, pulse_preview
+from Modularize.support.Pulse_schedule_library import StarkShift_sche, set_LO_frequency, pulse_preview
 import xarray as xr
 import numpy as np
-from quantify_core.data.handling import DataHandler as dh
 
 
 
 def Stark_shift_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,ro_p_min:float,ro_p_max:float,IF:int=200e6,xyf:float=0e9,xyf_span_Hz:float=400e6,n_avg:int=1000,RO_z_amp:float=0,p_points:int=40,f_points:int=60,run:bool=True,q:str='q1',Experi_info={},get_data_path:bool=False,analysis:bool=True):
     print("Stark shift start")
     trustable = True
-    # sche_func = Z_gate_two_tone_sche
     sche_func=StarkShift_sche
 
     analysis_result = {}
@@ -42,9 +40,6 @@ def Stark_shift_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,ro_p_min:fl
     
     freq = ManualParameter(name="freq", unit="Hz", label="Frequency")
     freq.batched = True
-    
-    # Z_bias = ManualParameter(name="Z", unit="V", label="Z bias")#
-    # Z_bias.batched = False#
     
     ro_pulse_amp = ManualParameter(name="ro_amp", unit="", label="Readout pulse amplitude")
     ro_pulse_amp.batched = False
@@ -66,12 +61,10 @@ def Stark_shift_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,ro_p_min:fl
 
 
     ro_p_samples = linspace(ro_p_min,ro_p_max,p_points)
-    
-    # Z_samples = linspace(Z_amp_start,Z_amp_end,Z_points)
+
     spec_sched_kwargs = dict(   
         frequencies=freq,
         q=q,
-        # Z_amp=Z_bias,#
         R_amp_2=ro_pulse_amp,
         spec_amp=QD_agent.Notewriter.get_2tone_piampFor(q),#
         spec_Du=50*1e-6,#
@@ -79,10 +72,10 @@ def Stark_shift_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,ro_p_min:fl
         pi_dura=qubit_info.rxy.duration(),
         R_amp={str(q):qubit_info.measure.pulse_amp()},#
         R_duration={str(q):qubit_info.measure.pulse_duration()},
+        R_duration_2={str(q):8e-6},
         R_integration={str(q):qubit_info.measure.integration_time()},
         R_inte_delay=qubit_info.measure.acq_delay(),
         # correlate_delay:float=1200e-9, # 
-        # Z_ro_amp=RO_z_amp,#
 
     )
     # exp_kwargs= dict(sweep_F=['start '+'%E' %f01_samples[0],'end '+'%E' %f01_samples[-1]],
@@ -101,47 +94,78 @@ def Stark_shift_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,ro_p_min:fl
         meas_ctrl.gettables(gettable)
         meas_ctrl.settables([freq,ro_pulse_amp])
         meas_ctrl.setpoints_grid((f01_samples,ro_p_samples))
-        qs_ds = meas_ctrl.run("Zgate-two-tone")
-        
-        # Save the raw data into netCDF
-        if get_data_path:
-            path = Data_manager().save_raw_data(QD_agent=QD_agent,ds=qs_ds,qb=q,exp_type='F2tone',get_data_loc=get_data_path)
-        else:
-            path = ''
-            Data_manager().save_raw_data(QD_agent=QD_agent,ds=qs_ds,qb=q,exp_type='F2tone',get_data_loc=get_data_path)
+        qs_ds = meas_ctrl.run("Stark-Shift")
 
-        if analysis:
-            try:
-                analysis_result[q] = QubitFluxSpectroscopyAnalysis(tuid=qs_ds.attrs["tuid"], dataset=qs_ds).run()
-            except:
-                analysis_result[q] = {}
-                print("Qb vs Flux fitting failed! Raw data had been saved.")
-                trustable = False
+        dict_ = {}
+        for idx, q in enumerate(XYFs):
+            freq_values = 2*Bias_samples.shape[0]*list(XYFs[q])
+            i_data = array(qs_ds[f'y{2*idx}']).reshape(Bias_samples.shape[0],array(XYFs[q]).shape[0])
+            q_data = array(qs_ds[f'y{2*idx+1}']).reshape(Bias_samples.shape[0],array(XYFs[q]).shape[0])
+            dict_[q] = (["mixer","bias","freq"],array([i_data,q_data]))
+    
+            dict_[f"{q}_freq"] = (["mixer","bias","freq"],array(freq_values).reshape(2,Bias_samples.shape[0],array(XYFs[q]).shape[0]))
+
+        rfs_ds = Dataset(dict_,coords={"mixer":array(["I","Q"]),"bias":Bias_samples,"freq":freq_datapoint_idx})
+        rfs_ds.attrs["execution_time"] = Data_manager().get_time_now()
+        
+        # # Save the raw data into netCDF
+        # if get_data_path:
+        #     path = Data_manager().save_raw_data(QD_agent=QD_agent,ds=qs_ds,qb=q,exp_type='starksh',get_data_loc=get_data_path)
+        # else:
+        #     path = ''
+        #     Data_manager().save_raw_data(QD_agent=QD_agent,ds=qs_ds,qb=q,exp_type='starksh',get_data_loc=get_data_path)
+
+        # if analysis:
+        #     try:
+        #         analysis_result[q] = QubitFluxSpectroscopyAnalysis(tuid=qs_ds.attrs["tuid"], dataset=qs_ds).run()
+        #     except:
+        #         analysis_result[q] = {}
+        #         print("Qb vs Flux fitting failed! Raw data had been saved.")
+        #         trustable = False
         
         
-        # show_args(exp_kwargs, title="Zgate_two_tone_kwargs: Meas.qubit="+q)
-        if Experi_info != {}:
-            show_args(Experi_info(q))
-        
+        # # show_args(exp_kwargs, title="Zgate_two_tone_kwargs: Meas.qubit="+q)
+        # if Experi_info != {}:
+        #     show_args(Experi_info(q))
+    
     else:
         n_s = 2
-        sweep_para1= array(f01_samples[:n_s])
-        sweep_para2= array(ro_p_samples[:2])
-        spec_sched_kwargs['frequencies']= sweep_para1.reshape(sweep_para1.shape or (1,))
-        # spec_sched_kwargs['Z_amp']= sweep_para2.reshape(sweep_para2.shape or (1,))[1]
-        spec_sched_kwargs['R_amp_2']= sweep_para2.reshape(sweep_para2.shape or (1,))[1]
+        preview_para = {}
+        for q in XYFs:
+            preview_para[q] = XYFs[q][:n_s]
+        sweep_para2 = array(Bias_samples[:2])
+        spec_sched_kwargs['frequencies']= preview_para
+        spec_sched_kwargs['Z_amp']= sweep_para2.reshape(sweep_para2.shape or (1,))[1]
         
         pulse_preview(QD_agent.quantum_device,sche_func,spec_sched_kwargs)
+        rfs_ds = ""
+
+
+        
+    for q in XYFs:
+        qubit_info = QD_agent.quantum_device.get_element(q)   
+        qubit_info.clock_freqs.f01(original_xyfs[q])
+
+    return rfs_ds
+
+    # else:
+    #     n_s = 2
+    #     sweep_para1= array(f01_samples[:n_s])
+    #     sweep_para2= array(ro_p_samples[:2])
+    #     spec_sched_kwargs['frequencies']= sweep_para1.reshape(sweep_para1.shape or (1,))
+    #     spec_sched_kwargs['R_amp_2']= sweep_para2.reshape(sweep_para2.shape or (1,))[1]
+        
+    #     pulse_preview(QD_agent.quantum_device,sche_func,spec_sched_kwargs)
         
         
-        # show_args(exp_kwargs, title="Zgate_two_tone_kwargs: Meas.qubit="+q)
-        if Experi_info != {}:
-            show_args(Experi_info(q))
-        path = ''
+    #     # show_args(exp_kwargs, title="Zgate_two_tone_kwargs: Meas.qubit="+q)
+    #     if Experi_info != {}:
+    #         show_args(Experi_info(q))
+    #     path = ''
 
-    qubit_info.clock_freqs.f01(original_f01)
+    # qubit_info.clock_freqs.f01(original_f01)
 
-    return analysis_result, path, trustable
+    # return analysis_result, path, trustable
 
 
 def update_by_fluxQubit(QD_agent:QDmanager,correct_results:dict,target_q:str):
@@ -150,19 +174,19 @@ def update_by_fluxQubit(QD_agent:QDmanager,correct_results:dict,target_q:str):
     """
     qubit = QD_agent.quantum_device.get_element(target_q)
     qubit.clock_freqs.f01(correct_results["xyf"])
-    QD_agent.Fluxmanager.check_offset_and_correctFor(target_q=target_q,new_offset=correct_results["sweet_bias"])
-    QD_agent.Fluxmanager.save_sweetspotBias_for(target_q=target_q,bias=correct_results["sweet_bias"])
+    # QD_agent.Fluxmanager.check_offset_and_correctFor(target_q=target_q,new_offset=correct_results["sweet_bias"])
+    # QD_agent.Fluxmanager.save_sweetspotBias_for(target_q=target_q,bias=correct_results["sweet_bias"])
 
 
 
-def fluxQubit_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,specific_qubits:str,run:bool=True,z_shifter:float=0,zpts:int=5,fpts:int=40,span_priod_factor:int=12,f_sapn_Hz=400e6,avg_times:int=1000,xy_IF:float=200e6):
-    center = QD_agent.Fluxmanager.get_proper_zbiasFor(target_q=specific_qubits)
-    partial_period = QD_agent.Fluxmanager.get_PeriodFor(target_q=specific_qubits)/span_priod_factor
+def StarkShift_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,specific_qubits:str,run:bool=True,z_shifter:float=0,zpts:int=5,fpts:int=40,span_priod_factor:int=12,f_sapn_Hz=400e6,avg_times:int=1000,xy_IF:float=200e6):
+    # center = QD_agent.Fluxmanager.get_proper_zbiasFor(target_q=specific_qubits)#
+    # partial_period = QD_agent.Fluxmanager.get_PeriodFor(target_q=specific_qubits)/span_priod_factor#
 
     if run:
         
-        Fctrl[specific_qubits](center)
-        results, nc_path, trustable= Stark_shift_spec(QD_agent,meas_ctrl,ro_p_min=ro_p_min,ro_p_max=ro_p_max,p_points=p_points,f_points=fpts,q=specific_qubits,run=True,get_data_path=True,xyf_span_Hz=f_sapn_Hz,IF=xy_IF,n_avg=avg_times)
+        # Fctrl[specific_qubits](center)
+        results, nc_path, trustable= Stark_shift_spec(QD_agent,meas_ctrl,ro_p_min=ro_p_min,ro_p_max=ro_p_max,p_points=p_points,f_points=fpts,q=specific_qubits,run=run,get_data_path=True,xyf_span_Hz=f_sapn_Hz,IF=xy_IF,n_avg=avg_times)
         reset_offset(Fctrl)
         if trustable:
             plot_QbFlux(QD_agent,nc_path,specific_qubits)
@@ -177,17 +201,17 @@ def fluxQubit_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,specific_
             return False, {}
 
     else:
-        results, _, trustable=  results, nc_path, trustable= Stark_shift_spec(QD_agent,meas_ctrl,ro_p_min=ro_p_min,ro_p_max=ro_p_max,p_points=p_points,f_points=fpts,q=specific_qubits,run=True,get_data_path=True,xyf_span_Hz=f_sapn_Hz,IF=xy_IF,n_avg=avg_times)
+        results, _, trustable= Stark_shift_spec(QD_agent,meas_ctrl,ro_p_min=ro_p_min,ro_p_max=ro_p_max,p_points=p_points,f_points=fpts,q=specific_qubits,run=run,get_data_path=True,xyf_span_Hz=f_sapn_Hz,IF=xy_IF,n_avg=avg_times)
         return False, {}
 
 
 if __name__ == "__main__":
     
     """ Fill in """
-    execution:bool = True
-    chip_info_restore:bool = 1
-    DRandIP = {"dr":"dr1","last_ip":"11"}
-    ro_elements = ['q0']
+    execution:bool = False
+    chip_info_restore:bool = 0
+    DRandIP = {"dr":"drke","last_ip":"242"}
+    ro_elements = ['q1']
     couplers = []
     z_shifter = 0.0 # V
 
@@ -208,7 +232,8 @@ if __name__ == "__main__":
 
 
     """ Preparations """
-    QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
+    # QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
+    QD_path=r"c:\Users\Ke Lab\SynologyDrive\09 Data\Fridge Data\Qubit\20241031_DR5_FQV1+NCU-1\Qblox\QD_backup\2024_11_4\DRKE#242_SumInfo.pkl"
     QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
     if ro_elements == 'all':
         ro_elements = list(Fctrl.keys())
@@ -220,13 +245,13 @@ if __name__ == "__main__":
     check_again =[]
     Cctrl = coupler_zctrl(DRandIP["dr"],cluster,QD_agent.Fluxmanager.build_Cctrl_instructions(couplers,'i'))
     for qubit in ro_elements:
-        if not QD_agent.Fluxmanager.get_offsweetspot_button(qubit):
+        if not QD_agent.Fluxmanager.get_offsweetspot_button(qubit):#?
         # if QD_agent.Fluxmanager.get_offsweetspot_button(qubit): #**when at off-sweet spot**
             init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
             # Cctrl['c0'](-0.15)
             # Cctrl['c1'](0.104)
-            # trustable, new_ans = fluxQubit_executor(QD_agent,meas_ctrl,qubit,run=execution,z_shifter=z_shifter,zpts=flux_pts,fpts=freq_pts,span_priod_factor=span_period_factor,f_sapn_Hz=freq_span_Hz,avg_times=avg_n,xy_IF=xy_IF)
-            trustable, new_ans = fluxQubit_executor(QD_agent, meas_ctrl, ro_elements[0], run=execution, z_shifter=z_shifter, zpts=flux_pts, fpts=freq_pts, span_priod_factor=span_period_factor, f_sapn_Hz=freq_span_Hz, avg_times=avg_n, xy_IF=xy_IF)
+            # trustable, new_ans = StarkShift_executor(QD_agent,meas_ctrl,qubit,run=execution,z_shifter=z_shifter,zpts=flux_pts,fpts=freq_pts,span_priod_factor=span_period_factor,f_sapn_Hz=freq_span_Hz,avg_times=avg_n,xy_IF=xy_IF)
+            trustable, new_ans = StarkShift_executor(QD_agent, meas_ctrl, ro_elements[0], run=execution, z_shifter=z_shifter, zpts=flux_pts, fpts=freq_pts, span_priod_factor=span_period_factor, f_sapn_Hz=freq_span_Hz, avg_times=avg_n, xy_IF=xy_IF)
             # Cctrl['c0'](0)
             # Cctrl['c1'](0)
             cluster.reset()
