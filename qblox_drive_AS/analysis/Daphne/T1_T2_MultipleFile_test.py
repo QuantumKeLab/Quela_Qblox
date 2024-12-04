@@ -4,7 +4,7 @@ from qcat.analysis.state_discrimination.readout_fidelity import GMMROFidelity
 from qcat.visualization.readout_fidelity import plot_readout_fidelity
 from xarray import Dataset, open_dataset
 from Modularize.analysis.Radiator.RadiatorSetAna import OSdata_arranger
-from Modularize.support.UserFriend import *
+from qblox_drive_AS.support.UserFriend import *
 from Modularize.support.QDmanager import QDmanager, Data_manager
 from numpy import array, moveaxis, mean, std, median, arange
 import matplotlib.pyplot as plt
@@ -13,7 +13,7 @@ from qcat.analysis.state_discrimination import p01_to_Teff
 import numpy as np
 from matplotlib.ticker import MultipleLocator
 from Modularize.analysis.Radiator.RadiatorSetAna import sort_set
-from Modularize.analysis.OneShotAna import a_OSdata_analPlot
+from qblox_drive_AS.analysis.OneShotAna import a_OSdata_analPlot
 import re
 
 """One Folder, Multiple Files"""

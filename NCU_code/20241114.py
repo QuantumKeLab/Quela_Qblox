@@ -3,12 +3,12 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 from xarray import Dataset
 from qblox_instruments import Cluster
 from utils.tutorial_utils import show_args
-from Modularize.support.UserFriend import *
+from qblox_drive_AS.support.UserFriend import *
 from qcodes.parameters import ManualParameter
 from numpy import array, linspace, median, std
 from quantify_scheduler.gettables import ScheduleGettable
 from quantify_core.measurement.control import MeasurementControl
-from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
+from qblox_drive_AS.support.Path_Book import find_latest_QD_pkl_for_dr
 from Modularize.support.Pulse_schedule_library import Qubit_state_single_shot_plot
 from Modularize.support import QDmanager, Data_manager,init_system_atte, init_meas, shut_down, coupler_zctrl
 from Modularize.support.Pulse_schedule_library import Qubit_SS_sche, set_LO_frequency, pulse_preview, Qubit_state_single_shot_fit_analysis

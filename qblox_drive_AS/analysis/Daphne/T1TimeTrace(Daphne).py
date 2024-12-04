@@ -4,7 +4,7 @@ from xarray import Dataset, open_dataset
 from Modularize.support import QDmanager, Data_manager
 import matplotlib.pyplot as plt
 from numpy import array, median, std
-from Modularize.support.Pulse_schedule_library import IQ_data_dis, dataset_to_array, T1_fit_analysis, Fit_analysis_plot
+from qblox_drive_AS.support.Pulse_schedule_library import IQ_data_dis, dataset_to_array, T1_fit_analysis, Fit_analysis_plot
 from datetime import datetime
 from Modularize.analysis.Radiator.RadiatorSetAna import sort_set
 import numpy as np

@@ -1,10 +1,10 @@
 import os, sys 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', "..", ".."))
-from Modularize.support.UserFriend import *
+from qblox_drive_AS.support.UserFriend import *
 from Modularize.support.QDmanager import QDmanager, Data_manager
 from numpy import array, moveaxis, mean, std, median, arange
 import numpy as np
-from Modularize.analysis.OneShotAna import a_OSdata_analPlot
+from qblox_drive_AS.analysis.OneShotAna import a_OSdata_analPlot
 
 def analyze_and_plot(Qmanager, target_q, folder_path, show_each_plot, save_folder):
     """針對特定資料夾中的 .nc 檔案進行分析並生成 histogram 圖"""

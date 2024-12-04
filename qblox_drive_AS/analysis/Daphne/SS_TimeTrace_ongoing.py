@@ -2,7 +2,7 @@ import os, sys
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', "..", ".."))
 from xarray import Dataset, open_dataset
 
-from Modularize.support.UserFriend import *
+from qblox_drive_AS.support.UserFriend import *
 from Modularize.support.QDmanager import QDmanager, Data_manager
 from numpy import array, moveaxis, mean, std, median, arange
 import matplotlib.pyplot as plt
@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import MultipleLocator
 from Modularize.analysis.Radiator.RadiatorSetAna import sort_set
-from Modularize.analysis.OneShotAna import a_OSdata_analPlot
+from qblox_drive_AS.analysis.OneShotAna import a_OSdata_analPlot
 import re
 from datetime import datetime, timedelta
 

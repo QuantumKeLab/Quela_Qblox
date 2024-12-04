@@ -2,16 +2,16 @@ import os, sys
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', ".."))
 import numpy as np
 from qblox_instruments import Cluster
-from Modularize.support.UserFriend import *
+from qblox_drive_AS.support.UserFriend import *
 from scipy.optimize import minimize
 from Modularize.support import QDmanager
 from Modularize.m14_SingleShot import SS_executor, Qubit_state_single_shot
-from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
+from qblox_drive_AS.support.Path_Book import find_latest_QD_pkl_for_dr
 from Modularize.support import init_meas, init_system_atte, shut_down, coupler_zctrl
 import matplotlib.pyplot as plt
 
 try:
-    from Modularize.analysis.OneShotAna import a_OSdata_analPlot
+    from qblox_drive_AS.analysis.OneShotAna import a_OSdata_analPlot
     mode = "AS"
 except:
     mode = "WeiEn"

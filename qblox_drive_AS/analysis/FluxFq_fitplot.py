@@ -4,7 +4,7 @@ import xarray as xr
 import matplotlib.pyplot as plt 
 from matplotlib.ticker import FuncFormatter
 from Modularize.support.QDmanager import QDmanager
-from Modularize.support.Pulse_schedule_library import IQ_data_dis, T1_fit_analysis, Fit_analysis_plot
+from qblox_drive_AS.support.Pulse_schedule_library import IQ_data_dis, T1_fit_analysis, Fit_analysis_plot
 from numpy import array, std, average, round, max, min, transpose, abs, sqrt, cos, sin, pi, linspace, arange,ndarray, log10, ndarray, asarray
 
 #//================= Fill in here ========================

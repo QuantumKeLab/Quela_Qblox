@@ -4,14 +4,14 @@ from numpy import NaN
 from numpy import array, linspace, sqrt
 from utils.tutorial_utils import show_args
 from qcodes.parameters import ManualParameter
-from Modularize.support.UserFriend import *
+from qblox_drive_AS.support.UserFriend import *
 from Modularize.support import QDmanager, Data_manager, cds,compose_para_for_multiplexing
 from quantify_scheduler.gettables import ScheduleGettable
 from quantify_core.measurement.control import MeasurementControl
-from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
+from qblox_drive_AS.support.Path_Book import find_latest_QD_pkl_for_dr
 from Modularize.support import init_meas, init_system_atte, shut_down, reset_offset, coupler_zctrl
-from Modularize.support.StarkShift_coyfromQuFluxFit  import plot_ROopti
-from Modularize.support.Pulse_schedule_library import StarkShift_sche, set_LO_frequency, pulse_preview
+from qblox_drive_AS.support.StarkShift_coyfromQuFluxFit  import plot_ROopti
+from qblox_drive_AS.support.Pulse_schedule_library import StarkShift_sche, set_LO_frequency, pulse_preview
 import xarray as xr
 import numpy as np
 from xarray import Dataset

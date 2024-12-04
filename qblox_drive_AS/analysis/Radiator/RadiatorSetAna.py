@@ -7,7 +7,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', "
 from qblox_drive_AS.support.Pulse_schedule_library import IQ_data_dis, dataset_to_array, T1_fit_analysis, T2_fit_analysis, plot_textbox, Fit_analysis_plot
 from xarray import Dataset, open_dataset # Dataset.to_dict(SS_ds)
 from numpy import array, ndarray, mean, std, round, arange, moveaxis, any, zeros, delete, average, sqrt
-# from Modularize.support.Pulse_schedule_library import hist_plot
+# from qblox_drive_AS.support.Pulse_schedule_library import hist_plot
 import matplotlib.pyplot as plt
 from xarray import DataArray
 from qblox_drive_AS.support.Path_Book import meas_raw_dir

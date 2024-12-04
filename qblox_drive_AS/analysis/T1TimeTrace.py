@@ -4,7 +4,7 @@ from xarray import Dataset, open_dataset
 from Modularize.support import QDmanager,Data_manager
 import matplotlib.pyplot as plt
 from numpy import array, median, std 
-from Modularize.support.Pulse_schedule_library import IQ_data_dis, dataset_to_array, T1_fit_analysis
+from qblox_drive_AS.support.Pulse_schedule_library import IQ_data_dis, dataset_to_array, T1_fit_analysis
 from datetime import datetime 
 from Modularize.analysis.Radiator.RadiatorSetAna import sort_set
 def time_label_sort(nc_file_name:str):

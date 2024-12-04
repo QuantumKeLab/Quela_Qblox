@@ -6,7 +6,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', "
 from pandas import DataFrame as DF
 from xarray import Dataset, open_dataset # Dataset.to_dict(SS_ds)
 from numpy import array, ndarray, mean, std, round, arange
-# from Modularize.support.Pulse_schedule_library import hist_plot
+# from qblox_drive_AS.support.Pulse_schedule_library import hist_plot
 import matplotlib.pyplot as plt
 from qblox_drive_AS.support.Path_Book import meas_raw_dir
 from qblox_drive_AS.analysis.Radiator.RadiatorSetAna import collect_allSets_inTempera, get_time_axis, timelabelfolder_creator, find_nearest, exp_item_translator, ax_set_y_label
