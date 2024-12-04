@@ -20,8 +20,8 @@ def rofCali(QD_agent:QDmanager,meas_ctrl:MeasurementControl,ro_span_Hz:float=3e6
     qubit = QD_agent.quantum_device.get_element(q)
 
     ro_f_origin= qubit.clock_freqs.readout()
-    qubit.measure.integration_time(3e-6)
-    qubit.measure.pulse_duration(3e-6)
+    qubit.measure.integration_time(2e-6)
+    qubit.measure.pulse_duration(2e-6)
     print("Integration time ",qubit.measure.integration_time()*1e6, "µs")
     print("Reset time ", qubit.reset.duration()*1e6, "µs")
     LO= ro_f_origin+IF+ro_span_Hz
@@ -72,10 +72,11 @@ def rofCali(QD_agent:QDmanager,meas_ctrl:MeasurementControl,ro_span_Hz:float=3e6
             show_args(exp_kwargs, title="RofCali_kwargs: Meas.qubit="+q)
 
         else:
-            n_s = 2
+            n_s = 4
             sweep_para= array(ro_f_samples[:n_s])
             sched_kwargs['ro_freq']= sweep_para.reshape(sweep_para.shape or (1,))
-            pulse_preview(QD_agent.quantum_device,sche_func,sched_kwargs)
+            if ini_state == 'e':
+                pulse_preview(QD_agent.quantum_device,sche_func,sched_kwargs)
             
 
             show_args(exp_kwargs, title="RofCali_kwargs: Meas.qubit="+q)
@@ -147,9 +148,9 @@ def rofCali_executor(QD_agent:QDmanager,cluster:Cluster,meas_ctrl:MeasurementCon
 if __name__ == '__main__':
 
     """ Fill in """
-    execute:bool = True
-    DRandIP = {"dr":"dr1","last_ip":"11"}
-    ro_elements = {'q1':{"span_Hz":0.5e6}}
+    execute:bool = 1
+    DRandIP = {"dr":"drke","last_ip":"242"}
+    ro_elements = {'q0':{"span_Hz":3e6}}
     couplers = []
 
 

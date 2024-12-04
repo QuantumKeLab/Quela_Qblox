@@ -313,6 +313,8 @@ class Data_manager:
         elif exp_type.lower() == 'fringe':
             path = os.path.join(parent_dir,f"{dr_loc}{qb}RamseyFringe{exp_timeLabel}.nc")
             
+        elif exp_type.lower() == 'starkshift':
+            path = os.path.join(parent_dir,f"{dr_loc}{qb}Starkshift{exp_timeLabel}.nc")   
         else:
             path = os.path.join(parent_dir,"Unknown.nc")
             raise KeyError("Wrong experience type!")

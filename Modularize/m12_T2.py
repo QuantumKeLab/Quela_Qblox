@@ -21,8 +21,8 @@ def Ramsey(QD_agent:QDmanager,meas_ctrl:MeasurementControl,freeduration:float,ar
     Real_detune= {}
     
     qubit_info = QD_agent.quantum_device.get_element(q)
-    qubit_info.measure.integration_time(1.5e-6)
-    qubit_info.measure.pulse_duration(1.5e-6)
+    qubit_info.measure.integration_time(10e-6)
+    qubit_info.measure.pulse_duration(10e-6)
     # qubit_info.rxy.amp180(0.30389033573721985)
     # qubit_info.reset.duration(qubit_info.reset.duration()*2)
     print("Integration time ",qubit_info.measure.integration_time()*1e6, "µs")
@@ -188,9 +188,9 @@ if __name__ == "__main__":
     """ Fill in """
     execution:bool = 1
     chip_info_restore:bool = 1
-    DRandIP = {"dr":"dr1","last_ip":"11"}
+    DRandIP = {"dr":"drke","last_ip":"242"}
     ro_elements = {
-        "q1":{"detune":0e6,"evoT":50e-6,"histo_counts":30},#-0.174e6
+        "q2":{"detune":0e6,"evoT":200e-6,"histo_counts":1},#-0.174e6
     }
     couplers = []
 

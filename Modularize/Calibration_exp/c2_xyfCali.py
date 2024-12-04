@@ -14,9 +14,9 @@ if __name__ == "__main__":
     
     """ Fill in """
     execution:bool = 1
-    DRandIP = {"dr":"dr1","last_ip":"11"}
+    DRandIP = {"dr":"drke","last_ip":"242"}
     ro_elements = {
-        "q0":{"evoT":40e-6}
+        "q2":{"evoT":100e-6}
     }
     couplers = []
 
@@ -46,8 +46,8 @@ if __name__ == "__main__":
             else:
                 trying_detune = ((-1)**(step))*abs_detuning
                 _, _, average_actual_detune = ramsey_executor(QD_agent,cluster,meas_ctrl,Fctrl,qubit,artificial_detune=trying_detune,freeDura=ro_elements[qubit]["evoT"],run=execution,avg_n=500)
-            Cctrl['c0'](0.0)
-            Cctrl['c1'](0.0)
+            # Cctrl['c0'](0.0)
+            # Cctrl['c1'](0.0)
             eyeson_print(f"Detuning = {round(abs_detuning*1e-6,2)} MHz")
             if step > 0 and average_actual_detune[qubit] < abs_detuning:
                 highlight_print(f"XYF calibration done successfully! detuning = {round(average_actual_detune[qubit]*1e-6,4)} MHz")

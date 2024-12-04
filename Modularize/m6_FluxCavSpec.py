@@ -129,13 +129,13 @@ if __name__ == "__main__":
     """ Fill in """
     execution:bool = True
     chip_info_restore:bool = 0
-    DRandIP = {"dr":"dr1","last_ip":"11"}
+    DRandIP = {"dr":"drke","last_ip":"242"}
     ro_elements = ['q0']
     cp_ctrl = {}#'c0':-0.3
 
     """ Optional paras """
     freq_half_window_Hz = 7e6
-    flux_half_window_V  = 0.4
+    flux_half_window_V  = 0.5
     freq_data_points = 40
     flux_data_points = 40
     freq_center_shift = 0e6 # freq axis shift
@@ -175,12 +175,12 @@ if __name__ == "__main__":
 
     
         """ Storing """
-        if update and execution:
-            QD_agent.refresh_log("after FluxDep")
-            QD_agent.QD_keeper()
-            if chip_info_restore:
-                chip_info.update_FluxCavitySpec(qb=qubit, result=FD_results[qubit])
-            update = False
+        # if update and execution:
+        #     QD_agent.refresh_log("after FluxDep")
+        #     QD_agent.QD_keeper()
+        #     if chip_info_restore:
+        #         chip_info.update_FluxCavitySpec(qb=qubit, result=FD_results[qubit])
+        #     update = False
     
 
         """ Close """

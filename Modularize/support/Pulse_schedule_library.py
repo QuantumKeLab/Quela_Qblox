@@ -558,8 +558,6 @@ def StarkShift_sche(
     frequencies: np.ndarray,
     # frequencies: dict,
     q:str,
-    spec_amp:float,
-    spec_Du:float,
     pi_amp: dict,##
     pi_dura:float,##
     R_amp: dict,
@@ -571,35 +569,25 @@ def StarkShift_sche(
     # powerDep:bool,##
     repetitions:int=1,  
     ref_pt:str='start',#
-    correlate_delay:float=1200e-9, # 
+    correlate_delay:float=280e-9, # 
 
 ) -> Schedule:
     
-    # qubits2read = list(frequencies.keys())#?
-    # sameple_idx = array(frequencies[qubits2read[0]]).shape[0]#?
     
     sched = Schedule("Stark Shift",repetitions=repetitions)
-
-    # for acq_idx in range(sameple_idx):    
+    sched.add_resource(ClockResource(name=q+ ".01",freq=frequencies.flat[0]))
+ 
     for acq_idx, freq in enumerate(frequencies):
-    #     for qubit_idx, q in enumerate(qubits2read):
-    #         freq = frequencies[q][acq_idx]#?
-        if acq_idx == 0:
-            sched.add_resource(ClockResource(name=q+ ".01",freq=frequencies.flat[0]))#, freq=array(frequencies[q]).flat[0]))
         sched.add(Reset(q))
         sched.add(SetClockFrequency(clock=q+ ".01", clock_freq_new=freq))
-        sched.add(IdlePulse(duration=5000*1e-9), label=f"buffer  {acq_idx}") #{qubit_idx} {acq_idx})
+        sched.add(IdlePulse(duration=5000*1e-9), label=f"buffer  {acq_idx}")
     
-        # if qubit_idx == 0:
-        spec_pulse = Readout(sched,q,R_amp,R_duration,powerDep=False)#power dependence?
-               
-            # else:
-                # Multi_Readout(sched,q,spec_pulse,R_amp,R_duration,powerDep=powerDep)
-
-        X_pi_p(sched,pi_amp,q,pi_dura,spec_pulse,freeDu=correlate_delay+electrical_delay,ref_point=ref_pt)#pi_dura[q]
-        Readout_2(sched,q,spec_pulse,R_amp=R_amp_2,R_duration=R_duration_2,powerDep=True,correlate_delay=-(R_duration_2[q]+correlate_delay+electrical_delay))
+      
+        spec_pulse = Readout(sched,q,R_amp,R_duration,powerDep=False)
+        Spec_pulse(sched,pi_amp[q],2e-6,q,spec_pulse,freeDu=correlate_delay,ref_point=ref_pt)
+        Readout_2(sched,q,spec_pulse,R_amp=R_amp_2,R_duration=R_duration_2,powerDep=True,correlate_delay=-(R_duration_2[q]+correlate_delay))
         
-        Integration(sched,q,R_inte_delay,R_integration,spec_pulse,acq_idx,single_shot=False,get_trace=False,trace_recordlength=0)#R_inte_delay[q],acq_index=acq_idx,acq_channel=qubit_idx,
+        Integration(sched,q,R_inte_delay[q],R_integration,spec_pulse,acq_idx,single_shot=False,get_trace=False,trace_recordlength=0)#R_inte_delay[q],acq_index=acq_idx,acq_channel=qubit_idx,
             
     return sched
 
