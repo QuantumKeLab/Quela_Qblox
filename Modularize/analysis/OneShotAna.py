@@ -25,8 +25,10 @@ def a_OSdata_analPlot(QD_agent:QDmanager, target_q:str, nc_path:str, plot:bool=T
     SS_ds = open_dataset(nc_path)
     ss_dict = Dataset.to_dict(SS_ds)
     # print(ss_dict)
+
     pe_I, pe_Q = ss_dict['data_vars']['e']['data']
     pg_I, pg_Q = ss_dict['data_vars']['g']['data']
+   
     pgI_collection = [pg_I]
     pgQ_collection = [pg_Q]
     peI_collection = [pe_I]
@@ -35,7 +37,7 @@ def a_OSdata_analPlot(QD_agent:QDmanager, target_q:str, nc_path:str, plot:bool=T
     OS_data = 1000*array([[pgI_collection,peI_collection],[pgQ_collection,peQ_collection]]) # can train or predict 2*2*histo_counts*shot
     tarin_data, fit_arrays = OSdata_arranger(OS_data)
     # train GMM
-    # print(tarin_data)
+    print(tarin_data)
     gmm2d_fidelity = GMMROFidelity()
     gmm2d_fidelity._import_data(tarin_data[0])
     gmm2d_fidelity._start_analysis()
@@ -296,13 +298,13 @@ def share_model_OSana(QD_agent:QDmanager,target_q:str,folder_path:str,pic_save:b
 if __name__ == "__main__":
 
     
-    QD_agent_path=r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\QD_backup\2024_10_26\DRKE#242_SumInfo.pkl"
+    QD_agent_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_12_4\DRKE#242_SumInfo.pkl"
     Qmanager = QDmanager(QD_agent_path)
     Qmanager.QD_loader()
     target_q='q0'
 
     "For single file"
-    nc_path=r"C:\Users\admin\SynologyDrive\09 Data\Fridge Data\Qubit\20241024_DRKe_5XQv4#5_second_coating_and_effT\Meas_raw\Q3_CopyFoldersForMainAnalysis\QDbackupIs1026\40mK\SS\DRKEq0_SingleShot(16)_H14M20S31.nc"
+    nc_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_12_4\DRKEq0_SingleShot(0)_H21M53S12.nc"
     a_OSdata_analPlot(Qmanager,target_q, nc_path)
     # a_OSdata_correlation_analPlot(nc_path)
     

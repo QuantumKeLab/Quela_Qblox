@@ -152,7 +152,7 @@ if __name__ == '__main__':
 
 
     """ Iteration """
-    snr_rec, effT_rec, thermal_pop = {}, {}, {}
+
     for qubit in ro_elements:
         for i in range(repeat):
             start_time = time.time()
@@ -166,43 +166,17 @@ if __name__ == '__main__':
 
             """ Running """
             Cctrl = coupler_zctrl(DRandIP["dr"],cluster,QD_agent.Fluxmanager.build_Cctrl_instructions(couplers,'i'))
-            if i == 0:
-                snr_rec[qubit], effT_rec[qubit], thermal_pop[qubit] = [], [], []
             init_system_atte(QD_agent.quantum_device,list([qubit]),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
-            ro_amp_scaling = ro_elements[qubit]["roAmp_factor"]
-            if ro_amp_scaling != 1 and repeat > 1 : raise ValueError("Check the RO_amp_factor should be 1 when you want to repeat it!")
-            # Cctrl['c0'](0.07)
-            # Cctrl['c1'](0.05)
-            info = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=ro_amp_scaling,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF)#,data_folder=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25\SS_overnight"
-            # Cctrl['c0'](0)
-            # Cctrl['c1'](0)
-            snr_rec[qubit].append(info[2])
-            effT_rec[qubit].append(info[1])
-            thermal_pop[qubit].append(info[0]*100)
-            if ro_amp_scaling !=1 or ro_atte_degrade_dB != 0:
-                keep = mark_input(f"Keep this RO amp for {qubit}?[y/n]")
-            else:
-                keep = 'y'
-
-            """ Storing """ 
-            if execute and repeat == 1:
-                if keep.lower() in ['y', 'yes']:
-                    QD_agent.QD_keeper() 
-                    
-                    
+    
+            info = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=1,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF)#,data_folder=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25\SS_overnight"
+       
                 
             """ Close """    
             shut_down(cluster,Fctrl,Cctrl)
             end_time = time.time()
             slightly_print(f"time cose: {round(end_time-start_time,1)} secs")
 
-    for qubit in effT_rec:
-        highlight_print(f"{qubit}: {round(median(array(effT_rec[qubit])),2)} +/- {round(std(array(effT_rec[qubit])),3)} mK")
-    
-        Data_manager().save_histo_pic(QD_agent,effT_rec,qubit,mode="ss")
-        Data_manager().save_histo_pic(QD_agent,thermal_pop,qubit,mode="pop")
-        
-        
+   
 
         
     
