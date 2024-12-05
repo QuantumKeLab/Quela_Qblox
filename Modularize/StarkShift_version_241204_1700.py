@@ -10,7 +10,7 @@ from quantify_scheduler.gettables import ScheduleGettable
 from quantify_core.measurement.control import MeasurementControl
 from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
 from Modularize.support import init_meas, init_system_atte, shut_down, reset_offset, coupler_zctrl
-from Modularize.support.StarkShift_coyfromQuFluxFit  import plot_ROopti
+from Modularize.support.StarkShift  import plot_ROopti
 from Modularize.support.Pulse_schedule_library import StarkShift_sche, set_LO_frequency, pulse_preview
 import xarray as xr
 import numpy as np
@@ -189,15 +189,15 @@ if __name__ == "__main__":
     
     """ Optional paras """
 
-    freq_pts:int = 500
-    freq_span_Hz:float = 500e6
+    freq_pts:int = 600
+    freq_span_Hz:float = 400e6
     sweet_flux_shifter:float = 0
     xy_IF = 100e6
     avg_n:int = 200
     
 
-    ro_p_max:float = 0.12#the output figure will show (ro_p_max)**2
-    p_pts = 500
+    ro_p_max:float = 0.13#the output figure will show (ro_p_max)**2
+    p_pts = 600
 
 
 

@@ -29,7 +29,7 @@ def RO_optimization(QD_agent:QDmanager,cluster,Fctrl,target_q:str='q0',run:bool=
     old_rof = qubit_info.clock_freqs.readout()
     old_rol = qubit_info.measure.pulse_amp()
     
-    qubit_info.rxy.duration(6e-8)
+    # qubit_info.rxy.duration(6e-8)
     print(qubit_info.rxy.duration())
     ## Initial readout fidelity and error calculation
     # info= SS_executor(QD_agent,cluster, Fctrl,target_q)
@@ -37,52 +37,52 @@ def RO_optimization(QD_agent:QDmanager,cluster,Fctrl,target_q:str='q0',run:bool=
           
     RO_fidelity = info[2]
     print(RO_fidelity)
-    # err_init = 1 - RO_fidelity
-    # rof.append(old_rof)
-    # rol.append(old_rol)
-    # err.append(err_init)
+    err_init = 1 - RO_fidelity
+    rof.append(old_rof)
+    rol.append(old_rol)
+    err.append(err_init)
 
-    # ## Define the goal function to minimize the error
-    # def goal_function(params):
-    #     rof, rol = params
-    #     qubit_info.clock_freqs.readout(rof) 
-    #     qubit_info.measure.pulse_amp(rol) 
-    #     info= SS_executor(QD_agent)
-    #     RO_fidelity = info[2]
-    #     return 1 - RO_fidelity
+    ## Define the goal function to minimize the error
+    def goal_function(params):
+        rof, rol = params
+        qubit_info.clock_freqs.readout(rof) 
+        qubit_info.measure.pulse_amp(rol) 
+        info= SS_executor(QD_agent)
+        RO_fidelity = info[2]
+        return 1 - RO_fidelity
 
-    # ## Define a callback function to track optimization progress
-    # optimization_trace = {'rof': [], 'rol': [], 'infidelity': []}
+    ## Define a callback function to track optimization progress
+    optimization_trace = {'rof': [], 'rol': [], 'infidelity': []}
 
-    # def callback(params):
-    #     f_val = goal_function(params)
-    #     optimization_trace['infidelity'].append(f_val)
-    #     optimization_trace['rof'].append(params[0])
-    #     optimization_trace['rol'].append(params[1])
+    def callback(params):
+        f_val = goal_function(params)
+        optimization_trace['infidelity'].append(f_val)
+        optimization_trace['rof'].append(params[0])
+        optimization_trace['rol'].append(params[1])
 
-    # ## Set initial values for rof and rol
-    # init_value = [old_rof, old_rol]
+    ## Set initial values for rof and rol
+    init_value = [old_rof, old_rol]
     
-    # ## Define bounds for rof and rol
-    # bounds = [(0.1, 0.9),  # rof's range [0.1, 0.9]
-    #       (0.1, 0.9)]  # rol's range [0.1, 0.9]
+    ## Define bounds for rof and rol
+    bounds = [(0.1, 0.9),  # rof's range [0.1, 0.9]
+          (0.1, 0.9)]  # rol's range [0.1, 0.9]
     
-    # ## Run the optimization using Nelder-Mead
-    # result = minimize(goal_function, init_value, method='L-BFGS-B', callback=callback, bounds=bounds,tol=2e-3,
-    #                 options={'maxiter': 200, 'disp': True, 'return_all': True})
+    ## Run the optimization using Nelder-Mead
+    result = minimize(goal_function, init_value, method='L-BFGS-B', callback=callback, bounds=bounds,tol=2e-3,
+                    options={'maxiter': 200, 'disp': True, 'return_all': True})
 
-    # ## Extract the results
-    # optimized_rof, optimized_rol = result.x
-    # rof.extend(optimization_trace['rof'])
-    # rol.extend(optimization_trace['rol'])
-    # err.extend(optimization_trace['infidelity'])
+    ## Extract the results
+    optimized_rof, optimized_rol = result.x
+    rof.extend(optimization_trace['rof'])
+    rol.extend(optimization_trace['rol'])
+    err.extend(optimization_trace['infidelity'])
 
-    # ## Plot the error progression
-    # plt.plot(range(len(err)), err)
-    # plt.xlabel('Iteration')
-    # plt.ylabel('Error')
-    # plt.title('Error Optimization Progress')
-    # plt.show()
+    ## Plot the error progression
+    plt.plot(range(len(err)), err)
+    plt.xlabel('Iteration')
+    plt.ylabel('Error')
+    plt.title('Error Optimization Progress')
+    plt.show()
 
 def RO_opti_executor(QD_agent:QDmanager,cluster:Cluster,Fctrl:dict,target_q:str,run:bool=True,shots:int=10000,plot:bool=True,exp_idx:int=0,IF:float=250e6):#,ro_amp_adj:float=1):
       

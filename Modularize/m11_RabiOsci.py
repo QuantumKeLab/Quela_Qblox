@@ -20,7 +20,7 @@ def Rabi(QD_agent:QDmanager,meas_ctrl:MeasurementControl,XY_amp:float=0.5, XY_du
     # qubit_info.clock_freqs.f01(4.1e9)
     LO= qubit_info.clock_freqs.f01()+IF
     qubit_info.measure.pulse_duration(1e-6)
-    qubit_info.measure.integration_time(0.6e-6)#1e-6
+    qubit_info.measure.integration_time(1e-6)#1e-6
     qubit_info.reset.duration(250e-6)
     print("Integration time ",qubit_info.measure.integration_time()*1e6, "µs")
     print("Reset time ", qubit_info.reset.duration()*1e6, "µs")
