@@ -5,7 +5,7 @@ from qblox_instruments import Cluster
 from qblox_drive_AS.support.UserFriend import *
 from scipy.optimize import minimize
 from Modularize.support import QDmanager
-from Modularize.m14_SingleShot import SS_executor, Qubit_state_single_shot
+from qblox_drive_AS.SingleReadout import SS_executor, Qubit_state_single_shot
 from qblox_drive_AS.support.Path_Book import find_latest_QD_pkl_for_dr
 from Modularize.support import init_meas, init_system_atte, shut_down, coupler_zctrl
 import matplotlib.pyplot as plt
