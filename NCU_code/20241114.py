@@ -9,9 +9,9 @@ from numpy import array, linspace, median, std
 from quantify_scheduler.gettables import ScheduleGettable
 from quantify_core.measurement.control import MeasurementControl
 from qblox_drive_AS.support.Path_Book import find_latest_QD_pkl_for_dr
-from Modularize.support.Pulse_schedule_library import Qubit_state_single_shot_plot
-from Modularize.support import QDmanager, Data_manager,init_system_atte, init_meas, shut_down, coupler_zctrl
-from Modularize.support.Pulse_schedule_library import Qubit_SS_sche, set_LO_frequency, pulse_preview, Qubit_state_single_shot_fit_analysis
+from qblox_drive_AS.support.Pulse_schedule_library import Qubit_state_single_shot_plot
+from qblox_drive_AS.support import QDmanager, Data_manager,init_system_atte, init_meas, shut_down, coupler_zctrl
+from qblox_drive_AS.support.Pulse_schedule_library import Qubit_SS_sche, set_LO_frequency, pulse_preview, Qubit_state_single_shot_fit_analysis
 
 
 def Cavity_powerDep_spec(quantum_device:QuantumDevice,ro_bare_guess:dict,ro_span_Hz:int=5e6,ro_p_min:float=0.1,ro_p_max:float=0.7,n_avg:int=1000,f_points:int=200,p_points:int=200,run:bool=True,q:str='q0',Save:bool=False):

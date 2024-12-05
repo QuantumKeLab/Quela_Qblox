@@ -5,7 +5,7 @@ from qcat.visualization.readout_fidelity import plot_readout_fidelity
 from xarray import Dataset, open_dataset
 from Modularize.analysis.Radiator.RadiatorSetAna import OSdata_arranger
 from qblox_drive_AS.support.UserFriend import *
-from Modularize.support.QDmanager import QDmanager, Data_manager
+from qblox_drive_AS.support.QDmanager import QDmanager, Data_manager
 from numpy import array, moveaxis, mean, std, median, arange
 import matplotlib.pyplot as plt
 from Modularize.analysis.Radiator.RadiatorSetAna import sort_files

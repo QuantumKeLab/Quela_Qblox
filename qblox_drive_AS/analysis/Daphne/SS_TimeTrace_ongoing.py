@@ -3,7 +3,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', "
 from xarray import Dataset, open_dataset
 
 from qblox_drive_AS.support.UserFriend import *
-from Modularize.support.QDmanager import QDmanager, Data_manager
+from qblox_drive_AS.support.QDmanager import QDmanager, Data_manager
 from numpy import array, moveaxis, mean, std, median, arange
 import matplotlib.pyplot as plt
 

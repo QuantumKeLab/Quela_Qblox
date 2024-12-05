@@ -7,7 +7,7 @@ from qblox_drive_AS.support import QDmanager
 cluster_IP:str = "192.168.1.242"
 dr_name:str = "drke"
 qubit_number_onChip:int = 4
-coupler_number_onChip:int = 2
+coupler_number_onChip:int = 0
 chip_name:str = "5Q4C_Test"
 chip_type:str = "5Q4C"
 old_QD_path:str = "" # set the path in string When you want to update the Hcfg. Otherwise, set it None
@@ -87,8 +87,8 @@ Hcfg = {
             "instrument_type": "QCM",
             "real_output_0": {"portclock_configs": [{"port": "q0:fl", "clock": "cl0.baseband"}]},
             "real_output_1": {"portclock_configs": [{"port": "q1:fl", "clock": "cl0.baseband"}]},
-            "real_output_2": {"portclock_configs": [{"port": "c0:fl", "clock": "cl0.baseband"}]},
-            "real_output_3": {"portclock_configs": [{"port": "c1:fl", "clock": "cl0.baseband"}]},
+            "real_output_2": {"portclock_configs": [{"port": "q2:fl", "clock": "cl0.baseband"}]},
+            "real_output_3": {"portclock_configs": [{"port": "q3:fl", "clock": "cl0.baseband"}]},
         },
         
         # ============ READOUT ============#

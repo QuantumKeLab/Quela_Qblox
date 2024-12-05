@@ -5,7 +5,7 @@ import quantify_core.data.handling as dh
 import matplotlib.pyplot as plt
 from typing import Callable
 from numpy import flip, pi, linspace, array, sqrt, std, mean, sort, diag, sign, absolute, arange
-from Modularize.support import QDmanager, Data_manager
+from qblox_drive_AS.support import QDmanager, Data_manager
 from qblox_drive_AS.support.Pulse_schedule_library import IQ_data_dis
 from numpy import ndarray, cos, sin, deg2rad, real, imag, transpose, abs
 from scipy.optimize import curve_fit

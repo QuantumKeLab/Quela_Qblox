@@ -5,7 +5,7 @@ from qblox_drive_AS.support.ExpFrames import FluxQubit
 
 ''' fill in '''
 Execution:bool = True
-DRandIP = {"dr":"dr2","last_ip":"10"}
+DRandIP = {"dr":"drke","last_ip":"242"}
 freq_span_range:dict = {"q0":[-350e6,100e6], "q1":[-300e6,150e6]}    # [freq_span_start, freq_span_end] use linspace, total span should <= 500 MHz
 bias_elements:list = ['q0', 'q1']
 z_amp_range:list = [-0.08, 0.08, 60]                                 # z-pulse amplitude [from, end, pts/step]

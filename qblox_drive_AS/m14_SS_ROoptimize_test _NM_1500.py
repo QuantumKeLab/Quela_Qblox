@@ -23,12 +23,29 @@ except:
     mode = "WeiEn"
     
 def RO_optimization(QD_agent:QDmanager,cluster,Fctrl,target_q:str='q0',run:bool=True,shots:int=10000,plot:bool=True,exp_label:int=0,IF:float=250e6):
-    slightly_print("Start to optimize readout")
+    print("Start to optimize readout")
+   
+    rof = []
+    rol = []
+    err = []
 
-    qubit_info.clock_freqs.readout()
+    qubit_info = QD_agent.quantum_device.get_element(target_q)
+    old_rof = qubit_info.clock_freqs.readout()
     old_rol = qubit_info.measure.pulse_amp()
-            
-       
+    
+    qubit_info.rxy.duration(6e-8)
+    print(qubit_info.rxy.duration())
+    
+    ## Initial readout fidelity and error calculation
+    # info= SS_executor(QD_agent,cluster, Fctrl,target_q)
+    info=SS_executor(QD_agent,cluster,Fctrl,target_q=target_q,execution=run,shots=shots,roAmp_modifier=1,plot=plot if repeat ==1 else False,exp_label=exp_label,IF= IF)#roAmp_modifier=ro_amp_scaling,
+          
+    RO_fidelity = info[2]
+    print(RO_fidelity)
+    err_init = 1 - RO_fidelity
+    rof.append(old_rof)
+    rol.append(old_rol)
+    err.append(err_init)
 
 
 def RO_opti_executor(QD_agent:QDmanager,cluster:Cluster,Fctrl:dict,target_q:str,run:bool=True,shots:int=10000,plot:bool=True,exp_idx:int=0,IF:float=250e6):#,ro_amp_adj:float=1):
@@ -72,30 +89,8 @@ if __name__ == '__main__':
             """ Running """
             # Cctrl = coupler_zctrl(DRandIP["dr"],cluster,QD_agent.Fluxmanager.build_Cctrl_instructions(couplers,'i'))
             init_system_atte(QD_agent.quantum_device,list([qubit]),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
-            
-            rot = []
-            rol = []
-            err = []
-
-            qubit_info = QD_agent.quantum_device.get_element(qubit)
-            
-            old_rot = qubit_info.measure.integration_time()
-            qubit_info.measure.pulse_duration(10e-6)
-            # old_rof = qubit_info.clock_freqs.readout()
-            old_rol = qubit_info.measure.pulse_amp()
-            
-            qubit_info.rxy.duration(6e-8)
-            print(qubit_info.rxy.duration())
-            
-            info = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=1,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF)#,data_folder=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25\SS_overnight"
-            
-            RO_fidelity = info[2]
-            print(RO_fidelity)
-            err_init = 1 - RO_fidelity
-            rof.append(old_rof)
-            rol.append(old_rol)
-            err.append(err_init)
-                    
+    
+            # info = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=1,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF)#,data_folder=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25\SS_overnight"
             RO_opti_executor(QD_agent,cluster,Fctrl,target_q=qubit,run=execute,shots=shot_num,plot=True,exp_idx=i,IF=xy_IF)
                 
             """ Close """    

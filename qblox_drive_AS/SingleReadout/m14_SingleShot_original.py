@@ -1,5 +1,5 @@
 import os, sys, time
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', ".."))
 from xarray import Dataset
 from qblox_instruments import Cluster
 from utils.tutorial_utils import show_args
@@ -10,7 +10,7 @@ from quantify_scheduler.gettables import ScheduleGettable
 from quantify_core.measurement.control import MeasurementControl
 from qblox_drive_AS.support.Path_Book import find_latest_QD_pkl_for_dr
 from qblox_drive_AS.support.Pulse_schedule_library import Qubit_state_single_shot_plot
-from Modularize.support import QDmanager, Data_manager,init_system_atte, init_meas, shut_down, coupler_zctrl
+from qblox_drive_AS.support import QDmanager, Data_manager,init_system_atte, init_meas, shut_down, coupler_zctrl
 from qblox_drive_AS.support.Pulse_schedule_library import Qubit_SS_sche, set_LO_frequency, pulse_preview, Qubit_state_single_shot_fit_analysis
 
 
@@ -124,14 +124,10 @@ def SS_executor(QD_agent:QDmanager,cluster:Cluster,Fctrl:dict,target_q:str,shots
         else:
             effT_mk, ro_fidelity, thermal_p = 0, 0, 0
     else:
-        # thermal_p, effT_mk, ro_fidelity = a_OSdata_analPlot(QD_agent,target_q,nc,plot,save_pic=save_every_pic)
-        print("Calling a_OSdata_analPlot with parameters:")
-        print(f"QD_agent: {QD_agent}, target_q: {target_q}, nc: {nc}, plot: {plot}, save_pic: {save_every_pic}")
-        thermal_p, effT_mk, ro_fidelity, p10_precentage,snr,power_snr_dB, dis, sigma=a_OSdata_analPlot(QD_agent,target_q,nc,plot,save_pic=save_every_pic)
-    # else:
-        # effT_mk, ro_fidelity, thermal_p = 0, 0, 0
+        thermal_p, effT_mk, ro_fidelity, rotate_angle = a_OSdata_analPlot(nc,QD_agent,target_q,plot,save_pic=save_every_pic)
 
-    return thermal_p, effT_mk, ro_fidelity,p10_precentage#,snr,power_snr_dB
+
+    return thermal_p, effT_mk, ro_fidelity, rotate_angle
 
 if __name__ == '__main__':
     
@@ -152,31 +148,58 @@ if __name__ == '__main__':
 
 
     """ Iteration """
-
+    snr_rec, effT_rec, thermal_pop = {}, {}, {}
     for qubit in ro_elements:
         for i in range(repeat):
             start_time = time.time()
 
             """ Preparation """
             slightly_print(f"The {i}th OS:")
-            QD_path =find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
-            QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
+            QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
+            QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path)
             QD_agent.Notewriter.modify_DigiAtte_For(-ro_atte_degrade_dB, qubit, 'ro')
 
 
             """ Running """
-            Cctrl = coupler_zctrl(DRandIP["dr"],cluster,QD_agent.Fluxmanager.build_Cctrl_instructions(couplers,'i'))
+            Fctrl = coupler_zctrl(Fctrl,QD_agent.Fluxmanager.build_Cctrl_instructions(couplers,'i'))
+            if i == 0:
+                snr_rec[qubit], effT_rec[qubit], thermal_pop[qubit] = [], [], []
             init_system_atte(QD_agent.quantum_device,list([qubit]),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'))
-    
-            info = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=1,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF)#,data_folder=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25\SS_overnight"
-       
+            ro_amp_scaling = ro_elements[qubit]["roAmp_factor"]
+            if ro_amp_scaling != 1 and repeat > 1 : raise ValueError("Check the RO_amp_factor should be 1 when you want to repeat it!")
+            # Cctrl['c0'](0.07)
+            # Cctrl['c1'](0.05)
+            info = SS_executor(QD_agent,cluster,Fctrl,qubit,execution=execute,shots=shot_num,roAmp_modifier=ro_amp_scaling,plot=True if repeat ==1 else False,exp_label=i,IF=xy_IF)#,data_folder=r"C:\Users\User\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_10_25\SS_overnight"
+            # Cctrl['c0'](0)
+            # Cctrl['c1'](0)
+            snr_rec[qubit].append(info[2])
+            effT_rec[qubit].append(info[1])
+            thermal_pop[qubit].append(info[0]*100)
+            QD_agent.refIQ[qubit] = [info[-1]]
+            if ro_amp_scaling !=1 or ro_atte_degrade_dB != 0:
+                keep = mark_input(f"Keep this RO amp for {qubit}?[y/n]")
+            else:
+                keep = 'y'
+
+            """ Storing """ 
+            if execute and repeat == 1:
+                if keep.lower() in ['y', 'yes']:
+                    QD_agent.QD_keeper() 
+                    
+                    
                 
             """ Close """    
-            shut_down(cluster,Fctrl,Cctrl)
+            shut_down(cluster,Fctrl)
             end_time = time.time()
             slightly_print(f"time cose: {round(end_time-start_time,1)} secs")
 
-   
+    for qubit in effT_rec:
+        highlight_print(f"{qubit}: {round(median(array(effT_rec[qubit])),2)} +/- {round(std(array(effT_rec[qubit])),3)} mK")
+    
+        Data_manager().save_histo_pic(QD_agent,effT_rec,qubit,mode="ss")
+        Data_manager().save_histo_pic(QD_agent,thermal_pop,qubit,mode="pop")
+        
+        
 
         
     

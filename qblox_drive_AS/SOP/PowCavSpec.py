@@ -101,6 +101,7 @@ def plot_powerCavity_S21(ds:Dataset, QD_agent:QDmanager=None, save_fig_folder:st
     for idx, q in enumerate(ds.data_vars):
         if str(q).split("_")[-1] != 'freq':
             amp:ndarray = sqrt(array(ds[q])[0]**2+array(ds[q])[1]**2)
+            print(amp.shape)
             s21 = []
             for i in range(amp.shape[0]):
                 if power[i] != 0:

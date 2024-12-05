@@ -1,7 +1,7 @@
 import os, sys, json 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', ".."))
 from xarray import Dataset, open_dataset
-from Modularize.support import QDmanager, Data_manager
+from qblox_drive_AS.support import QDmanager, Data_manager
 import matplotlib.pyplot as plt
 from numpy import ndarray, array, median, std, mean
 from qblox_drive_AS.support.Pulse_schedule_library import IQ_data_dis, dataset_to_array, T2_fit_analysis, T1_fit_analysis

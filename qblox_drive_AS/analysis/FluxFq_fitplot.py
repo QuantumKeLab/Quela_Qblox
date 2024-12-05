@@ -3,7 +3,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', "
 import xarray as xr
 import matplotlib.pyplot as plt 
 from matplotlib.ticker import FuncFormatter
-from Modularize.support.QDmanager import QDmanager
+from qblox_drive_AS.support.QDmanager import QDmanager
 from qblox_drive_AS.support.Pulse_schedule_library import IQ_data_dis, T1_fit_analysis, Fit_analysis_plot
 from numpy import array, std, average, round, max, min, transpose, abs, sqrt, cos, sin, pi, linspace, arange,ndarray, log10, ndarray, asarray
 

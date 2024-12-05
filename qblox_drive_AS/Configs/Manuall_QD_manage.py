@@ -126,7 +126,7 @@ class QD_modifier():
 
 if __name__ == "__main__":
 
-    QD_path = r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20241204\DRKE#242_SumInfo.pkl"
+    QD_path = r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20241205\DRKE#242_SumInfo.pkl"
     QMaster = QD_modifier(QD_path)
 
     """ Set RO amp by a coef. """

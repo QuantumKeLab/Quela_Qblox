@@ -1,7 +1,7 @@
 import os, sys 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', "..", ".."))
 from qblox_drive_AS.support.UserFriend import *
-from Modularize.support.QDmanager import QDmanager, Data_manager
+from qblox_drive_AS.support.QDmanager import QDmanager, Data_manager
 from numpy import array, moveaxis, mean, std, median, arange
 import numpy as np
 from qblox_drive_AS.analysis.OneShotAna import a_OSdata_analPlot

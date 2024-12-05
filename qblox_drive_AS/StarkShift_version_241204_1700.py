@@ -5,11 +5,11 @@ from numpy import array, linspace, sqrt
 from utils.tutorial_utils import show_args
 from qcodes.parameters import ManualParameter
 from qblox_drive_AS.support.UserFriend import *
-from Modularize.support import QDmanager, Data_manager, cds,compose_para_for_multiplexing
+from qblox_drive_AS.support import QDmanager, Data_manager, cds,compose_para_for_multiplexing
 from quantify_scheduler.gettables import ScheduleGettable
 from quantify_core.measurement.control import MeasurementControl
 from qblox_drive_AS.support.Path_Book import find_latest_QD_pkl_for_dr
-from Modularize.support import init_meas, init_system_atte, shut_down, reset_offset, coupler_zctrl
+from qblox_drive_AS.support import init_meas, init_system_atte, shut_down, reset_offset, coupler_zctrl
 from qblox_drive_AS.support.StarkShift_coyfromQuFluxFit  import plot_ROopti
 from qblox_drive_AS.support.Pulse_schedule_library import StarkShift_sche, set_LO_frequency, pulse_preview
 import xarray as xr
@@ -66,11 +66,11 @@ def Stark_shift_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,ro_elements
         R_amp_2=ro_pulse_amp,
         pi_amp={str(q):spec_pulse_amp},
         pi_dura=qubit_info.rxy.duration(),
-        R_amp=compose_para_for_multiplexing(QD_agent,ro_elements,'1'),
-        R_duration=compose_para_for_multiplexing(QD_agent,ro_elements,'3'),
+        R_amp=compose_para_for_multiplexing(QD_agent,ro_elements,'r1'),
+        R_duration=compose_para_for_multiplexing(QD_agent,ro_elements,'r3'),
         R_duration_2={str(q):8e-6},
-        R_integration=compose_para_for_multiplexing(QD_agent,ro_elements,'4'),
-        R_inte_delay=compose_para_for_multiplexing(QD_agent,ro_elements,'2'),
+        R_integration=compose_para_for_multiplexing(QD_agent,ro_elements,'r4'),
+        R_inte_delay=compose_para_for_multiplexing(QD_agent,ro_elements,'r2'),
         # correlate_delay:float=1200e-9, # 
 
     )
@@ -180,7 +180,7 @@ def StarkShift_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,specific
 if __name__ == "__main__":
     
     """ Fill in """
-    execution:bool = 1
+    execution:bool = 0
     chip_info_restore:bool = 0
     DRandIP = {"dr":"drke","last_ip":"242"}
     ro_elements = ['q0']
@@ -189,7 +189,7 @@ if __name__ == "__main__":
     
     """ Optional paras """
 
-    freq_pts:int = 500
+    freq_pts:int = 3
     freq_span_Hz:float = 500e6
     sweet_flux_shifter:float = 0
     xy_IF = 100e6
@@ -197,14 +197,14 @@ if __name__ == "__main__":
     
 
     ro_p_max:float = 0.12#the output figure will show (ro_p_max)**2
-    p_pts = 500
+    p_pts = 4
 
 
 
 
     """ Preparations """
     QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
-    QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path,mode='l')
+    QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path)#,mode='l'
     if ro_elements == 'all':#?
         ro_elements = list(Fctrl.keys())#?
     chip_info = cds.Chip_file(QD_agent=QD_agent)
@@ -213,7 +213,7 @@ if __name__ == "__main__":
     """ Running """
     FQ_results = {}
     check_again =[]
-    Cctrl = coupler_zctrl(DRandIP["dr"],cluster,QD_agent.Fluxmanager.build_Cctrl_instructions(couplers,'i'))
+    
     for qubit in ro_elements:
         if not QD_agent.Fluxmanager.get_offsweetspot_button(qubit):#?
         # if QD_agent.Fluxmanager.get_offsweetspot_button(qubit): #**when at off-sweet spot**
