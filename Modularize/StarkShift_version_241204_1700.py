@@ -189,15 +189,15 @@ if __name__ == "__main__":
     
     """ Optional paras """
 
-    freq_pts:int = 600
+    freq_pts:int = 200
     freq_span_Hz:float = 400e6
     sweet_flux_shifter:float = 0
-    xy_IF = 100e6
-    avg_n:int = 200
+    xy_IF = 50e6
+    avg_n:int = 300
     
 
-    ro_p_max:float = 0.13#the output figure will show (ro_p_max)**2
-    p_pts = 600
+    ro_p_max:float = 0.26#the output figure will show (ro_p_max)**2
+    p_pts = 40
 
 
 

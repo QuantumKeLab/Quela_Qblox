@@ -25,9 +25,10 @@ except:
 
 def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:str='q1',IF:float=250e6,Experi_info:dict={},ro_amp_factor:float=1,T1:float=15e-6,exp_idx:int=0,parent_datafolder:str='',plot:bool=False):
     qubit_info = QD_agent.quantum_device.get_element(q)
-    qubit_info.measure.integration_time(1.5e-6)
-    qubit_info.measure.pulse_duration(1.5e-6)
+    # qubit_info.measure.integration_time(1e-6)
+    # qubit_info.measure.pulse_duration(1e-6)
     print("Integration time ",qubit_info.measure.integration_time()*1e6, "µs")
+    print("Pulse duration ",qubit_info.measure.pulse_duration()*1e6, "µs")
     print("Reset time ", qubit_info.reset.duration()*1e6, "µs")
     
     # qubit_info.reset.duration(250e-6)
@@ -39,7 +40,7 @@ def Qubit_state_single_shot(QD_agent:QDmanager,shots:int=1000,run:bool=True,q:st
         qubit_info.measure.pulse_amp(ro_amp_factor*qubit_info.measure.pulse_amp())
         eyeson_print(f"The new RO amp = {round(qubit_info.measure.pulse_amp(),5)}")
     else:
-        eyeson_print(f"RO amp = {qubit_info.measure.pulse_amp()}")
+        eyeson_print(f"RO amp = {round(qubit_info.measure.pulse_amp(),4)}")
     set_LO_frequency(QD_agent.quantum_device,q=q,module_type='drive',LO_frequency=LO)
     data = {}
     analysis_result = {}
@@ -125,8 +126,8 @@ def SS_executor(QD_agent:QDmanager,cluster:Cluster,Fctrl:dict,target_q:str,shots
             effT_mk, ro_fidelity, thermal_p = 0, 0, 0
     else:
         # thermal_p, effT_mk, ro_fidelity = a_OSdata_analPlot(QD_agent,target_q,nc,plot,save_pic=save_every_pic)
-        print("Calling a_OSdata_analPlot with parameters:")
-        print(f"QD_agent: {QD_agent}, target_q: {target_q}, nc: {nc}, plot: {plot}, save_pic: {save_every_pic}")
+        # print("Calling a_OSdata_analPlot with parameters:")
+        # print(f"QD_agent: {QD_agent}, target_q: {target_q}, nc: {nc}, plot: {plot}, save_pic: {save_every_pic}")
         thermal_p, effT_mk, ro_fidelity, p10_precentage,snr,power_snr_dB, dis, sigma=a_OSdata_analPlot(QD_agent,target_q,nc,plot,save_pic=save_every_pic)
     # else:
         # effT_mk, ro_fidelity, thermal_p = 0, 0, 0
