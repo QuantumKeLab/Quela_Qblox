@@ -52,6 +52,11 @@ def a_OSdata_analPlot(QD_agent:QDmanager, target_q:str, nc_path:str, plot:bool=T
     p01=np.abs(p01)*100
     effT_mK = np.abs(p01_to_Teff(p01, transi_freq)*1000)#p01_to_Teff(p01, transi_freq)*1000
     RO_fidelity_percentage = (p00+p11)*100/2
+    print("Readout Fidelity from a_OSdata_analPlot",RO_fidelity_percentage)
+    print("p00=",p00)
+    print("p11=",p11)
+   
+
     p10_precentage=p10*100
     snr = g1d_fidelity.discriminator.snr
     power_snr_dB=np.log10(snr)*20
@@ -298,13 +303,13 @@ def share_model_OSana(QD_agent:QDmanager,target_q:str,folder_path:str,pic_save:b
 if __name__ == "__main__":
 
     
-    QD_agent_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_12_5\DRKE#242_SumInfo.pkl"
+    QD_agent_path=r"C:\Users\Ke Lab\Desktop\HYL\20241205_loading\QD_backup\2024_12_5\DRKE#242_SumInfo.pkl"
     Qmanager = QDmanager(QD_agent_path)
     Qmanager.QD_loader()
     target_q='q0'
 
     "For single file"
-    nc_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_12_6\QDbackupIs20241205\Amp_dependent\008\SS\DRKEq0_SingleShot(3)_H2M42S31.nc"
+    nc_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_12_6\QDbackupIs20241205\Amp_dependent\006\SS\DRKEq0_SingleShot(0)_H0M13S59.nc"
     a_OSdata_analPlot(Qmanager,target_q, nc_path)
     # a_OSdata_correlation_analPlot(nc_path)
     
