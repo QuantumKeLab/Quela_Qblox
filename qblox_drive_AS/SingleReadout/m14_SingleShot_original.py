@@ -136,13 +136,13 @@ if __name__ == '__main__':
     execute:bool = 1
     repeat:int = 1
     DRandIP = {"dr":"drke","last_ip":"242"}
-    ro_elements = {'q0':{"roAmp_factor":0.6}}
+    ro_elements = {'q0':{"roAmp_factor":0.5}}
     couplers = []
 
 
     """ Optional paras (don't use is better) """
     ro_atte_degrade_dB:int = 0 # multiple of 2 
-    shot_num:int = 10000
+    shot_num:int = 50000
     xy_IF = 250e6
 
 

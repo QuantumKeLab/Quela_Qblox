@@ -113,17 +113,17 @@ def share_model_OSana(QD_agent:QDmanager,target_q:str,folder_path:str,pic_save:b
 if __name__ == "__main__":
 #old
     
-    QD_agent_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\Modularize\QD_backup\2024_12_4\DRKE#242_SumInfo.pkl"
+    QD_agent_path=r"C:\Users\Ke Lab\Desktop\HYL\20241205_loading\QD_backup\2024_12_5\DRKE#242_SumInfo.pkl"
     Qmanager = QDmanager(QD_agent_path)
     Qmanager.QD_loader()
     target_q='q0'
 
     "For single file"
-    nc_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_12_4\DRKEq0_SingleShot(0)_H21M53S12.nc"
+    nc_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\Modularize\Meas_raw\2024_12_6\QDbackupIs20241205\Amp_dependent\008\SS\DRKEq0_SingleShot(0)_H2M40S25.nc"
     a_OSdata_analPlot(Qmanager,target_q, nc_path)
     # a_OSdata_correlation_analPlot(nc_path)
     
-#master
-    nc_path = 'Modularize/Meas_raw/20241029/DR2q0_SingleShot(0)_H12M46S03.nc'
-    a_OSdata_analPlot(nc_path)
+# #master
+#     nc_path = 'Modularize/Meas_raw/20241029/DR2q0_SingleShot(0)_H12M46S03.nc'
+#     a_OSdata_analPlot(nc_path)
 
