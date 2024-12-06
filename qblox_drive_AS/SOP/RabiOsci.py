@@ -60,6 +60,8 @@ def PowerRabi(QD_agent:QDmanager,meas_ctrl:MeasurementControl,pi_amp:dict,pi_dur
     for q in pi_amp:
         qubit_info = QD_agent.quantum_device.get_element(q)
         eyeson_print(f"{q} Reset time: {round(qubit_info.reset.duration()*1e6,0)} µs")
+        print(f"Readout time(integration)={qubit_info.measure.integration_time()}")
+        print(f"Readout time(pulse duration)={qubit_info.measure.pulse_duration()}")
         eyeson_print(f"XYF = {round(qubit_info.clock_freqs.f01()*1e-9,3)} GHz")
         pi_amp_idxes = arange(0,pi_amp[q].shape[0])
         
@@ -136,6 +138,8 @@ def TimeRabi(QD_agent:QDmanager,meas_ctrl:MeasurementControl,pi_amp:dict,pi_dura
     for q in pi_dura:
         qubit_info = QD_agent.quantum_device.get_element(q)
         eyeson_print(f"{q} Reset time: {round(qubit_info.reset.duration()*1e6,0)} µs")
+        print(f"Readout time(integration)={qubit_info.measure.integration_time()}")
+        print(f"Readout time(pulse duration)={qubit_info.measure.pulse_duration()}")
         eyeson_print(f"XYF = {round(qubit_info.clock_freqs.f01()*1e-9,3)} GHz")
         pi_dura_idxes = arange(0,pi_dura[q].shape[0])
         

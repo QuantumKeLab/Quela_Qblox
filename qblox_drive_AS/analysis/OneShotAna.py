@@ -48,6 +48,7 @@ def a_OSdata_analPlot(nc_path:str, QD_agent:QDmanager=None, target_q:str=None, p
     
     p00 = g1d_fidelity.g1d_dist[0][0][0]
     p01 = g1d_fidelity.g1d_dist[0][0][1]
+    p10 = g1d_fidelity.g1d_dist[1][0][0]#
     p11 = g1d_fidelity.g1d_dist[1][0][1]
     if transi_freq is not None:
         effT_mK = p01_to_Teff(p01, transi_freq)*1000
@@ -55,6 +56,12 @@ def a_OSdata_analPlot(nc_path:str, QD_agent:QDmanager=None, target_q:str=None, p
     print("Readout Fidelity from a_OSdata_analPlot",RO_fidelity_percentage)
     print("p00=",p00)
     print("p11=",p11)
+    
+    p10_precentage=p10*100
+    snr = g1d_fidelity.discriminator.snr
+    power_snr_dB=np.log10(snr)*20
+    dis = g1d_fidelity.discriminator.signal
+    sigma = np.mean(g1d_fidelity.discriminator.noise)
     
     if plot:
         z = moveaxis(array(tarin_data[0]),0,1) # (IQ, state, shots) -> (state, IQ, shots)
@@ -69,8 +76,17 @@ def a_OSdata_analPlot(nc_path:str, QD_agent:QDmanager=None, target_q:str=None, p
         print(f"!! center:\n{gmm2d_fidelity.centers}")
         plot_readout_fidelity(da, gmm2d_fidelity, g1d_fidelity,transi_freq,pic_save_path)
         plt.close()
+        
+    print('|p01|',p01)
+    print('effT_mK',effT_mK)
+    print('p10',p10)
+    print("snr",snr)
+    print("power_snr_dB",power_snr_dB)
+    print("distance",dis)
+    print("sigma",sigma)
+    
+    return p01, effT_mK, RO_fidelity_percentage, angle,  p10_precentage,snr,power_snr_dB,dis,sigma
 
-    return p01, effT_mK, RO_fidelity_percentage, angle
 
 def share_model_OSana(QD_agent:QDmanager,target_q:str,folder_path:str,pic_save:bool=True):
     transi_freq = QD_agent.quantum_device.get_element(target_q).clock_freqs.f01()

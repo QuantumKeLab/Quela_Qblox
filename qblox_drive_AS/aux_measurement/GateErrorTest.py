@@ -29,8 +29,8 @@ def XGateError_single_shot(QD_agent:QDmanager,ro_elements:list, max_gate_num:int
         qubit_info = QD_agent.quantum_device.get_element(q)
         qubit_info.reset.duration(qubit_info.reset.duration()+max(pulse_repeats)*pi_dura)
         eyeson_print(f"{q} Reset time: {round(qubit_info.reset.duration()*1e6,0)} µs")
-        eyeson_print(f"{q} Integration time: {round(qubit_info.measure.integration_time()*1e6,1)} µs")
-
+        print(f"Readout time(integration)={qubit_info.measure.integration_time()}")
+        print(f"Readout time(pulse duration)={qubit_info.measure.pulse_duration()}")
     
     folder = []
     if untrained:

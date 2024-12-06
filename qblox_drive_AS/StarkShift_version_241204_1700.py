@@ -10,7 +10,7 @@ from quantify_scheduler.gettables import ScheduleGettable
 from quantify_core.measurement.control import MeasurementControl
 from qblox_drive_AS.support.Path_Book import find_latest_QD_pkl_for_dr
 from qblox_drive_AS.support import init_meas, init_system_atte, shut_down, reset_offset, coupler_zctrl
-from qblox_drive_AS.support.StarkShift_coyfromQuFluxFit  import plot_ROopti
+from qblox_drive_AS.support.StarkShift  import plot_ROopti
 from qblox_drive_AS.support.Pulse_schedule_library import StarkShift_sche, set_LO_frequency, pulse_preview
 import xarray as xr
 import numpy as np

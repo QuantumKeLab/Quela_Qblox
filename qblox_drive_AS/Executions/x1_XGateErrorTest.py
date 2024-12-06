@@ -5,10 +5,10 @@ from qblox_drive_AS.support.ExpFrames import XGateErrorTest
 
 ''' fill in '''
 Execution:bool = 1
-DRandIP = {"dr":"dr1","last_ip":"11"}
-target_qs:list = ["q4"]
-un_trained_pulse:bool = True
-max_gate_num = 300
+DRandIP = {"dr":"drke","last_ip":"242"}
+target_qs:list = ["q0"]
+un_trained_pulse:bool = False#True:guassian
+max_gate_num = 600
 shots:int = 10000
 
 

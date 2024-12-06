@@ -11,21 +11,25 @@ from qblox_drive_AS.support.Pulse_schedule_library import dataset_to_array, IQ_d
 
 
 if __name__ == '__main__':
-    import os
-    x = array([[0,2,4,6,8],[1,3,5,7,9]])
-    print(x.shape)
-    print(x[0][0])
-    # QD_agent = QDmanager('Modularize/QD_backup/2024_8_29/DR4#81_SumInfo.pkl')
-    # QD_agent.QD_loader()
-    # qs = ['q1']
-    # # for q in qs:
-    # #     print(q,":")
-    # #     qubit = QD_agent.quantum_device.get_element(q)
-    # #     print(f"bare= {QD_agent.Notewriter.get_bareFreqFor(q)*1e-9} GHz")
-    # #     print(f"ROF = {qubit.clock_freqs.readout()*1e-9} GHz")
-    # #     print(f"XYF = {qubit.clock_freqs.f01()*1e-9} GHz")
-    # #     print(f"x = {(qubit.clock_freqs.readout()-QD_agent.Notewriter.get_bareFreqFor(q))*1e-6} MHz")
-    # #     print(f"g = {QD_agent.Notewriter.get_sweetGFor(q)*1e-6} MHz")
+    # import os
+    # x = array([[0,2,4,6,8],[1,3,5,7,9]])
+    # print(x.shape)
+    # print(x[0][0])
+    QD_agent = QDmanager(r'C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20241206\DRKE#242_SumInfo.pkl')
+    QD_agent.QD_loader()
+    qs = ['q0']
+    for q in qs:
+        print(q,":")
+        qubit = QD_agent.quantum_device.get_element(q)
+        print(f"bare= {QD_agent.Notewriter.get_bareFreqFor(q)*1e-9} GHz")
+        print(f"ROF = {qubit.clock_freqs.readout()*1e-9} GHz")
+        print(f"XYF = {qubit.clock_freqs.f01()*1e-9} GHz")
+        print(f"XY_length = {qubit.rxy.duration()} ")
+        print(f"Readout time(integration)={qubit.measure.integration_time()}")
+        print(f"Readout time(pulse duration)={qubit.measure.pulse_duration()}")
+        print(f"Readout amp={qubit.measure.pulse_amp()}")
+        print(f"x = {(qubit.clock_freqs.readout()-QD_agent.Notewriter.get_bareFreqFor(q))*1e-6} MHz")
+        print(f"g = {QD_agent.Notewriter.get_sweetGFor(q)*1e-6} MHz")
 
     # file = 'Modularize/Meas_raw/2024_8_29/DR4q1_T2(0)_H12M58S58.nc'
     # nc = open_dataset(file)

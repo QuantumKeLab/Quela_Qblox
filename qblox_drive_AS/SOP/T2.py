@@ -15,6 +15,9 @@ def Ramsey(QD_agent:QDmanager,meas_ctrl:MeasurementControl,time_samples:dict, sp
     for q in time_samples:
         qubit_info = QD_agent.quantum_device.get_element(q)
         eyeson_print(f"{q} Reset time: {round(qubit_info.reset.duration()*1e6,0)} µs")
+        print(f"Readout time(integration)={qubit_info.measure.integration_time()}")
+        print(f"Readout time(pulse duration)={qubit_info.measure.pulse_duration()}")
+        
         time_data_idx = arange(time_samples[q].shape[0])
         if q not in list(spin_num.keys()):
             spin_num[q] = 0

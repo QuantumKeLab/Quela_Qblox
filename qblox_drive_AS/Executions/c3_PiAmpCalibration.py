@@ -7,7 +7,7 @@ from qblox_drive_AS.support.ExpFrames import PiAcali
 ''' fill in '''
 Execution:bool = True
 DRandIP = {"dr":"drke","last_ip":"242"}
-pi_power_coef_range:dict = {"q0":[0.85,1.15]}
+pi_power_coef_range:dict = {"q0":[0.95,1.05]}
 coef_sampling_func:str = 'linspace'
 pi_pair_num:list = [12,15]
 coef_ptsORstep:int|float = 100

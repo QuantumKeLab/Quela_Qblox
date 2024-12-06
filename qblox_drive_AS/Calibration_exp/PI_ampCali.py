@@ -22,7 +22,8 @@ def pi_amp_cali(QD_agent:QDmanager,meas_ctrl:MeasurementControl, roamp_samples:d
         data_sample_idx = arange(roamp_samples[q].shape[0])
         qubit_info = QD_agent.quantum_device.get_element(q)
         eyeson_print(f"{q} Reset time: {round(qubit_info.reset.duration()*1e6,0)} µs")
-
+        print(f"Readout time(integration)={qubit_info.measure.integration_time()}")
+        print(f"Readout time(pulse duration)={qubit_info.measure.pulse_duration()}")
     
     Sweep_para = ManualParameter(name="XY_Amp_coef")
     Sweep_para.batched = True

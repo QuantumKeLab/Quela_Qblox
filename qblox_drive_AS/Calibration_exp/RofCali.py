@@ -18,7 +18,8 @@ def rofCali(QD_agent:QDmanager,meas_ctrl:MeasurementControl,rof_samples:dict,n_a
         qubit_info.clock_freqs.readout(NaN)
         eyeson_print(f"{q} Reset time: {round(qubit_info.reset.duration()*1e6,0)} µs")
         rof_data_idx = arange(rof_samples[q].shape[0])
-    
+        print(f"Readout time(integration)={qubit_info.measure.integration_time()}")
+        print(f"Readout time(pulse duration)={qubit_info.measure.pulse_duration()}")
     
     option_rof = ManualParameter(name="freq", unit="Hz", label="Frequency")
     option_rof.batched = True

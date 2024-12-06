@@ -126,17 +126,17 @@ class QD_modifier():
 
 if __name__ == "__main__":
 
-    QD_path = r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20241205\DRKE#242_SumInfo.pkl"
+    QD_path = r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20241206\DRKE#242_SumInfo.pkl"
     QMaster = QD_modifier(QD_path)
 
     """ Set RO amp by a coef. """
-    QMaster.set_ROamp_by_coef(roAmp_coef_dict={}) # roAmp_coef_dict = {"q0":0.93, "q1":0.96, ...}, set None or {} to bypass 
+    QMaster.set_ROamp_by_coef(roAmp_coef_dict={"q0":1.4}) # roAmp_coef_dict = {"q0":0.93, "q1":0.96, ...}, set None or {} to bypass 
 
     """ Set RO freq """
     QMaster.set_ROF(ROFs={})                      # ROFs = {"q0":6.0554e9, .....}
     
     """ Set Integration time """ 
-    QMaster.set_integration_time(inte_time_s={}) # inte_time_s = {"q0":1e-6, "q1":0.75e-6, ...}, set None or {} to bypass 
+    QMaster.set_integration_time(inte_time_s={"q0":1.5e-6}) # inte_time_s = {"q0":1e-6, "q1":0.75e-6, ...}, set None or {} to bypass 
 
     """ Set reset time (All qubits global) """
     QMaster.setGlobally_reset_time(reset_time_s=None)      # reset_time_s = 250e-6, all the qubit in the quantum_device will share the same value

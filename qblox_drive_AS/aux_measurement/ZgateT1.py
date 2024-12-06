@@ -17,6 +17,8 @@ def Zgate_T1(QD_agent:QDmanager,meas_ctrl:MeasurementControl,time_samples:dict,z
     for q in time_samples:
         qubit_info = QD_agent.quantum_device.get_element(q)
         eyeson_print(f"{q} Reset time: {round(qubit_info.reset.duration()*1e6,0)} µs")
+        print(f"Readout time(integration)={qubit_info.measure.integration_time()}")
+        print(f"Readout time(pulse duration)={qubit_info.measure.pulse_duration()}")
         origin_pi_amp[q] = qubit_info.rxy.amp180()
         if no_pi_pulse:
             qubit_info.rxy.amp180(0)
