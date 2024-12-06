@@ -2763,7 +2763,7 @@ class XGateErrorTest(ExpGovernment):
 
         self.CloseMeasurement() 
 
-class SingleShot(ExpGovernment):
+class ROAdepOS(ExpGovernment):
     """ Helps you get the **Dressed** cavities. """
     def __init__(self,QD_path:str,data_folder:str=None,JOBID:str=None):
         super().__init__()
@@ -2780,7 +2780,7 @@ class SingleShot(ExpGovernment):
     def RawDataPath(self,path:str):
         self.__raw_data_location = path
 
-    def SetParameters(self, target_qs:list, histo_counts:int=1, shots:int=10000, execution:bool=True):
+    def SetParameters(self, target_qs:list, roAmp_factor:list|ndarray, histo_counts:int=1, shots:int=10000, execution:bool=True):
         """ 
         ### Args:\n
         * target_qs: list, like ["q0", "q1", ...]
