@@ -136,7 +136,7 @@ if __name__ == '__main__':
 
     """ Fill in """
     execute: bool = 1
-    repeat: int = 1
+    repeat: int = 30
     DRandIP = {"dr": "drke", "last_ip": "242"}
     ro_elements = {'q0': {"roAmp_factor": 1}}
     couplers = []
@@ -150,7 +150,7 @@ if __name__ == '__main__':
     snr_rec, effT_rec, thermal_pop = {}, {}, {}
 
     # 設定 roAmp_factor 的取值範圍
-    ro_amp_factors = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+    ro_amp_factors = [1.2]#, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
 
     for qubit in ro_elements:
         for ro_amp_factor in ro_amp_factors:  # 增加對 roAmp_factor 的迭代
