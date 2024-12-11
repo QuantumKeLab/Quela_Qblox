@@ -115,6 +115,16 @@ def sort_timeLabel(files):
     sorted_files = sorted(files, key=lambda x: datetime.strptime(x.split("_")[-1].split(".")[0], "%Y%m%d%H%M%S"))
     return sorted_files
 
+import re
+
+def sort_filesLabel(file_list):
+    # 假設根據名稱中的數值進行排序，例如提取數值部分並排序
+    def extract_number(filename):
+        match = re.search(r"[-+]?\d*\.\d+|\d+", filename)  # 提取數值部分
+        return float(match.group()) if match else float('inf')  # 如果找不到數值，放在最後
+    
+    return sorted(file_list, key=extract_number)
+
 
 
 class Artist():
@@ -457,7 +467,45 @@ class analysis_tools():
             self.rotated_data[state_idx] = rotate_data(state_data,self.RO_rotate_angle)
         
         self.fit_packs = {"effT_mK":self.effT_mK,"thermal_population":self.thermal_populations,"RO_fidelity":self.RO_fidelity_percentage,"RO_rotation_angle":self.RO_rotate_angle}
+    
+    def oneshot_AmpDepent_ana(self,data:DataArray,tansition_freq_Hz:float=None):
+        self.fq = tansition_freq_Hz
+        self.gmm2d_fidelity = GMMROFidelity()
+        self.gmm2d_fidelity._import_data(data)
+        self.gmm2d_fidelity._start_analysis()
+        g1d_fidelity = self.gmm2d_fidelity.export_G1DROFidelity()
+        
+        p00 = g1d_fidelity.g1d_dist[0][0][0]
+        self.thermal_populations = abs(g1d_fidelity.g1d_dist[0][0][1])
+        p11 = g1d_fidelity.g1d_dist[1][0][1]
+        p10 = g1d_fidelity.g1d_dist[1][0][0]   
+        
+        self.p10_precentage=p10*100
+        import numpy as np
+        self.snr = g1d_fidelity.discriminator.snr
+        self.power_snr_dB=np.log10(self.snr)*20
+        self.dis = g1d_fidelity.discriminator.signal
+        self.sigma = np.mean(g1d_fidelity.discriminator.noise)
+        
+        if self.fq is not None:
+            self.effT_mK = p01_to_Teff(self.thermal_populations, self.fq)*1000
+        else:
+            self.effT_mK = 0
+        self.RO_fidelity_percentage = (p00+p11)*100/2
+        
 
+        _, self.RO_rotate_angle = rotate_onto_Inphase(self.gmm2d_fidelity.centers[0],self.gmm2d_fidelity.centers[1])
+        z = moveaxis(array(data),0,1) # (IQ, state, shots) -> (state, IQ, shots)
+        self.rotated_data = empty_like(array(data))
+        for state_idx, state_data in enumerate(z):
+            self.rotated_data[state_idx] = rotate_data(state_data,self.RO_rotate_angle)
+        
+        self.fit_packs = {"effT_mK":self.effT_mK,"thermal_population":self.thermal_populations,
+                          "RO_fidelity":self.RO_fidelity_percentage,"p10_precentage":self.p10_precentage,
+                          "SNR":self.snr,"PowerSNR":self.power_snr_dB,
+                          "distance":self.dis,"Sigma":self.sigma,"RO_rotation_angle":self.RO_rotate_angle}
+
+    
     def oneshot_plot(self,save_pic_path:str=None):
         da = DataArray(moveaxis(self.rotated_data,0,1), coords= [("mixer",["I","Q"]), ("prepared_state",[0,1]), ("index",arange(array(self.rotated_data).shape[2]))] )
         self.gmm2d_fidelity._import_data(da)
@@ -466,6 +514,16 @@ class analysis_tools():
 
         plot_readout_fidelity(da, self.gmm2d_fidelity, g1d_fidelity,self.fq,save_pic_path,plot=True if save_pic_path is None else False)
         plt.close()
+        
+    def oneshot_AmpDepent_plot(self,save_pic_path:str=None):
+        da = DataArray(moveaxis(self.rotated_data,0,1), coords= [("mixer",["I","Q"]), ("prepared_state",[0,1]), ("index",arange(array(self.rotated_data).shape[2]))] )
+        self.gmm2d_fidelity._import_data(da)
+        self.gmm2d_fidelity._start_analysis()
+        g1d_fidelity = self.gmm2d_fidelity.export_G1DROFidelity()
+
+        plot_readout_fidelity(da, self.gmm2d_fidelity, g1d_fidelity,self.fq,save_pic_path,plot=True if save_pic_path is None else False)
+        plt.close()
+        
 
     def T2_ana(self,var:str,ref:list):
         raw_data = self.ds[var]
@@ -986,6 +1044,8 @@ class Multiplex_analyzer(QCATAna,analysis_tools):
                 self.rabi_ana(kwargs["var_name"])
             case 'm14': 
                 self.oneshot_ana(self.ds,self.transition_freq)
+            case 'a3': 
+                self.oneshot_AmpDepent_ana(self.ds,self.transition_freq)
             case 'm12':
                 self.T2_ana(kwargs["var_name"],self.refIQ)
             case 'm13':
@@ -1023,6 +1083,8 @@ class Multiplex_analyzer(QCATAna,analysis_tools):
                 self.rabi_plot(pic_save_folder)
             case 'm14': 
                 self.oneshot_plot(pic_save_folder)
+            case 'a3': 
+                self.oneshot_AmpDepent_plot(self.ds,self.transition_freq)
             case 'm12':
                 self.T2_plot(pic_save_folder)
             case 'm13':

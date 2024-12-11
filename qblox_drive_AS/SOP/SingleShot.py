@@ -13,9 +13,10 @@ def Qubit_state_single_shot(QD_agent:QDmanager,ro_elements:list,shots:int=1000,r
 
     for q in ro_elements:
         qubit_info = QD_agent.quantum_device.get_element(q)
-        eyeson_print(f"{q} Reset time: {round(qubit_info.reset.duration()*1e6,0)} µs")
-        eyeson_print(f"{q} Integration time: {round(qubit_info.measure.integration_time()*1e6,1)} µs")
-
+        eyeson_print(f"{q} Reset time: {round(qubit_info.reset.duration()*1e6,3)} µs")
+        print(f"Readout time(integration):{round(qubit_info.measure.integration_time()*1e6,3)} µs")
+        print(f"Readout time(pulse duration): {round(qubit_info.measure.pulse_duration()*1e6,3)} µs")
+        eyeson_print(f"{q} RO amp: {round(qubit_info.measure.pulse_amp(),5)} V")
     
     folder = []
 

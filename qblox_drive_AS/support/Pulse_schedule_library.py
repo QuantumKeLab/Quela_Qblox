@@ -2020,7 +2020,7 @@ def Amp_plot(quantum_device:QuantumDevice, results:dict,title:str):
     plt.show()
     
 def hist_plot(q:str,data:dict,title:str, save_path:str='', show:bool=True):
-    fig, ax = plt.subplots(nrows =1,figsize =(4,3),dpi =250) 
+    fig, ax = plt.subplots(nrows =1,figsize =(7,6),dpi =150) 
     m, bins, patches = ax.hist(np.array(data[q]), bins='auto', density=False)
     ax.axvline(np.median(np.array(data[q])), color = "k", ls = "--",lw=1)
     ax.set_ylabel('Counts')
@@ -2036,20 +2036,20 @@ def hist_plot(q:str,data:dict,title:str, save_path:str='', show:bool=True):
         #     plt.title(f"{title} = {round(np.median(np.array(data[q])),4)}  $\pm$ {round(np.std(np.array(data[q])),5)} mK")
         elif title.lower() in ["eff_t"]:
             ax.set_xlabel(f"{title} (mK)")
-            plt.title(f"{title} = {round(np.median(np.array(data[q])),4)}  $\pm$ {round(np.std(np.array(data[q])),5)} mK")
+            plt.title(f"{title} = {round(np.median(np.array(data[q])),2)}  $\pm$ {round(np.std(np.array(data[q])),3)} mK")
         elif title.lower() in ["readout fidelity"]:
             ax.set_xlabel(f"{title} (%)")
-            plt.title(f"{title} = {round(np.median(np.array(data[q])),4)}  $\pm$ {round(np.std(np.array(data[q])),5)} %")
+            plt.title(f"{title} = {round(np.median(np.array(data[q])),2)}  $\pm$ {round(np.std(np.array(data[q])),3)} %")
         elif title.lower() in ["p10"]:
             ax.set_xlabel(f"{title} (%)")
-            plt.title(f"{title} = {round(np.median(np.array(data[q])),4)}  $\pm$ {round(np.std(np.array(data[q])),5)} %")
+            plt.title(f"{title} = {round(np.median(np.array(data[q])),2)}  $\pm$ {round(np.std(np.array(data[q])),3)} %")
         elif title.lower() in ["Voltage SNR"]:
             ax.set_xlabel(f"{title} ")
-            plt.title(f"{title} = {round(np.median(np.array(data[q])),4)}  $\pm$ {round(np.std(np.array(data[q])),5)} ")
+            plt.title(f"{title} = {round(np.median(np.array(data[q])),2)}  $\pm$ {round(np.std(np.array(data[q])),3)} ")
         else:
         # elif title.lower() in ["Power SNR dB"]:
             ax.set_xlabel(f"{title} dB")
-            plt.title(f"{title} = {round(np.median(np.array(data[q])),4)}  $\pm$ {round(np.std(np.array(data[q])),5)} dB")
+            plt.title(f"{title} = {round(np.median(np.array(data[q])),2)}  $\pm$ {round(np.std(np.array(data[q])),3)} dB")
         
         
     plt.tight_layout()

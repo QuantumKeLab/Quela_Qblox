@@ -6,8 +6,8 @@ from qblox_drive_AS.support.ExpFrames import IQ_references
 ''' fill in '''
 Execution:bool = True
 DRandIP = {"dr":"drke","last_ip":"242"}
-RO_amp_factor:dict = {"q0":1}#, "q1":1}    # ro-amp *= ro_amp_factor
-shots:int = 10000
+RO_amp_factor:dict = {"q2":1}#, "q1":1}    # ro-amp *= ro_amp_factor
+shots:int = 50000
 
 ''' Don't Touch '''
 save_dir = Data_manager().build_packs_folder()
