@@ -270,8 +270,8 @@ def time_monitor_data_ana(QD_agent:QDmanager,folder_path:str,save_every_fit_pic:
 
 
 if __name__ == "__main__":
-    QD_path = ""
-    folder_path = ""
+    QD_path = r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20241215\DRKE#242_SumInfo.pkl"
+    folder_path = r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\Meas_raw\20241215\H00M42S47_overnight"
     save_every_fit_fig:bool = False
 
     QD_agent = QDmanager(QD_path)

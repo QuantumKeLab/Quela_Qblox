@@ -621,7 +621,7 @@ class analysis_tools():
     def T1_plot(self,save_pic_path:str=None):
         save_pic_path = os.path.join(save_pic_path,f"{self.qubit}_T1_{self.ds.attrs['execution_time'].replace(' ', '_')}.png") if save_pic_path is not None else ""
         fig, ax = plt.subplots()
-        ax = plot_qubit_relaxation(self.plot_item["time"],self.plot_item["data"], ax, self.ans)
+        ax = plot_qubit_relaxation(self.plot_item["time"],self.plot_item["data"], ax, self.ans, dpi=150)
         ax.set_title(f"{self.qubit} T1 = {round(self.ans.params['tau'].value,1)} µs" )
         if save_pic_path != "" : 
             slightly_print(f"pic saved located:\n{save_pic_path}")

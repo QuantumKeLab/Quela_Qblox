@@ -6,7 +6,7 @@ from qblox_drive_AS.support.ExpFrames import BroadBand_CavitySearching
 """ Fill in """
 DRandIP = {"dr":"drke","last_ip":"242"}
 target_qs = ["q0"]
-freq_sample_linspaced = [4.48e9, 4.83e9, 1000]
+freq_sample_linspaced = [5.7e9, 6.2e9, 1000]
 save_dir = Data_manager().build_packs_folder()
 
 

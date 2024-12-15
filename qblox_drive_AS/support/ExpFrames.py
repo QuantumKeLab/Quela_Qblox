@@ -912,7 +912,7 @@ class FluxQubit(ExpGovernment):
             ds.close()
             permi = mark_input(f"What qubit can be updated ? {list(answer.keys())}/ all/ no :").lower()
             if permi in list(answer.keys()):
-                update_by_fluxQubit(QD_savior,answer[q],q)
+                update_by_fluxQubit(QD_savior,answer[permi],permi)
                 QD_savior.QD_keeper()
             elif permi in ["all",'y','yes']:
                 for q in list(answer.keys()):
@@ -3113,10 +3113,104 @@ class ROAdepOS_test(ExpGovernment):
                 self.counter += 1
 
 
+class StarkShift(ExpGovernment):
+    def __init__(self,QD_path:str,data_folder:str=None,JOBID:str=None):
+        super().__init__()
+        self.QD_path = QD_path
+        self.save_dir = data_folder
+        self.__raw_data_location:str = ""
+        self.JOBID = JOBID
+
+    @property
+    def RawDataPath(self):
+        return self.__raw_data_location
+
+    def SetParameters(self, freq_span_range:dict, roamp_range:list, roamp_sampling_func:str, freq_pts:int=100, avg_n:int=100, execution:bool=True):
+        """ ### Args:
+            * freq_span_range: {"q0":[freq_span_start, freq_span_end], ...}, sampling function use linspace\n
+            * roamp_range: [amp_start, amp_end, pts]\n
+            * roamp_sampling_func (str): 'linspace', 'arange', 'logspace'
+        """
+        self.freq_range = {}
+        self.tempor_freq:list = [freq_span_range,freq_pts] # After QD loaded, use it to set self.freq_range
+
+        self.avg_n = avg_n
+        self.execution = execution
+        self.target_qs = list(freq_span_range.keys())
+        if roamp_sampling_func in ['linspace','logspace','arange']:
+            sampling_func:callable = eval(roamp_sampling_func)
+        else:
+            sampling_func:callable = linspace
+        self.roamp_samples = sampling_func(*roamp_range)
+
+    def PrepareHardware(self):
+        self.QD_agent, self.cluster, self.meas_ctrl, self.ic, self.Fctrl = init_meas(QuantumDevice_path=self.QD_path)
+        # Set the system attenuations
+        init_system_atte(self.QD_agent.quantum_device,self.target_qs,ro_out_att=self.QD_agent.Notewriter.get_DigiAtteFor(self.target_qs[0], 'ro'))
+        
+    def RunMeasurement(self):
+        from qblox_drive_AS.SOP.StarkShift import Stark_shift_spec
+        from qblox_drive_AS.SOP.CavitySpec import QD_RO_init
+        
+        # set self.freq_range
+        for q in self.tempor_freq[0]:
+            rof = self.QD_agent.quantum_device.get_element(q).clock_freqs.readout()
+            self.freq_range[q] = linspace(rof+self.tempor_freq[0][q][0],rof+self.tempor_freq[0][q][1],self.tempor_freq[1])
+        QD_RO_init(self.QD_agent,self.freq_range)
+        dataset = Stark_shift_spec(self.QD_agent,self.meas_ctrl,self.freq_range,self.roamp_samples,self.avg_n,self.execution)
+        if self.execution:
+            if self.save_dir is not None:
+                self.save_path = os.path.join(self.save_dir,f"StarkShift_{datetime.now().strftime('%Y%m%d%H%M%S') if self.JOBID is None else self.JOBID}")
+                self.__raw_data_location = self.save_path + ".nc"
+                dataset.to_netcdf(self.__raw_data_location)
+                
+            else:
+                self.save_fig_path = None
+        
+    def CloseMeasurement(self):
+        shut_down(self.cluster,self.Fctrl)
+
+
+    def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
+        """ User callable analysis function pack """
+        from qblox_drive_AS.SOP.PowCavSpec import plot_powerCavity_S21
+        if self.execution:
+            if new_QD_path is None:
+                QD_file = self.QD_path
+            else:
+                QD_file = new_QD_path
+
+            if new_file_path is None:
+                file_path = self.__raw_data_location
+                fig_path = self.save_dir
+            else:
+                file_path = new_file_path
+                fig_path = os.path.split(new_file_path)[0]
+
+            QD_savior = QDmanager(QD_file)
+            QD_savior.QD_loader()
+
+            ds = open_dataset(file_path)
+
+            plot_powerCavity_S21(ds,QD_savior,fig_path)
+            ds.close()
+        # QD_savior.QD_keeper()
+
+
+    def WorkFlow(self):
+    
+        self.PrepareHardware()
+
+        self.RunMeasurement()
+
+        self.CloseMeasurement()      
+
+
+
 if __name__ == "__main__":
-    EXP =  ROAdepOS_test(QD_path="")
+    EXP =  EnergyRelaxation(QD_path="")
     EXP.execution = True
-    EXP.RunAnalysis(new_QD_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20241209\DRKE#242_SumInfo.pkl",
-                    new_file_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\Meas_raw\20241209\H22M19S10\SingleShot_0.9_(0).nc"
-                    ,histo_ana=False)
+    EXP.RunAnalysis(new_QD_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20241214\DRKE#242_SumInfo.pkl",
+                    new_file_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\Meas_raw\20241214\H04M17S22 _T1\T1_20241214042148.nc"
+                    )#,histo_ana=False)
     

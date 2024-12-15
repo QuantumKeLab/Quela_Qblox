@@ -15,9 +15,9 @@ if __name__ == '__main__':
     # x = array([[0,2,4,6,8],[1,3,5,7,9]])
     # print(x.shape)
     # print(x[0][0])
-    QD_agent = QDmanager(r'C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20241210\DRKE#242_SumInfo.pkl')
+    QD_agent = QDmanager(r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20241215\DRKE#242_SumInfo.pkl")
     QD_agent.QD_loader()
-    qs = ['q2']
+    qs = ['q0','q1','q2','q3',]#,'q3']#'q0','q2',
     for q in qs:
         print(q,":")
         qubit = QD_agent.quantum_device.get_element(q)

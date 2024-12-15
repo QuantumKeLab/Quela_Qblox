@@ -10,7 +10,7 @@ qubit_number_onChip:int = 4
 coupler_number_onChip:int = 0
 chip_name:str = "5Q4C_Test"
 chip_type:str = "5Q4C"
-old_QD_path:str = "" # set the path in string When you want to update the Hcfg. Otherwise, set it None
+old_QD_path:str = r"" # set the path in string When you want to update the Hcfg. Otherwise, set it None
 
 
 Hcfg = {

@@ -6,10 +6,10 @@ from qblox_drive_AS.support.ExpFrames import PowerRabiOsci
 ''' fill in '''
 Execution:bool = True
 DRandIP = {"dr":"drke","last_ip":"242"}
-pi_amp_range:dict = {"q0":[-0.25,0.25]}#, "q1":[-0.5,0.5]}    # [pi_amp_start, pi_amp_end]
+pi_amp_range:dict = {"q0":[-0.9,0.9],"q1":[-0.4,0.4]}#, "q3":[-0.15,0.15]}#}    # [pi_amp_start, pi_amp_end]
 pi_amp_sampling_func:str = 'linspace'                          # 'linspace'/ 'logspace'/ 'arange
 
-pi_dura:dict = {"q0":40e-9}#, "q1":46e-9}
+pi_dura:dict = {'q0':100e-9,'q1':100e-9}#"q2":500e-9}#, "q3":150e-9}#
 
 pi_amp_ptsORstep:int|float = 100  # Depends on the sampling func you use, 'linspace' or 'logspace' set pts in int, 'arange' set step in float
 AVG:int = 300
