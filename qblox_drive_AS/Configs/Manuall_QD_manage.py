@@ -12,6 +12,12 @@ class QD_modifier():
         self.QD_agent = QDmanager(QD_path)
         self.QD_agent.QD_loader()
 
+    def set_RamseyT2detuing(self, detunes:dict={}):
+        if detunes is not None:
+            if len(list(detunes.keys())) != 0:
+                for q in detunes:
+                    self.QD_agent.Notewriter.save_artiT2Detune_for(q,detunes[q])
+                self.to_modifiy_item.append("RamseyT2_detuning")
 
     def set_integration_time(self, inte_time_s:dict=None):
         if inte_time_s is not None:
@@ -161,7 +167,10 @@ if __name__ == "__main__":
     QMaster.set_sweet_bias(offsets={"q2":-0.2 })          # offsets = {"q0": 0.08, ....}
 
     """ Set Darg coef """
-    QMaster.set_drag_coef(Coefs={})
+    QMaster.set_drag_coef(Coefs={})    # Coefs = {"q0": -0.5, ....}
+
+    """ Set T2 use detuing, unit: Hz """
+    QMaster.set_RamseyT2detuing(detunes={})   # detunes = {"q0": -0.5e6, ....}
 
 
     QMaster.save_modifications()
