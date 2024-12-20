@@ -136,7 +136,7 @@ def Stark_shift_spec(QD_agent:QDmanager,meas_ctrl:MeasurementControl,ro_elements
 
     return path, trustable#rfs_ds
 
-
+#?
 def update_by_StarkShift(QD_agent:QDmanager,correct_results:dict,target_q:str):
     """
     correct_results dict in the form: {"xyf":float,"sweet_bias":float}  #?
@@ -147,101 +147,101 @@ def update_by_StarkShift(QD_agent:QDmanager,correct_results:dict,target_q:str):
     # QD_agent.Fluxmanager.check_offset_and_correctFor(target_q=target_q,new_offset=correct_results["sweet_bias"])
     # QD_agent.Fluxmanager.save_sweetspotBias_for(target_q=target_q,bias=correct_results["sweet_bias"])
 
-def StarkShift_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,specific_qubits:str,run:bool=True,p_pts:int=20,max_p:float=0.15,fpts:int=40,f_sapn_Hz=400e6,avg_times:int=1000,xy_IF:float=200e6):
-    if run:
+# def StarkShift_executor(QD_agent:QDmanager,meas_ctrl:MeasurementControl,specific_qubits:str,run:bool=True,p_pts:int=20,max_p:float=0.15,fpts:int=40,f_sapn_Hz=400e6,avg_times:int=1000,xy_IF:float=200e6):
+#     if run:
         
-        # Fctrl[specific_qubits](center)
-        nc_path, trustable= Stark_shift_spec(QD_agent,meas_ctrl,ro_p_max=max_p,p_points=p_pts,f_points=fpts,ro_elements=specific_qubits,run=run,xyf_span_Hz=f_sapn_Hz,IF=xy_IF,n_avg=avg_times,get_data_path=True)
-        # delta=1
-        # g=1
-        # n_critic_origin=delta**2/(4*g**2)
-        Kai_eff=1
-        AC_Shift=1
-        n_critic=AC_Shift/(2* Kai_eff) 
+#         # Fctrl[specific_qubits](center)
+#         nc_path, trustable= Stark_shift_spec(QD_agent,meas_ctrl,ro_p_max=max_p,p_points=p_pts,f_points=fpts,ro_elements=specific_qubits,run=run,xyf_span_Hz=f_sapn_Hz,IF=xy_IF,n_avg=avg_times,get_data_path=True)
+#         # delta=1
+#         # g=1
+#         # n_critic_origin=delta**2/(4*g**2)
+#         Kai_eff=1
+#         AC_Shift=1
+#         n_critic=AC_Shift/(2* Kai_eff) 
         
-        reset_offset(Fctrl)
-        if trustable:
-            plot_ROopti(QD_agent,nc_path)
-            permission = mark_input("Update the QD with this result ? [y/n]") 
-            if permission.lower() in ['y','yes']:
-                return trustable, {"xyf":results[specific_qubits].quantities_of_interest["freq_0"].nominal_value,"sweet_bias":results[specific_qubits].quantities_of_interest["offset_0"].nominal_value+center}
-            else:
-                return False, {}
-        else:
-            plot_ROopti(QD_agent,nc_path)
-            trustable = False
-            return False, {}
+#         reset_offset(Fctrl)
+#         if trustable:
+#             plot_ROopti(QD_agent,nc_path)
+#             permission = mark_input("Update the QD with this result ? [y/n]") 
+#             if permission.lower() in ['y','yes']:
+#                 return trustable, {"xyf":results[specific_qubits].quantities_of_interest["freq_0"].nominal_value,"sweet_bias":results[specific_qubits].quantities_of_interest["offset_0"].nominal_value+center}
+#             else:
+#                 return False, {}
+#         else:
+#             plot_ROopti(QD_agent,nc_path)
+#             trustable = False
+#             return False, {}
 
-    else:
-        path, trustable= Stark_shift_spec(QD_agent,meas_ctrl,ro_elements=ro_elements,ro_p_max=ro_p_max,p_points=p_pts,f_points=fpts,run=run,get_data_path=True,xyf_span_Hz=f_sapn_Hz,IF=xy_IF,n_avg=avg_times)
-        return False, {}
+#     else:
+#         path, trustable= Stark_shift_spec(QD_agent,meas_ctrl,ro_elements=ro_elements,ro_p_max=ro_p_max,p_points=p_pts,f_points=fpts,run=run,get_data_path=True,xyf_span_Hz=f_sapn_Hz,IF=xy_IF,n_avg=avg_times)
+#         return False, {}
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
     
-    """ Fill in """
-    execution:bool = 0
-    chip_info_restore:bool = 0
-    DRandIP = {"dr":"drke","last_ip":"242"}
-    ro_elements = ['q0']
-    couplers = []
+#     """ Fill in """
+#     execution:bool = 0
+#     chip_info_restore:bool = 0
+#     DRandIP = {"dr":"drke","last_ip":"242"}
+#     ro_elements = ['q0']
+#     couplers = []
 
     
-    """ Optional paras """
+#     """ Optional paras """
 
-    freq_pts:int = 3
-    freq_span_Hz:float = 500e6
-    sweet_flux_shifter:float = 0
-    xy_IF = 100e6
-    avg_n:int = 200
+#     freq_pts:int = 3
+#     freq_span_Hz:float = 500e6
+#     sweet_flux_shifter:float = 0
+#     xy_IF = 100e6
+#     avg_n:int = 200
     
 
-    ro_p_max:float = 0.12#the output figure will show (ro_p_max)**2
-    p_pts = 4
+#     ro_p_max:float = 0.12#the output figure will show (ro_p_max)**2
+#     p_pts = 4
 
 
 
 
-    """ Preparations """
-    QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
-    QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path)#,mode='l'
-    if ro_elements == 'all':#?
-        ro_elements = list(Fctrl.keys())#?
-    chip_info = cds.Chip_file(QD_agent=QD_agent)
+#     """ Preparations """
+#     QD_path = find_latest_QD_pkl_for_dr(which_dr=DRandIP["dr"],ip_label=DRandIP["last_ip"])
+#     QD_agent, cluster, meas_ctrl, ic, Fctrl = init_meas(QuantumDevice_path=QD_path)#,mode='l'
+#     if ro_elements == 'all':#?
+#         ro_elements = list(Fctrl.keys())#?
+#     chip_info = cds.Chip_file(QD_agent=QD_agent)
 
 
-    """ Running """
-    FQ_results = {}
-    check_again =[]
+#     """ Running """
+#     FQ_results = {}
+#     check_again =[]
     
-    for qubit in ro_elements:
-        if not QD_agent.Fluxmanager.get_offsweetspot_button(qubit):#?
-        # if QD_agent.Fluxmanager.get_offsweetspot_button(qubit): #**when at off-sweet spot**
-            init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
-            # Cctrl['c0'](-0.15)
-            # Cctrl['c1'](0.104)
+#     for qubit in ro_elements:
+#         if not QD_agent.Fluxmanager.get_offsweetspot_button(qubit):#?
+#         # if QD_agent.Fluxmanager.get_offsweetspot_button(qubit): #**when at off-sweet spot**
+#             init_system_atte(QD_agent.quantum_device,list([qubit]),ro_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'ro'),xy_out_att=QD_agent.Notewriter.get_DigiAtteFor(qubit,'xy'))
+#             # Cctrl['c0'](-0.15)
+#             # Cctrl['c1'](0.104)
             
-            nc_path,trustable = StarkShift_executor(QD_agent, meas_ctrl,ro_elements, max_p=ro_p_max, run=execution, p_pts=p_pts, fpts=freq_pts, f_sapn_Hz=freq_span_Hz, avg_times=avg_n, xy_IF=xy_IF)
-            #,new_ans
+#             nc_path,trustable = StarkShift_executor(QD_agent, meas_ctrl,ro_elements, max_p=ro_p_max, run=execution, p_pts=p_pts, fpts=freq_pts, f_sapn_Hz=freq_span_Hz, avg_times=avg_n, xy_IF=xy_IF)
+#             #,new_ans
             
-            # Cctrl['c0'](0)
-            # Cctrl['c1'](0)
-            cluster.reset()
+#             # Cctrl['c0'](0)
+#             # Cctrl['c1'](0)
+#             cluster.reset()
 
-            """ Storing """
-            if  trustable:
-                update_by_StarkShift(QD_agent,new_ans,qubit)
-                QD_agent.QD_keeper()
-                if chip_info_restore:
-                    chip_info.update_by_StarkShift(qb=qubit, result=new_ans)
-            else:
-                check_again.append(qubit)    
+#             """ Storing """
+#             if  trustable:
+#                 update_by_StarkShift(QD_agent,new_ans,qubit)
+#                 QD_agent.QD_keeper()
+#                 if chip_info_restore:
+#                     chip_info.update_by_StarkShift(qb=qubit, result=new_ans)
+#             else:
+#                 check_again.append(qubit)    
 
-    """ Close """
-    print('Stark shift measurement done!')
-    # if len(check_again) != 0:
-    #     warning_print(f"qubits to check again: {check_again}")
-    shut_down(cluster,Fctrl,Cctrl)
+#     """ Close """
+#     print('Stark shift measurement done!')
+#     # if len(check_again) != 0:
+#     #     warning_print(f"qubits to check again: {check_again}")
+#     shut_down(cluster,Fctrl,Cctrl)
 
   
     

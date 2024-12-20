@@ -2884,7 +2884,7 @@ class ROAdepOS(ExpGovernment):
 
                 self.counter += 1
                 
-class ROAdepOS_test(ExpGovernment):
+class ROAdepOS_MultiFilesAnalysis(ExpGovernment):
     """ Helps you get the **Dressed** cavities. """
     def __init__(self,QD_path:str,data_folder:str=None,JOBID:str=None):
         super().__init__()
@@ -2980,7 +2980,7 @@ class ROAdepOS_test(ExpGovernment):
 
             if not histo_ana:
                 if not os.path.isfile(new_file_path):
-                    raise ValueError("For single file analysis, new_file_path must be a valid file path.")
+                    raise ValueError("For single file analysis, new_file_path must be a valid file path. If it is multiple files, you need to give the input: histo_ana=True")
 
                 ds = open_dataset(new_file_path)
 
@@ -3162,7 +3162,6 @@ class StarkShift(ExpGovernment):
 
     def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None):
         """ User callable analysis function pack """
-        from qblox_drive_AS.SOP.PowCavSpec import plot_powerCavity_S21
         if self.execution:
             if new_QD_path is None:
                 QD_file = self.QD_path
@@ -3199,7 +3198,7 @@ class StarkShift(ExpGovernment):
 if __name__ == "__main__":
     EXP =  EnergyRelaxation(QD_path="")
     EXP.execution = True
-    EXP.RunAnalysis(new_QD_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20241214\DRKE#242_SumInfo.pkl",
-                    new_file_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\Meas_raw\20241214\H04M17S22 _T1\T1_20241214042148.nc"
-                    )#,histo_ana=False)
+    EXP.RunAnalysis(new_QD_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20241218\DRKE#242_SumInfo.pkl",
+                    new_file_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\Meas_raw\20241218\80mK\H16M13S17_325T1"
+                    )#,histo_ana=True)
     

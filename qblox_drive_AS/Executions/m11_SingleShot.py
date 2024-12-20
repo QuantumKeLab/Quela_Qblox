@@ -6,8 +6,8 @@ from qblox_drive_AS.support.ExpFrames import SingleShot
 ''' fill in '''
 Execution:bool = True
 DRandIP = {"dr":"drke","last_ip":"242"}
-target_qs:list = ["q0","q1"]#,"q3"]#,"q1"]
-shots:int = 10000
+target_qs:list = ["q0"]#,"q1","q3"]#,"q1"]
+shots:int = 50000
 histo_counts:int = 1
 ''' Don't Touch '''
 save_dir = Data_manager().build_packs_folder()

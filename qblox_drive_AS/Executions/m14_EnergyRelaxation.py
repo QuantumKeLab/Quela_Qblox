@@ -7,11 +7,11 @@ from qblox_drive_AS.support.ExpFrames import EnergyRelaxation
 ''' fill in '''
 Execution:bool = True
 DRandIP = {"dr":"drke","last_ip":"242"}
-time_range:dict = {"q0":[0,400e-6],"q2":[0,400e-6]}#"q3":[0,40e-6]},"q1":[0,70e-6]}
+time_range:dict = {"q0":[0,50e-6]}#,"q1":[0,50e-6]"q3":[0,40e-6]},"q1":[0,70e-6]}
 time_sampling_func:str = "linspace"
 time_ptsORstep:int|float = 100
 AVG:int = 500
-histo_counts:int = 1
+histo_counts:int =200
 
 ''' Don't Touch '''
 save_dir = Data_manager().build_packs_folder()

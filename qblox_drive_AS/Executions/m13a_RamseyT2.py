@@ -7,12 +7,11 @@ from qblox_drive_AS.support.ExpFrames import Ramsey
 ''' fill in '''
 Execution:bool = 1
 DRandIP = {"dr":"drke","last_ip":"242"}
-time_range:dict = {"q1":[0,50e-6]}#,"q2":[0,200e-6]}#,"q1":[0,30e-6]}
+time_range:dict = {"q0":[0,50e-6]}#,"q2":[0,200e-6]}#,"q1":[0,30e-6]}
 time_sampling_func:str = "linspace"
 time_ptsORstep:int|float = 100
 AVG:int = 500
-histo_counts:int = 1
-
+histo_counts:int = 99
 ''' Don't Touch '''
 save_dir = Data_manager().build_packs_folder()
 EXP = Ramsey(QD_path=find_latest_QD_pkl_for_dr(DRandIP["dr"],DRandIP["last_ip"]),data_folder=save_dir)
