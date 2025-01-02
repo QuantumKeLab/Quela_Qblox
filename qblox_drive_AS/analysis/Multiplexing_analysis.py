@@ -612,6 +612,88 @@ class analysis_tools():
         self.fit_packs["mean_T1"] = mean(array(self.T1_fit))
         self.fit_packs["std_T1"] = std(array(self.T1_fit))
     
+    """Max T1 in histogram"""
+    # import numpy as np
+    # def T1_plot(self, save_pic_path: str = None, specific_data: np.ndarray = None):
+    # # 使用特定数据进行绘图
+    #     if specific_data is not None:
+    #         self.plot_item["data"] = specific_data
+    #         self.ans = qubit_relaxation_fitting(self.plot_item["time"], specific_data)
+    #         T1_value = self.ans.params["tau"].value
+    #     else:
+    #         T1_value = self.ans.params["tau"].value
+
+    #     save_pic_path = os.path.join(
+    #         save_pic_path,
+    #         f"{self.qubit}_T1_{self.ds.attrs['execution_time'].replace(' ', '_')}.png"
+    #     ) if save_pic_path is not None else ""
+        
+    #     fig, ax = plt.subplots()
+    #     ax = plot_qubit_relaxation(
+    #         self.plot_item["time"], self.plot_item["data"], ax, self.ans, dpi=144
+    #     )
+        
+        
+    #     # 设置坐标轴标签
+    #     ax.set_xlabel("Time (µs)", fontsize=14)  # x轴标签
+    #     ax.set_ylabel("Amplitude (mV)", fontsize=14)  # y轴标签
+
+    #     # 设置标题
+    #     ax.set_title(f"{self.qubit} T1 = {round(self.ans.params['tau'].value, 1)} µs", fontsize=16)
+
+    #     # 修改tick的大小
+    #     ax.tick_params(axis='both', which='major', labelsize=12)  # 主刻度
+    #     ax.tick_params(axis='both', which='minor', labelsize=10)  # 次刻度（如果有）
+
+    #     ax.set_title(f"{self.qubit} T1 = {round(T1_value, 1)} µs")
+        
+    #     if save_pic_path != "":
+    #         slightly_print(f"pic saved located:\n{save_pic_path}")
+    #         plt.savefig(save_pic_path)
+    #         plt.close()
+    #     else:
+    #         plt.show()
+
+
+    # def T1_ana(self, var: str, ref: list):
+    #     raw_data = self.ds[var]
+    #     time_samples = array(self.ds[f"{var}_x"])[0][0]
+    #     reshaped = moveaxis(array(raw_data), 0, 1)  # (repeat, IQ, idx)
+    #     self.qubit = var
+    #     self.plot_item = {"time": array(time_samples) * 1e6}
+    #     self.T1_fit = []
+    #     self.T1_fit_data = []  # 用於儲存對應數據的列表
+
+    #     for idx, data in enumerate(reshaped):
+    #         if len(ref) == 1:
+    #             processed_data = rotate_data(data, ref[0])[0] * 1000  # I
+    #         else:
+    #             processed_data = sqrt((data[0] - ref[0]) ** 2 + (data[1] - ref[1]) ** 2) * 1000
+
+    #         self.plot_item["data"] = processed_data
+    #         self.ans = qubit_relaxation_fitting(self.plot_item["time"], self.plot_item["data"])
+
+    #         self.T1_fit.append(self.ans.params["tau"].value)
+    #         self.T1_fit_data.append(processed_data)  # 儲存對應的原始數據
+
+    #     print(self.T1_fit)
+
+    #     # 找出最大值及對應的數據
+    #     max_index = argmax(self.T1_fit)
+    #     max_T1 = self.T1_fit[max_index]
+    #     corresponding_data = self.T1_fit_data[max_index]
+
+    #     print(f"Maximum T1: {max_T1}, Corresponding Data: {corresponding_data}")
+
+    #     self.fit_packs["median_T1"] = median(array(self.T1_fit))
+    #     self.fit_packs["mean_T1"] = mean(array(self.T1_fit))
+    #     self.fit_packs["std_T1"] = std(array(self.T1_fit))
+
+    #     # 繪製最大值對應的圖表
+    #     self.T1_plot(save_pic_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\Meas_raw\20241225\H17M13S51", specific_data=corresponding_data)
+
+
+
     def T1_plot(self,save_pic_path:str=None):
         save_pic_path = os.path.join(save_pic_path,f"{self.qubit}_T1_{self.ds.attrs['execution_time'].replace(' ', '_')}.png") if save_pic_path is not None else ""
         fig, ax = plt.subplots()

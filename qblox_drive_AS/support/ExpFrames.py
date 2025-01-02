@@ -2820,7 +2820,10 @@ class ROAdepOS(ExpGovernment):
 
     def RunAnalysis(self,new_QD_path:str=None,new_file_path:str=None,histo_ana:bool=False):
         """ if histo_ana, it will check all the data in the same folder with the given new_file_path """
-    
+        import re
+        from collections import defaultdict
+        import numpy as np
+        
         if self.execution:
             if new_QD_path is None:
                 QD_file = self.QD_path
@@ -2852,25 +2855,61 @@ class ROAdepOS(ExpGovernment):
                 QD_savior.QD_keeper()
             else:
                 amp = []
-                eff_T, thermal_pop, ro_fide= {}, {}, {}   
+                eff_T, thermal_pop, ro_fide, p10, snr, power_snr, dis, sigma = {}, {}, {}, {}, {}, {}, {}, {}
                 files = sort_timeLabel([os.path.join(fig_path,name) for name in os.listdir(fig_path) if (os.path.isfile(os.path.join(fig_path,name)) and name.split(".")[-1]=='nc')])
                 
                 for nc_idx, nc_file in enumerate(files):
                     ds = open_dataset(nc_file)
                     for var in ds.data_vars:
-                        if nc_idx == 0: eff_T[var], thermal_pop[var], ro_fide[var]= [], [], []
+                        if nc_idx == 0:  eff_T[var], thermal_pop[var], ro_fide[var], p10[var], snr[var], power_snr[var], dis[var], sigma[var] = [], [], [], [], [], [], [], []
                         ANA = Multiplex_analyzer("a3")
                         ANA._import_data(ds[var]*1000,var_dimension=0,fq_Hz=QD_savior.quantum_device.get_element(var).clock_freqs.f01())
                         ANA._start_analysis()
-                        eff_T[var].append(ANA.fit_packs["effT_mK"])
-                        thermal_pop[var].append(ANA.fit_packs["thermal_population"]*100)
-                        ro_fide[var].append(ANA.fit_packs["RO_fidelity"])
                 
-                for qubit in eff_T:
-                    highlight_print(f"{qubit}: {round(median(array(eff_T[qubit])),1)} +/- {round(std(array(eff_T[qubit])),1)} mK")
-                    Data_manager().save_histo_pic(QD_savior,eff_T,qubit,mode="ss",pic_folder=fig_path)
-                    Data_manager().save_histo_pic(QD_savior,thermal_pop,qubit,mode="pop",pic_folder=fig_path)
-                    Data_manager().save_histo_pic(QD_savior, ro_fide, qubit, mode="rofdlty", pic_folder=fig_path)
+                # Append only valid (non-NaN) values, convert negative values to positive
+                        if not np.isnan(ANA.fit_packs["effT_mK"]):
+                            eff_T[var].append(abs(ANA.fit_packs["effT_mK"]))
+                        if not np.isnan(ANA.fit_packs["thermal_population"]):
+                            thermal_pop[var].append(abs(ANA.fit_packs["thermal_population"]) * 100)
+                        if not np.isnan(ANA.fit_packs["RO_fidelity"]):
+                            ro_fide[var].append(abs(ANA.fit_packs["RO_fidelity"]))
+                        if not np.isnan(ANA.fit_packs["p10_precentage"]):
+                            p10[var].append(abs(ANA.fit_packs["p10_precentage"]))
+                        if not np.isnan(ANA.fit_packs["SNR"]):
+                            snr[var].append(abs(ANA.fit_packs["SNR"]))
+                        if not np.isnan(ANA.fit_packs["PowerSNR"]):
+                            power_snr[var].append(abs(ANA.fit_packs["PowerSNR"]))
+                        if not np.isnan(ANA.fit_packs["distance"]):
+                            dis[var].append(abs(ANA.fit_packs["distance"]))
+                        if not np.isnan(ANA.fit_packs["Sigma"]):
+                            sigma[var].append(abs(ANA.fit_packs["Sigma"]))
+                            # Calculate and save mean/std for each variable
+                    for var in eff_T:
+                        all_results[var]['eff_T'].append((key, np.mean(eff_T[var]), np.std(eff_T[var])))
+                        all_results[var]['thermal_pop'].append((key, np.mean(thermal_pop[var]), np.std(thermal_pop[var])))
+                        all_results[var]['ro_fide'].append((key, np.mean(ro_fide[var]), np.std(ro_fide[var])))
+                        all_results[var]['p10'].append((key, np.mean(p10[var]), np.std(p10[var])))
+                        all_results[var]['snr'].append((key, np.mean(snr[var]), np.std(snr[var])))
+                        all_results[var]['power_snr'].append((key, np.mean(power_snr[var]), np.std(power_snr[var])))
+                        all_results[var]['dis'].append((key, np.mean(dis[var]), np.std(dis[var])))
+                        all_results[var]['sigma'].append((key, np.mean(sigma[var]), np.std(sigma[var])))
+
+                    for qubit in eff_T:#not sure if it is work
+                        highlight_print(f"Amp {key} - {qubit}: {round(median(array(eff_T[qubit])), 1)} +/- {round(std(array(eff_T[qubit])), 1)} mK")
+                        Data_manager().save_histo_pic(QD_savior, eff_T, qubit, mode="ss", pic_folder=fig_path)
+                        Data_manager().save_histo_pic(QD_savior, thermal_pop, qubit, mode="pop", pic_folder=fig_path)
+                        Data_manager().save_histo_pic(QD_savior, ro_fide, qubit, mode="rofdlty", pic_folder=fig_path)
+                        Data_manager().save_histo_pic(QD_savior, p10, qubit, mode="p10", pic_folder=fig_path)
+
+                        # Data_manager().save_histo_pic(QD_savior, snr, 'snr', mode="snr", save_fig=True, pic_folder=fig_path)
+                        # Data_manager().save_histo_pic(QD_savior, power_snr, 'power_snr_dB', mode="powersnr", save_fig=True, pic_folder=fig_path)
+                   
+                # Print final results for each variable
+                for var, results in all_results.items():
+                    print(f"Results for variable {var}:")
+                    for metric, data in results.items():
+                        print(f"  {metric}: {data}")
+
                     
     def WorkFlow(self):
         for amp_coef in self.roAmp_factor:
@@ -2885,7 +2924,6 @@ class ROAdepOS(ExpGovernment):
                 self.counter += 1
                 
 class ROAdepOS_MultiFilesAnalysis(ExpGovernment):
-    """ Helps you get the **Dressed** cavities. """
     def __init__(self,QD_path:str,data_folder:str=None,JOBID:str=None):
         super().__init__()
         self.QD_path = QD_path
@@ -2915,7 +2953,6 @@ class ROAdepOS_MultiFilesAnalysis(ExpGovernment):
         self.counter:int = 0
         if self.histos > 0:
             self.use_time_label = True
-
 
 
     def PrepareHardware(self, now_roa_coef:float):
@@ -3071,24 +3108,24 @@ class ROAdepOS_MultiFilesAnalysis(ExpGovernment):
                     for metric, data in results.items():
                         print(f"  {metric}: {data}")
 
-                        # Plotting
-                        x_vals = np.array([x[0] for x in data])  
-                        means = [x[1] for x in data]
-                        stds = [x[2] for x in data]
+                        # # Plotting
+                        # x_vals = np.array([x[0] for x in data])  
+                        # means = [x[1] for x in data]
+                        # stds = [x[2] for x in data]
 
-                        plt.figure(figsize=(10, 6))
-                        plt.errorbar(x_vals * 0.1, means, yerr=stds, fmt='o', capsize=5, capthick=2, label=f'{metric} Mean')  # Multiply x_vals by 0.1
-                        plt.xlabel('Readout Voltage (V)', fontsize=14)
-                        plt.ylabel(metric, fontsize=14)
-                        plt.title(f'{metric} vs Amplitude for {var}', fontsize=16)
-                        plt.grid(True)
-                        plt.legend()
-                        plt.tight_layout()
-                        # Save the plot
-                        plot_path = os.path.join(fig_path, f"{var}_{metric}_plot.png")
-                        plt.savefig(plot_path)
-                        plt.close()
-                        print(f"Plot saved to {plot_path}")
+                        # plt.figure(figsize=(10, 6))
+                        # plt.errorbar(x_vals * 0.1, means, yerr=stds, fmt='o', capsize=5, capthick=2, label=f'{metric} Mean')  # Multiply x_vals by 0.1
+                        # plt.xlabel('Readout Voltage (V)', fontsize=14)
+                        # plt.ylabel(metric, fontsize=14)
+                        # plt.title(f'{metric} vs Amplitude for {var}', fontsize=16)
+                        # plt.grid(True)
+                        # plt.legend()
+                        # plt.tight_layout()
+                        # # Save the plot
+                        # plot_path = os.path.join(fig_path, f"{var}_{metric}_plot.png")
+                        # plt.savefig(plot_path)
+                        # plt.close()
+                        # print(f"Plot saved to {plot_path}")
     def WorkFlow(self):
         for amp_coef in self.roAmp_factor:
             for j in range(self.histos):
@@ -3114,7 +3151,7 @@ class StarkShift(ExpGovernment):
     def RawDataPath(self):
         return self.__raw_data_location
 
-    def SetParameters(self, freq_span_range:dict, roamp_range:list, roamp_sampling_func:str, freq_pts:int=100, avg_n:int=100, execution:bool=True):
+    def SetParameters(self, target_qs:list, freq_span_Hz:int, ro_amp_range:list ,freq_pts:int ,execution:bool=True):
         """ ### Args:
             * freq_span_range: {"q0":[freq_span_start, freq_span_end], ...}, sampling function use linspace\n
             * roamp_range: [amp_start, amp_end, pts]\n
@@ -3198,7 +3235,7 @@ class StarkShift(ExpGovernment):
 if __name__ == "__main__":
     EXP =  EnergyRelaxation(QD_path="")
     EXP.execution = True
-    EXP.RunAnalysis(new_QD_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20241218\DRKE#242_SumInfo.pkl",
-                    new_file_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\Meas_raw\20241218\80mK\H16M13S17_325T1"
-                    )#,histo_ana=True)
+    EXP.RunAnalysis(new_QD_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20241229\DRKE#242_SumInfo.pkl",
+                    new_file_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\Meas_raw\20241229\TSRI131#10\Q4\H21M24S11\T1_20241229212718.nc"
+            )#,histo_ana=True)
     
