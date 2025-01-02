@@ -11,6 +11,13 @@ class QD_modifier():
         self.to_modifiy_item = []
         self.QD_agent = QDmanager(QD_path)
         self.QD_agent.QD_loader()
+        
+    def set_xyf(self, xyfs_Hz:dict={}):
+        if xyfs_Hz is not None:
+            if len(list(xyfs_Hz.keys())) != 0:
+                for q in xyfs_Hz:
+                    self.QD_agent.quantum_device.get_element(q).clock_freqs.f01(xyfs_Hz[q]) 
+                self.to_modifiy_item.append("XYF")
 
     def set_RamseyT2detuing(self, detunes:dict={}):
         if detunes is not None:
@@ -132,30 +139,33 @@ class QD_modifier():
 
 if __name__ == "__main__":
 
-    QD_path = r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20241218\DRKE#242_SumInfo.pkl"
+    QD_path = r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20241229\DRKE#242_SumInfo.pkl"
     QMaster = QD_modifier(QD_path)
 
+    """ Set transition frequency """
+    QMaster.set_xyf(xyfs_Hz = {})    # xyfs_Hz = {"q0":4e9, "q1":4.5e9, ...}
+
     """ Set RO amp by a coef. """
-    QMaster.set_ROamp_by_coef(roAmp_coef_dict={"q0":1, "q1":1,"q2":1, "q3":1}) # roAmp_coef_dict = {"q0":0.93, "q1":0.96, ...}, set None or {} to bypass 
+    QMaster.set_ROamp_by_coef(roAmp_coef_dict={"q0":0.8,"q1":0.8}) #"q0":1,  # roAmp_coef_dict = {"q0":0.93, "q1":0.96, ...}, set None or {} to bypass 
 
     """ Set RO freq """
-    QMaster.set_ROF(ROFs={})                      # ROFs = {"q0":6.0554e9, .....}
+    QMaster.set_ROF(ROFs={})#"q0":4.52436e9,"q1":4.61996e9,"q2":4.7125e9,"q3":4.8069e9   # ROFs = {"q0":6.0554e9, .....}
     
     """ Set Integration time """ 
-    QMaster.set_integration_time(inte_time_s={"q0":2e-6})#, "q1":2e-6 } #"q0":2e-6 #inte_time_s = {"q0":1e-6, "q1":0.75e-6, ...}, set None or {} to bypass 
+    QMaster.set_integration_time(inte_time_s={"q1":1.5e-6} ) #inte_time_s = {"q0":1e-6, "q1":0.75e-6, ...}, set None or {} to bypass 
 
     """ Set reset time (All qubits global) """
     QMaster.setGlobally_reset_time(reset_time_s=100e-6)      # reset_time_s = 250e-6, all the qubit in the quantum_device will share the same value
 
     """ Set driving attenuation (All qubits blobal) """     # xy_atte = 10 recommended, all qubits are shared with a same value. Must be multiples of 2.
-    QMaster.setGlobally_driving_atte(xy_atte=None)
+    QMaster.setGlobally_driving_atte(xy_atte=0)
 
     """ Set driving IF """
     QMaster.set_drivin_IF(driving_IF_Hz={})   # driving_IF_Hz = {"q0":-150e6, "q1":-100e6, ...}, set None or {} to bypass  !!! Always be negative !!!
 
     """ Set RO-LO, RO-atte ( target_q QRM-RF modlue global) """
     QMaster.set_roLOfreq(LO_Hz=None, target_q='q0') # LO is global in the same QRM-RF module, set None to bypass 
-    QMaster.set_roAtte(ro_atte=None, target_q='q0') # RO-attenuation is global in the same QRM-RF module, set None to bypass 
+    QMaster.set_roAtte(ro_atte= 38, target_q='q0') # RO-attenuation is global in the same QRM-RF module, set None to bypass 
 
     """ Set coupler bias """
     QMaster.update_coupler_bias(cp_elements={})  # cp_elements = {"c0":0.1, "c2":0.05, ...}, set None or {} to bypass 
