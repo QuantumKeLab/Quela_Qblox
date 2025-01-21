@@ -154,9 +154,18 @@ class Zoom_CavitySearching(ExpGovernment):
         
     
     def RunMeasurement(self):
-        from qblox_drive_AS.SOP.CavitySpec import QD_RO_init, Cavity_spec
+        from qblox_drive_AS.SOP.CavitySpec import QD_RO_init, CavitySearch
         QD_RO_init(self.QD_agent,self.freq_range)
-        dataset = Cavity_spec(self.QD_agent,self.meas_ctrl,self.freq_range,self.avg_n,self.execution)
+        meas = CavitySearch()
+        meas.ro_elements = self.freq_range
+        meas.execution = self.execution
+        meas.n_avg = self.avg_n
+        meas.meas_ctrl = self.meas_ctrl
+        meas.QD_agent = self.QD_agent
+        meas.run()
+        dataset = meas.dataset
+        
+        
         if self.execution:
             if self.save_dir is not None:
                 self.save_path = os.path.join(self.save_dir,f"zoomCS_{datetime.now().strftime('%Y%m%d%H%M%S') if self.JOBID is None else self.JOBID}")
@@ -331,11 +340,20 @@ class Dressed_CavitySearching(ExpGovernment):
         
     
     def RunMeasurement(self):
-        from qblox_drive_AS.SOP.CavitySpec import Cavity_spec, QD_RO_init
+        from qblox_drive_AS.SOP.CavitySpec import QD_RO_init, CavitySearch
         QD_RO_init(self.QD_agent,self.freq_range)
         for q in self.ro_amp:
             self.QD_agent.quantum_device.get_element(q).measure.pulse_amp(self.ro_amp[q])
-        dataset = Cavity_spec(self.QD_agent,self.meas_ctrl,self.freq_range,self.avg_n,self.execution)
+        
+        meas = CavitySearch()
+        meas.ro_elements = self.freq_range
+        meas.execution = self.execution
+        meas.n_avg = self.avg_n
+        meas.meas_ctrl = self.meas_ctrl
+        meas.QD_agent = self.QD_agent
+        meas.run()
+        dataset = meas.dataset
+        
         if self.execution:
             if self.save_dir is not None:
                 self.save_path = os.path.join(self.save_dir,f"dressedCS_{datetime.now().strftime('%Y%m%d%H%M%S') if self.JOBID is None else self.JOBID}")
@@ -930,10 +948,9 @@ class PowerRabiOsci(ExpGovernment):
     def RawDataPath(self):
         return self.__raw_data_location
 
-    def SetParameters(self, pi_amp:dict, pi_dura:dict, pi_amp_sampling_func:str, pi_amp_pts_or_step:float=100, avg_n:int=100, execution:bool=True, OSmode:bool=False):
+    def SetParameters(self, pi_amp:dict, pi_amp_sampling_func:str, pi_amp_pts_or_step:float=100, avg_n:int=100, execution:bool=True, OSmode:bool=False):
         """ ### Args:
             * pi_amp: {"q0":[pi_amp_start, pi_amp_end], ...}\n
-            * pi_dura: {"q0":pi_duration_in_seconds, ...}\n
             * pi_amp_sampling_func (str): 'linspace', 'arange', 'logspace'\n
             * pi_amp_pts_or_step: Depends on what sampling func you use, `linspace` or `logspace` set pts, `arange` set step. 
         """
@@ -946,7 +963,6 @@ class PowerRabiOsci(ExpGovernment):
         for q in pi_amp:
             self.pi_amp_samples[q] = sampling_func(*pi_amp[q],pi_amp_pts_or_step)
             
-        self.pi_dura = pi_dura
         self.avg_n = avg_n
         self.execution = execution
         self.OSmode = OSmode
@@ -958,13 +974,15 @@ class PowerRabiOsci(ExpGovernment):
         # bias coupler
         self.Fctrl = coupler_zctrl(self.Fctrl,self.QD_agent.Fluxmanager.build_Cctrl_instructions([cp for cp in self.Fctrl if cp[0]=='c' or cp[:2]=='qc'],'i'))
         # offset bias, LO and driving atte
+        self.pi_dura = {}
+        
         for q in self.target_qs:
             self.Fctrl[q](self.QD_agent.Fluxmanager.get_proper_zbiasFor(target_q=q))
             IF_minus = self.QD_agent.Notewriter.get_xyIFFor(q)
             xyf = self.QD_agent.quantum_device.get_element(q).clock_freqs.f01()
             set_LO_frequency(self.QD_agent.quantum_device,q=q,module_type='drive',LO_frequency=xyf-IF_minus)
             init_system_atte(self.QD_agent.quantum_device,[q],ro_out_att=self.QD_agent.Notewriter.get_DigiAtteFor(q, 'ro'), xy_out_att=self.QD_agent.Notewriter.get_DigiAtteFor(q,'xy'))
-        
+            self.pi_dura[q] = self.QD_agent.quantum_device.get_element(q).rxy.duration()
         
     def RunMeasurement(self):
         from qblox_drive_AS.SOP.RabiOsci import PowerRabi
@@ -1037,7 +1055,7 @@ class TimeRabiOsci(ExpGovernment):
     def RawDataPath(self):
         return self.__raw_data_location
 
-    def SetParameters(self, pi_dura:dict, pi_amp:dict, pi_dura_sampling_func:str, pi_dura_pts_or_step:float=100, avg_n:int=100, execution:bool=True, OSmode:bool=False):
+    def SetParameters(self, pi_dura:dict, pi_dura_sampling_func:str, pi_dura_pts_or_step:float=100, avg_n:int=100, execution:bool=True, OSmode:bool=False):
         """ ### Args:
             * pi_amp: {"q0": pi-amp in V, ...}\n
             * pi_dura: {"q0":[pi_duration_start, pi_duration_end], ...}\n
@@ -1054,8 +1072,6 @@ class TimeRabiOsci(ExpGovernment):
         for q in pi_dura:
             self.pi_dura_samples[q] = sort_elements_2_multiples_of(sampling_func(*pi_dura[q],pi_dura_pts_or_step)*1e9,4)*1e-9
     
-
-        self.pi_amp = pi_amp
         self.avg_n = avg_n
         self.execution = execution
         self.OSmode = OSmode
@@ -1067,13 +1083,15 @@ class TimeRabiOsci(ExpGovernment):
         # bias coupler
         self.Fctrl = coupler_zctrl(self.Fctrl,self.QD_agent.Fluxmanager.build_Cctrl_instructions([cp for cp in self.Fctrl if cp[0]=='c' or cp[:2]=='qc'],'i'))
         # offset bias, LO and atte
+        self.pi_amp = {}
         for q in self.target_qs:
             self.Fctrl[q](self.QD_agent.Fluxmanager.get_proper_zbiasFor(target_q=q))
             IF_minus = self.QD_agent.Notewriter.get_xyIFFor(q)
             xyf = self.QD_agent.quantum_device.get_element(q).clock_freqs.f01()
             set_LO_frequency(self.QD_agent.quantum_device,q=q,module_type='drive',LO_frequency=xyf-IF_minus)
             init_system_atte(self.QD_agent.quantum_device,[q],ro_out_att=self.QD_agent.Notewriter.get_DigiAtteFor(q, 'ro'), xy_out_att=self.QD_agent.Notewriter.get_DigiAtteFor(q,'xy'))
-        
+            self.pi_amp[q] = self.QD_agent.quantum_device.get_element(q).rxy.amp180()
+            
     def RunMeasurement(self):
         from qblox_drive_AS.SOP.RabiOsci import TimeRabi
     
@@ -1172,7 +1190,7 @@ class SingleShot(ExpGovernment):
         self.Fctrl = coupler_zctrl(self.Fctrl,self.QD_agent.Fluxmanager.build_Cctrl_instructions([cp for cp in self.Fctrl if cp[0]=='c' or cp[:2]=='qc'],'i'))
         # offset bias, LO and driving atte
         for q in self.target_qs:
-            self.Fctrl[q](self.QD_agent.Fluxmanager.get_proper_zbiasFor(target_q=q))
+            # self.Fctrl[q](self.QD_agent.Fluxmanager.get_proper_zbiasFor(target_q=q))
             IF_minus = self.QD_agent.Notewriter.get_xyIFFor(q)
             xyf = self.QD_agent.quantum_device.get_element(q).clock_freqs.f01()
             set_LO_frequency(self.QD_agent.quantum_device,q=q,module_type='drive',LO_frequency=xyf-IF_minus)
@@ -1264,6 +1282,7 @@ class Ramsey(ExpGovernment):
         self.save_dir = data_folder
         self.__raw_data_location:str = ""
         self.JOBID = JOBID
+        self.histos:int = 0
 
     @property
     def RawDataPath(self):
@@ -2458,7 +2477,7 @@ class ZgateEnergyRelaxation(ExpGovernment):
                 ds.close()
             
 
-    def WorkFlow(self):
+    def WorkFlow(self, histo_counts:int=None):
         idx = 1
         start_time = datetime.now()
         while True:
@@ -2470,9 +2489,19 @@ class ZgateEnergyRelaxation(ExpGovernment):
 
             slightly_print(f"It's the {idx}-th measurement, about {round((datetime.now() - start_time).total_seconds()/60,1)} mins recorded.")
             
+            if histo_counts is not None:
+                # ensure the histo_counts you set is truly a number
+                try: 
+                    a = int(histo_counts)/100
+                    self.want_while = True
+                except:
+                    raise TypeError(f"The arg `histo_counts` you set is not a number! We see it's {type(histo_counts)}...")
+                if histo_counts == idx:
+                    break
             idx += 1
             if not self.want_while:
                 break
+            
                 
 class QubitMonitor():
     def __init__(self, QD_path:str, save_dir:str, execution:bool=True):
@@ -2756,6 +2785,7 @@ class XGateErrorTest(ExpGovernment):
 
 
 if __name__ == "__main__":
-    EXP = BroadBand_CavitySearching(QD_path="")
-    EXP.RunAnalysis(new_QD_path="qblox_drive_AS/QD_backup/20241128/DR1#11_SumInfo.pkl",new_file_path="/Users/ratiswu/Desktop/FTP-ASqcMeas/BroadBandCS_20241209143406.nc")
+    EXP = Ramsey(QD_path="")
+    EXP.execution = 1
+    EXP.RunAnalysis(new_QD_path="/Users/ratiswu/Desktop/FTP-ASqcMeas/ramsey_updates/qblox_ExpConfigs_20250117192846/DR1#11_SumInfo.pkl",new_file_path="/Users/ratiswu/Desktop/FTP-ASqcMeas/ramsey_updates/Ramsey_20250117192846.nc")
     
