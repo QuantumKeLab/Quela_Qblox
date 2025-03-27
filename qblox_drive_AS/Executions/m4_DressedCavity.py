@@ -7,12 +7,17 @@ from qblox_drive_AS.support.ExpFrames import Dressed_CavitySearching
 
 ''' fill in '''
 Execution:bool = True
-DRandIP = {"dr":"dr2","last_ip":"10"}
-freq_range:dict = {"q0":[5.9925e9, 5.9975e9], "q1":[6.075e9, 6.080e9]}    # np.linspace(rof+span, rof+span, freq_pts)
-ro_amp = {"q0":0.2, "q1":0.2}
+DRandIP = {"dr":"drke","last_ip":"242"}
+freq_range:dict = { #FQV1
+                  "q0":[4.8085e9, 4.811e9],
+                   "q1":[4.91e9, 4.913e9],
+                   "q2":[5.009e9, 5.0115e9],
+                   "q3":[5.11e9, 5.114e9]
+                }   # np.linspace(rof+span, rof+span, freq_pts)
+ro_amp = {"q0":0.07, "q1":0.02, "q2":0.08, "q3":0.04}#, "q1":1
 
-freq_pts:int = 100
-AVG:int = 100
+freq_pts:int = 300
+AVG:int = 200
 
 ''' Don't Touch '''
 save_dir = Data_manager().build_packs_folder()

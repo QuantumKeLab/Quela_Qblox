@@ -6,13 +6,13 @@ from qblox_drive_AS.support.ExpFrames import TimeRabiOsci
 
 ''' fill in '''
 Execution:bool = True
-DRandIP = {"dr":"dr2","last_ip":"10"}
-pi_dura_range:dict = {"q0":[0,200e-9], "q1":[0,200e-9]}    # [pi_amp_start, pi_amp_end]
+DRandIP = {"dr":"drke","last_ip":"242"}
+pi_dura_range:dict = {"q2":[0,200e-9]}    # [pi_amp_start, pi_amp_end]
 pi_dura_sampling_func:str = 'linspace'                          # 'linspace'/ 'logspace'/ 'arange
 
 
 pi_dura_ptsORstep:int|float = 100  # Depends on the sampling func you use, 'linspace' or 'logspace' set pts in int, 'arange' set step in float
-AVG:int = 300
+AVG:int = 1000
 
 ''' Don't Touch '''
 save_dir = Data_manager().build_packs_folder()

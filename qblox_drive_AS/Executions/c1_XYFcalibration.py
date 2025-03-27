@@ -6,12 +6,12 @@ from qblox_drive_AS.support.ExpFrames import XYFcali
 
 ''' fill in '''
 Execution:bool = True
-DRandIP = {"dr":"dr1","last_ip":"11"}
-target_qs:list = ["q4"]
-AVG:int = 500
+DRandIP = {"dr":"drke","last_ip":"242"}
+target_qs:list = ["q3"]
+AVG:int = 100
 
 """ try change it ONLY when fitting goes wrong """
-evoT = 5e-6
+evoT = 50e-6
 
 
 ''' Don't Touch '''

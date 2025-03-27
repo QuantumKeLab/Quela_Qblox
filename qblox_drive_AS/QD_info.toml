@@ -1,47 +1,47 @@
-QD_file: qblox_drive_AS/QD_backup/20250122/DR1#11_SumInfo.pkl
+QD_file: C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20250321\DRKE#242_SumInfo.pkl
 Comments: ---
 
-RO-atte = 26 dB
+RO-atte = 36 dB
 XY-atte = 0 dB
-Reset time = 600 µs
+Reset time = 1000 us
 
 [q0]
-    bare   = 4.508897929076325 GHz
-    ROF    = 4.508976642691805 GHz
-    ROT    = 8.0 µs
-    XYF    = 2.6048282857747043 GHz
-    Pi-amp = 0.732139731799475 V
-    Pi-dura= 200.0 ns
-    x      = 0.0787136154794693 MHz
-    g      = 18.499024766413836 MHz
+    bare   = 4.809310301255909 GHz
+    ROF    = 4.80985 GHz
+    ROT    = 5.0 us
+    XYF    = 3.537458632130211 GHz
+    Pi-amp = 0.31222399894140906 V
+    Pi-dura= 40.0 ns
+    x      = 0.5396987440910339 MHz
+    g      = 26.16658039980514 MHz
 
 [q1]
-    bare   = 4.604740611931549 GHz
-    ROF    = 4.605404986066962 GHz
-    ROT    = 4.0 µs
-    XYF    = 3.491817888393119 GHz
-    Pi-amp = 0.33855876255267886 V
-    Pi-dura= 200.0 ns
-    x      = 0.6643741354141235 MHz
-    g      = 28.212533399605253 MHz
+    bare   = 4.910947294406603 GHz
+    ROF    = 4.911550208252859 GHz
+    ROT    = 4.0 us
+    XYF    = 3.8886816899600642 GHz
+    Pi-amp = 0.2503541181429948 V
+    Pi-dura= 40.0 ns
+    x      = 0.6029138462553024 MHz
+    g      = 29.955431220191848 MHz
 
 [q2]
-    bare   = 4.698012769030793 GHz
-    ROF    = 4.698527897634897 GHz
-    ROT    = 4.0 µs
-    XYF    = 3.4188165302904636 GHz
-    Pi-amp = 0.18353527863089436 V
-    Pi-dura= 200.0 ns
-    x      = 0.515128604104042 MHz
-    g      = 26.9172764434143 MHz
+    bare   = 5.010059711168352 GHz
+    ROF    = 5.010384562697759 GHz
+    ROT    = 4.8 us
+    XYF    = 3.2338490484923805 GHz
+    Pi-amp = 0.4584830637034544 V
+    Pi-dura= 40.0 ns
+    x      = 0.3248515294075012 MHz
+    g      = 21.69439931640346 MHz
 
 [q3]
-    bare   = 4.794240996877137 GHz
-    ROF    = 4.7948298926835315 GHz
-    ROT    = 5.0 µs
-    XYF    = 3.525529715998996 GHz
-    Pi-amp = 0.4482143305329039 V
-    Pi-dura= 200.0 ns
-    x      = 0.588895806394577 MHz
-    g      = 30.656741711800432 MHz
+    bare   = 5.111592345930814 GHz
+    ROF    = 5.1119526436393485 GHz
+    ROT    = 4.5 us
+    XYF    = 3.654864262280459 GHz
+    Pi-amp = 0.5090030455533437 V
+    Pi-dura= 40.0 ns
+    x      = 0.3602977085342407 MHz
+    g      = 29.98624163433717 MHz
 
