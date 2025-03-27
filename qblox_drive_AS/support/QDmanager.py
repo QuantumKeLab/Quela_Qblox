@@ -9,7 +9,7 @@ from quantify_scheduler.device_under_test.quantum_device import QuantumDevice
 from quantify_scheduler.device_under_test.transmon_element import BasicTransmonElement
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
-from qcat.analysis.state_discrimination.readout_fidelity import GMMROFidelity
+from qblox_drive_AS.support.StatifyContainer import Statifier
 
 
 def ret_q(dict_a):
@@ -114,9 +114,9 @@ def find_path_by_clock(hardware_config, port, clock):
 
 class QDmanager():
     def __init__(self,QD_path:str=''):
-        self.manager_version:str = "v2.0" # Only RatisWu can edit it
+        self.manager_version:str = "v2.1" # Only RatisWu can edit it
         self.path = QD_path
-        self.StateDiscriminator:GMMROFidelity = GMMROFidelity()
+        self.StateDiscriminator:Statifier = Statifier()
         self.Waveformer:GateGenesis = None
         self.machine_IP = ""
         self.refIQ = {}
@@ -154,7 +154,7 @@ class QDmanager():
 
                     self.Fctrl_str_ver[q] = f"{cluster_name}.{module_name}.{func_name}"
                 else:
-                    self.Fctrl_str_ver[q] = f'pass'
+                    self.Fctrl_str_ver[q] = f"pass" 
         except:
             ans = self.quantum_device.elements()
             eyeson_print("Your Hcfg didn't assign the flux connections so the Fctrl will be empty! ")
@@ -207,51 +207,65 @@ class QDmanager():
         """
         Load the QuantumDevice, Bias config, hardware config and Flux control callable dict from a given json file path contain the serialized QD.
         """
+        update:bool = False
         with open(self.path, 'rb') as inp:
             gift:QDmanager = pickle.load(inp) # refer to `merged_file` in QD_keeper()
 
-          
+
         try:  
             manager_ver = gift.manager_version
-            if manager_ver.lower() != "v2.0":
-                raise AttributeError(Back.RED + Fore.YELLOW + Style.BRIGHT +"Your QD_file is too old! please use self.version_converter() to load it."+ Style.RESET_ALL)   
+            if manager_ver.lower() not in  ["v2.0","v2.1"]:
+                update = True   
         except:
-            raise AttributeError(Back.RED + Fore.YELLOW + Style.BRIGHT +"Your QD_file is too old! please use self.version_converter() to load it."+ Style.RESET_ALL)
+            update = True
         
-        # class
-        self.Fluxmanager = gift.Fluxmanager
-        self.Notewriter = gift.Notewriter
-        self.Waveformer = gift.Waveformer
-        self.quantum_device = gift.quantum_device
-        self.StateDiscriminator = gift.StateDiscriminator
+        if update:
+            self.version_converter(gift)
+            print("This QD_file is out-updated, successfully updated !")
 
-        # string/ int
-        self.manager_version = gift.manager_version
-        self.chip_name:str = gift.chip_name
-        self.chip_type:str = gift.chip_type
-        self.Identity:str = gift.Identity
-        self.Log:str = gift.Log
-        self.Fctrl_str_ver = gift.Fctrl_str_ver
-        self.machine_IP:str = gift.machine_IP
-        self.q_num:int = len(list(filter(ret_q,self.Fluxmanager.get_bias_dict())))
-        self.c_num:int = len(list(filter(ret_c,self.Fluxmanager.get_bias_dict())))
-        
-        # dict
-        self.refIQ = gift.refIQ
-        self.Hcfg = gift.Hcfg
-        self.rotate_angle = gift.rotate_angle
-        
-        if new_Hcfg is not None:
-            from qblox_drive_AS.support.UserFriend import slightly_print
-            self.Hcfg = new_Hcfg
-            self.quantum_device.hardware_config(new_Hcfg)
-            slightly_print("Saved new given Hardware config.")
-            self.made_mobileFctrl()
         else:
-            self.quantum_device.hardware_config(self.Hcfg)
+            # class
+            self.Fluxmanager = gift.Fluxmanager
+            self.Notewriter = gift.Notewriter
+            self.Waveformer = gift.Waveformer
+            self.quantum_device = gift.quantum_device
+            try:
+                if manager_ver.lower() == "v2.1":
+                    self.StateDiscriminator = gift.StateDiscriminator
+                else:
+                    self.StateDiscriminator:Statifier = Statifier()
+            except:
+                print("Generating Statifier ...")
+                self.StateDiscriminator:Statifier = Statifier()
+
+            # string/ int
+            self.manager_version = gift.manager_version
+            self.chip_name:str = gift.chip_name
+            self.chip_type:str = gift.chip_type
+            self.Identity:str = gift.Identity
+            self.Log:str = gift.Log
+            self.Fctrl_str_ver = gift.Fctrl_str_ver
+            self.machine_IP:str = gift.machine_IP
+            self.q_num:int = len(list(filter(ret_q,self.Fluxmanager.get_bias_dict())))
+            self.c_num:int = len(list(filter(ret_c,self.Fluxmanager.get_bias_dict())))
+            
+            # dict
+            self.refIQ = gift.refIQ
+            self.Hcfg = gift.Hcfg
+            self.rotate_angle = gift.rotate_angle
+            
+            if new_Hcfg is not None:
+                from qblox_drive_AS.support.UserFriend import slightly_print
+                self.Hcfg = new_Hcfg
+                self.quantum_device.hardware_config(new_Hcfg)
+                slightly_print("Saved new given Hardware config.")
+                self.made_mobileFctrl()
+            else:
+                self.quantum_device.hardware_config(self.Hcfg)
         
         print("Old friends loaded!")
-    
+
+        
     def QD_keeper(self, special_path:str=''):
         """
         Save the merged dictionary to a json file with the given path. \n
@@ -267,13 +281,8 @@ class QDmanager():
             pickle.dump(self, file)
             print(f'Summarized info had successfully saved to the given path!')
 
-    def version_converter(self, old_QD_path:str=None):
-        
-        if old_QD_path is not None:
-            self.path = old_QD_path
-
-        with open(self.path, 'rb') as inp:
-            gift:dict = pickle.load(inp) # refer to `merged_file` in QD_keeper()
+    def version_converter(self, gift):
+        from qcat.analysis.state_discrimination.readout_fidelity import GMMROFidelity
         # string and int
         self.chip_name:str = gift["chip_info"]["name"]
         self.chip_type:str = gift["chip_info"]["type"]
@@ -295,9 +304,12 @@ class QDmanager():
         self.quantum_device :QuantumDevice = gift["QD"]
 
         if "Discriminator" in list(gift.keys()):
-            self.StateDiscriminator = gift["Discriminator"]
+            if type(gift["Discriminator"]) != GMMROFidelity:
+                self.StateDiscriminator = gift["Discriminator"]
+            else:
+                self.StateDiscriminator:Statifier = Statifier()
         else:
-            self.StateDiscriminator:GMMROFidelity = GMMROFidelity()
+            self.StateDiscriminator:Statifier = Statifier()
         
         
         # dict
@@ -306,8 +318,7 @@ class QDmanager():
         self.rotate_angle = gift["rota_angle"]
         
         self.quantum_device.hardware_config(self.Hcfg)
-        self.QD_keeper()
-        print("The version had been updated and the file is saved !")
+
 
     def build_new_QD(self,qubit_number:int,coupler_number:int,Hcfg:dict,cluster_ip:str,dr_loc:str,chip_name:str='',chip_type:str=''):
 
@@ -330,7 +341,7 @@ class QDmanager():
         self.Fluxmanager :FluxBiasDict = FluxBiasDict(self.q_num,self.cp_num)
         self.Notewriter: Notebook = Notebook(self.q_num)
         self.Waveformer:GateGenesis = GateGenesis(q_num=self.q_num,c_num=self.cp_num)
-        self.StateDiscriminator:GMMROFidelity = GMMROFidelity()
+        self.StateDiscriminator:Statifier = Statifier()
 
         
         # for firmware v0.7.0
@@ -344,7 +355,7 @@ class QDmanager():
             qubit.reset.duration(250e-6)
             qubit.clock_freqs.readout(6e9)
             qubit.measure.acq_delay(0)
-            qubit.measure.pulse_amp(0.15)
+            qubit.measure.pulse_amp(0.5)
             qubit.measure.pulse_duration(1e-6)
             qubit.measure.integration_time(1e-6)
             qubit.clock_freqs.f01(4e9)
@@ -426,7 +437,7 @@ class QDmanager():
         if "state_discriminator" in option_selected:
             self.StateDiscriminator = option_selected["state_discriminator"]
         else:
-            self.StateDiscriminator = GMMROFidelity()
+            self.StateDiscriminator = Statifier()
 
 
 
@@ -697,6 +708,7 @@ class Data_manager:
 
 if __name__ == "__main__":
     
-    QD_agent = QDmanager("qblox_drive_AS/QD_backup/20250120/DR1#11_SumInfo.pkl")
-    QD_agent.version_converter()
-    # QD_agent.QD_keeper()
+    QD_agent = QDmanager("qblox_drive_AS/QD_backup/20250218/DR1#11_SumInfo.pkl")
+    QD_agent.QD_loader()
+    print(QD_agent.StateDiscriminator.elements)
+    
