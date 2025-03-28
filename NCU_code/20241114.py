@@ -3,15 +3,15 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 from xarray import Dataset
 from qblox_instruments import Cluster
 from utils.tutorial_utils import show_args
-from qblox_drive_AS.support.UserFriend import *
+from Modularize.support.UserFriend import *
 from qcodes.parameters import ManualParameter
 from numpy import array, linspace, median, std
 from quantify_scheduler.gettables import ScheduleGettable
 from quantify_core.measurement.control import MeasurementControl
-from qblox_drive_AS.support.Path_Book import find_latest_QD_pkl_for_dr
-from qblox_drive_AS.support.Pulse_schedule_library import Qubit_state_single_shot_plot
-from qblox_drive_AS.support import QDmanager, Data_manager,init_system_atte, init_meas, shut_down, coupler_zctrl
-from qblox_drive_AS.support.Pulse_schedule_library import Qubit_SS_sche, set_LO_frequency, pulse_preview, Qubit_state_single_shot_fit_analysis
+from Modularize.support.Path_Book import find_latest_QD_pkl_for_dr
+from Modularize.support.Pulse_schedule_library import Qubit_state_single_shot_plot
+from Modularize.support import QDmanager, Data_manager,init_system_atte, init_meas, shut_down, coupler_zctrl
+from Modularize.support.Pulse_schedule_library import Qubit_SS_sche, set_LO_frequency, pulse_preview, Qubit_state_single_shot_fit_analysis
 
 
 def Cavity_powerDep_spec(quantum_device:QuantumDevice,ro_bare_guess:dict,ro_span_Hz:int=5e6,ro_p_min:float=0.1,ro_p_max:float=0.7,n_avg:int=1000,f_points:int=200,p_points:int=200,run:bool=True,q:str='q0',Save:bool=False):
@@ -138,17 +138,17 @@ def One_tone_sche(
 
 
 def Readout_amp_optimization(quantum_device:QuantumDevice,R_amp_low:float,R_amp_high:float,shots:int=1000,points:int=200,run:bool=True,q:str='q0',Save:bool=False):
-    sche_func= Qubit_amp_SS_sche
+    sche_func= Qubit_amp_SS_sche#
     LO= f01[q]+IF
     hw_c=set_LO_frequency(quantum_device,q=q,module_type='drive',LO_frequency=LO)    
     analysis_result = {}
     raw_data={}
-    raw_data[q]=[]
-    analysis_result[q]=[]
-    amp_samples = linspace(R_amp_low,R_amp_high,points)
+    raw_data[q]=[]#
+    analysis_result[q]=[]#
+    amp_samples = linspace(R_amp_low,R_amp_high,points)#
     exp_kwargs= dict(sweep_amp=['start '+'%E' %amp_samples[0],'end '+'%E' %amp_samples[-1]],
-                     shots=shots,points=points)
-    def state_dep_sched(ini_state,amp,data):
+                     shots=shots,points=points)#
+    def state_dep_sched(ini_state,amp,data):#NCU added: amp,data
         
         spec_sched_kwargs = dict(  
             q= q,
@@ -178,15 +178,15 @@ def Readout_amp_optimization(quantum_device:QuantumDevice,R_amp_low:float,R_amp_
             pulse_preview(quantum_device,sche_func,spec_sched_kwargs)
     if run:
         if Save is True:
-            write_presave_txt(Save_filepath+q+'_'+'Readout_amp_cal_')
+            write_presave_txt(Save_filepath+q+'_'+'Readout_amp_cal_')#?
             
         else: pass 
     tau= R_integration[q] 
     if run:
         for i in range(points):
             data = {}
-            state_dep_sched('g',amp_samples[i],data)
-            state_dep_sched('e',amp_samples[i],data)
+            state_dep_sched('g',amp_samples[i],data)#NCU add: amp_samples[i],data
+            state_dep_sched('e',amp_samples[i],data)#NCU add: amp_samples[i],data
             print(i)
             raw_data[q].append(data)
         for i in range(points):     
@@ -230,7 +230,7 @@ def Qubit_amp_SS_sche(
     q:str,
     ini_state:str,
     pi_amp: dict,
-    pi_Du: dict,
+    pi_Du: dict,##
     R_amp: any,
     R_duration: dict,
     R_integration:dict,
@@ -247,10 +247,11 @@ def Qubit_amp_SS_sche(
     spec_pulse = Readout(sched,q,R_amp,R_duration,powerDep=True)
     
     if ini_state=='e': 
-        X_pi_p(sched,pi_amp,pi_Du,q,spec_pulse,freeDu=0)
+        X_pi_p(sched,pi_amp,pi_Du,q,spec_pulse,freeDu=0)#pi_Du
         
     else: None
     Integration(sched,q,R_inte_delay,R_integration,spec_pulse,acq_index=0,acq_channel=0,single_shot=True,get_trace=False,trace_recordlength=0)
+    #AS: Integration(sched,q,R_inte_delay,R_integration,spec_pulse,0,single_shot=True,get_trace=False,trace_recordlength=0)
 
     return sched
 

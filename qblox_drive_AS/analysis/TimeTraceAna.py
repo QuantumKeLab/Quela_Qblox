@@ -8,6 +8,8 @@ from datetime import datetime
 from qblox_drive_AS.support.UserFriend import *
 from matplotlib.gridspec import GridSpec as GS
 from qblox_drive_AS.analysis.Multiplexing_analysis import Multiplex_analyzer
+import numpy as np
+from scipy.stats import norm
 
 def time_label_sort(nc_file_name:str):
     return datetime.strptime(nc_file_name.split("_")[-1].split(".")[0],"H%HM%MS%S")
@@ -230,6 +232,27 @@ def time_monitor_data_ana(QD_agent:QDmanager,folder_path:str,save_every_fit_pic:
             
             colormap(array(time_diffs),array(T1_evo_time[q])*1e6,array(sorted_values_raw),array(sorted_values_ans),fig_path=os.path.join(pic_folder,f"{q}_T1_timeDep_colormap.png"))
             plot_timeDepCohe(array(time_diffs), array(sorted_values_ans), "t1", units={"x":"min","y":"µs"}, fig_path=os.path.join(pic_folder,f"{q}_T1_timeDep.png"))
+
+            # 繪製T1 histogram 並做高斯擬合
+            T1_values = [item[1] for item in sorted_item_ans]
+            # 繪製 histogram
+            plt.hist(T1_values, bins=30, density=True, alpha=0.6, color='g' )
+            #高斯擬合
+            mu, std = norm.fit(T1_values)
+            # 繪製高斯曲線
+            xmin, xmax = plt.xlim()
+            x = np.linspace(xmin, xmax, 100)
+            p = norm.pdf(x, mu, std)
+            plt.plot(x, p, 'k', linewidth=2)
+            title = f"T1 Histogram and Gaussian Fit(nmean = (mu:.2f), std = (std:.2f)"
+            plt.title(title)
+            plt.xlabel('T1 Time (us)')
+            plt.ylabel('Density')
+            #自動調整布局
+            plt.tight_layout()
+            histogram_path = os.path.join(pic_folder, f"(q)_T1_histogram.png")
+            plt.savefig(histogram_path)
+            plt.close()
     if T2 != 0:
         for q in T2_rec:
             sorted_item_ans = sorted(T2_rec[q].items(), key=lambda item: datetime.strptime(item[0], "%Y-%m-%d %H:%M:%S"))
@@ -273,8 +296,8 @@ def time_monitor_data_ana(QD_agent:QDmanager,folder_path:str,save_every_fit_pic:
 
 
 if __name__ == "__main__":
-    QD_path = r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20241215\DRKE#242_SumInfo.pkl"
-    folder_path = r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\Meas_raw\20241215\H00M42S47_overnight"
+    QD_path = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20250107_DR1_FQv1_TaAl_1217OS (fromDaiJia)\20250107_002238\20250107_002238\qblox_ExpConfigs_20250107002238\DR1#11_SumInfo.pkl"
+    folder_path = r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20250107_DR1_FQv1_TaAl_1217OS (fromDaiJia)\20250107_002238\20250107_002238\T1"
     save_every_fit_fig:bool = False
 
     QD_agent = QDmanager(QD_path)

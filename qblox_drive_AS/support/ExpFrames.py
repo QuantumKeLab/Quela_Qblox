@@ -1,6 +1,7 @@
 from numpy import ndarray
 from abc import ABC
-import os
+import os, json, sys
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 from datetime import datetime
 from xarray import Dataset
 from qblox_drive_AS.support.QDmanager import QDmanager, Data_manager
@@ -3235,7 +3236,7 @@ class StarkShift(ExpGovernment):
 if __name__ == "__main__":
     EXP =  EnergyRelaxation(QD_path="")
     EXP.execution = True
-    EXP.RunAnalysis(new_QD_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20241229\DRKE#242_SumInfo.pkl",
-                    new_file_path=r"C:\Users\Ke Lab\Documents\GitHub\Quela_Qblox\qblox_drive_AS\Meas_raw\20241229\TSRI131#10\Q4\H21M24S11\T1_20241229212718.nc"
+    EXP.RunAnalysis(new_QD_path=r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241216_DRKe_5XQv4#5_no_coating\Qblox_3.2GB\QD_backup\20241217\DRKE#242_SumInfo.pkl",
+                    new_file_path=r"C:\Users\User\SynologyDrive\SynologyDrive\09 Data\Fridge Data\Qubit\20241216_DRKe_5XQv4#5_no_coating\Qblox_3.2GB\raw_data\20241217\AmpD\H01M36S39_plot\SingleShot_0.7_(0).nc"
             )#,histo_ana=True)
     
