@@ -4,7 +4,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', "
 from qblox_drive_AS.support import QDmanager
 
 
-cluster_IP:str = "192.168.1.242"
+cluster_IP:str = "192.168.1..242"
 dr_name:str = "drke"
 qubit_number_onChip:int = 4
 coupler_number_onChip:int = 0
