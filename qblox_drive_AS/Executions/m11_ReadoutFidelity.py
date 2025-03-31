@@ -5,9 +5,9 @@ from qblox_drive_AS.support.ExpFrames import nSingleShot
 
 ''' fill in '''
 Execution:bool = True
-DRandIP = {"dr":"dr1","last_ip":"11"}
-target_qs:list = ["q0","q2"]
-shots:int = 10000
+DRandIP = {"dr":"drke","last_ip":"242"}
+target_qs:list = ["q3"]
+shots:int = 30000
 histo_counts:int = 1 # use only when the fitting won't go wrong.
 
 ''' Don't Touch '''

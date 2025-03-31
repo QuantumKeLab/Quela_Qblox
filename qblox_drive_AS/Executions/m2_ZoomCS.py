@@ -6,15 +6,15 @@ from qblox_drive_AS.support import Data_manager
 ''' fill in '''
 Execution:bool = True
 DRandIP = {"dr":"drke","last_ip":"242"}
-freq_range:dict = {"q0":[4.8e9, 4.85e9],
-                   "q1":[4.9e9, 4.95e9],
-                   "q2":[5.0e9, 5.05e9],
-                   "q3":[5.1e9, 5.15e9],
+freq_range:dict = {"q0":[4.805e9, 4.814e9],
+                   "q1":[4.9075e9, 4.914e9],
+                   "q2":[5.005e9, 5.014e9],
+                   "q3":[5.106e9, 5.115e9],
                 #    "q4":[6.315e9, 6.325e9],
                 #    "q5":[6.414e9, 6.424e9],
                 }
 freq_pts:int = 500
-AVG:int = 100
+AVG:int = 500
 
 ''' Don't Touch '''
 save_dir = Data_manager().build_packs_folder()

@@ -1,51 +1,51 @@
-QD_file: C:\Users\admin\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20250330\DRKE#242_SumInfo.pkl
+QD_file: C:\Users\admin\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20250331\DRKE#242_SumInfo.pkl
 Comments: ---
 
-RO-atte = 0 dB
+RO-atte = 24 dB
 XY-atte = 0 dB
 Reset time = 250 us
 
 [q0]
-    bare   = 0.0 GHz
-    ROF    = 6.0 GHz
-    RO-amp = 0.5 V
-    ROT    = 1.0 us
-    XYF    = 4.0 GHz
-    Pi-amp = 0.05 V
+    bare   = 4.808898169681391 GHz
+    ROF    = 4.810156088468035 GHz
+    RO-amp = 0.038 V
+    ROT    = 2.0 us
+    XYF    = 4.140155526053443 GHz
+    Pi-amp = 0.16161507335907405 V
     Pi-dura= 40.0 ns
-    x      = 6000.0 MHz
-    g      = 0.0 MHz
+    x      = 1.2579187866439818 MHz
+    g      = 31.993878980244148 MHz
 
 [q1]
-    bare   = 0.0 GHz
-    ROF    = 6.0 GHz
-    RO-amp = 0.5 V
-    ROT    = 1.0 us
+    bare   = 4.910410717547768 GHz
+    ROF    = 4.910880589025248 GHz
+    RO-amp = 0.085 V
+    ROT    = 2.0 us
     XYF    = 4.0 GHz
     Pi-amp = 0.05 V
     Pi-dura= 40.0 ns
-    x      = 6000.0 MHz
+    x      = 0.4698714774799347 MHz
     g      = 0.0 MHz
 
 [q2]
-    bare   = 0.0 GHz
-    ROF    = 6.0 GHz
-    RO-amp = 0.5 V
-    ROT    = 1.0 us
-    XYF    = 4.0 GHz
-    Pi-amp = 0.05 V
-    Pi-dura= 40.0 ns
-    x      = 6000.0 MHz
-    g      = 0.0 MHz
+    bare   = 5.009631041329779 GHz
+    ROF    = 5.010576391410321 GHz
+    RO-amp = 0.006 V
+    ROT    = 20.0 us
+    XYF    = 3.5507291389074465 GHz
+    Pi-amp = 0.026977227018291815 V
+    Pi-dura= 100.0 ns
+    x      = 0.9453500805425643 MHz
+    g      = 37.137218944853046 MHz
 
 [q3]
-    bare   = 0.0 GHz
-    ROF    = 6.0 GHz
-    RO-amp = 0.5 V
-    ROT    = 1.0 us
-    XYF    = 4.0 GHz
-    Pi-amp = 0.05 V
+    bare   = 5.110767805268362 GHz
+    ROF    = 5.112032166536547 GHz
+    RO-amp = 0.055 V
+    ROT    = 1.5 us
+    XYF    = 4.18466809160137 GHz
+    Pi-amp = 0.24177212408865517 V
     Pi-dura= 40.0 ns
-    x      = 6000.0 MHz
-    g      = 0.0 MHz
+    x      = 1.2643612681846619 MHz
+    g      = 34.218775671226865 MHz
 
