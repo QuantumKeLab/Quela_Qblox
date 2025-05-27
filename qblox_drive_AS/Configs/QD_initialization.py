@@ -4,13 +4,13 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', "
 from qblox_drive_AS.support import QDmanager
 
 
-cluster_IP:str = "192.168.1..242"
+cluster_IP:str = "192.168.50.242"
 dr_name:str = "drke"
 qubit_number_onChip:int = 4
 coupler_number_onChip:int = 0
-chip_name:str = "FQV1_WJv8_Al#6_Zline"
-chip_type:str = "4FQ"
-old_QD_path:str = "" # set the path in string When you want to update the Hcfg. Otherwise, set it None
+chip_name:str = "FQV1"
+chip_type:str = "4Q"
+old_QD_path:str = r"C:\Users\admin\Documents\GitHub\Quela_Qblox\qblox_drive_AS\QD_backup\20250527\DRKE#242_SumInfo.pkl" # set the path in string When you want to update the Hcfg. Otherwise, set it None
 
 
 Hcfg = {
@@ -43,23 +43,6 @@ Hcfg = {
                 "lo_freq": 3e9,
                 "portclock_configs": [
                     {
-                        "port": "q1:mw",
-                        "clock": "q1.01",
-                        "mixer_amp_ratio": 1.0,
-                        "mixer_phase_error_deg": 0.0,
-                    }
-                ],
-            },
-        },
-        f"cluster{dr_name}_module8": {
-            "instrument_type": "QCM_RF",
-            "complex_output_0": {
-                "output_att": 0,
-                "dc_mixer_offset_I": 0.0,
-                "dc_mixer_offset_Q": 0.0,
-                "lo_freq": 3e9,
-                "portclock_configs": [
-                    {
                         "port": "q2:mw",
                         "clock": "q2.01",
                         "mixer_amp_ratio": 1.0,
@@ -67,21 +50,9 @@ Hcfg = {
                     }
                 ],
             },
-            "complex_output_1": {
-                "output_att": 0,
-                "dc_mixer_offset_I": 0.0,
-                "dc_mixer_offset_Q": 0.0,
-                "lo_freq": 3e9,
-                "portclock_configs": [
-                    {
-                        "port": "q3:mw",
-                        "clock": "q3.01",
-                        "mixer_amp_ratio": 1.0,
-                        "mixer_phase_error_deg": 0.0,
-                    }
-                ],
-            },
         },
+        
+       
         # ============ FLUX ============#
         f"cluster{dr_name}_module2": {
             "instrument_type": "QCM",
@@ -99,7 +70,7 @@ Hcfg = {
                 "input_att": 0,
                 "dc_mixer_offset_I": 0.0,
                 "dc_mixer_offset_Q": 0.0,
-                "lo_freq": 6e9,       # *** Should be set as a parameter later on
+                "lo_freq": 4.8e9,       # *** Should be set as a parameter later on
                 "portclock_configs": [
                     {
                         "port": "q:res",
