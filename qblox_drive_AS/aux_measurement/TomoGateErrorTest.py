@@ -1,5 +1,5 @@
 from qblox_drive_AS.support.Pulser import ScheduleConductor
-from qblox_drive_AS.support.Pulse_schedule_library import Schedule, X, Reset, Rxy, Measure, BinMode
+from qblox_drive_AS.support.Pulse_schedule_library import Schedule, X, Reset, Rxy, Measure, BinMode, IdlePulse
 from qblox_drive_AS.support.UserFriend import eyeson_print
 from qblox_drive_AS.support import check_acq_channels
 from qcodes.parameters import ManualParameter
@@ -12,7 +12,6 @@ from qblox_drive_AS.support import BasicTransmonElement
 from qcodes.parameters import ManualParameter
 from itertools import product
 import numpy as np
-
 class XTomographyPS(ScheduleConductor):
     def __init__(self):
         super().__init__()
@@ -20,6 +19,8 @@ class XTomographyPS(ScheduleConductor):
         self._init_state: str = "zero"  # options: "zero", "plus", "plus_i"
         self._gate_counts:list = arange(0, 100)  # 1~99 X gates
         self._avg_n:int = 100
+        self._control_q: str = "q0"
+        self._noise_q: str = "q0"
 
     @property
     def target_q(self):
@@ -46,6 +47,23 @@ class XTomographyPS(ScheduleConductor):
     def n_avg(self, avg:int):
         self._avg_n = avg
 
+    @property
+    def control_q(self):
+        return self._control_q
+
+    @control_q.setter
+    def control_q(self, qt: str):
+        self._control_q = qt
+
+    @property
+    def noise_q(self):
+        return self._noise_q
+
+    @noise_q.setter
+    def noise_q(self, qn: str):
+        self._noise_q = qn
+
+
     def __PulseSchedule__(self,
         gate_counts: list,
         repetitions: int = 1
@@ -68,18 +86,50 @@ class XTomographyPS(ScheduleConductor):
                         last_op = reset
                     # X gates3
                     for _ in range(x_gate_count):
-                        last_op = sched.add(X(q))
+                        # 1. 先加入 control_q 的 X gate，並把這個動作存成一個變數 (reference)
+                        control_op = sched.add(X(self._control_q))
+                        
+                        # 2. 加入 noise_q 的 X gate，強制它的「起點」對齊 control_op 的「起點」
+                        if self._noise_q == None:
+                            pass
+                        else:
+                            sched.add(X(self._noise_q), 
+                                    ref_op=control_op, 
+                                    ref_pt="start", 
+                                    ref_pt_new="start"
+                                    )
+                        last_op = control_op
+                # Tomography: X, Y, Z bases
+                    buffer_time = 60e-9  # 設定你想要的緩衝時間，例如 50 ns (單位為秒)
+                
                 # Tomography: X, Y, Z bases
                     if basis == 'X':
-                        sched.add(Rxy(theta=90.0, phi=90.0, qubit=q))
+                        # 在 last_op 結束後，等待 buffer_time 再打 Rxy
+                        tomo_op = sched.add(Rxy(theta=90.0, phi=90.0, qubit=q), 
+                                            ref_op=last_op, 
+                                            rel_time=buffer_time)
+                        meas_ref_op = tomo_op
+                        meas_rel_time = 0.0 # Measure 緊接在 tomo_op 後面
+                        
                     elif basis == 'Y':
-                        sched.add(Rxy(theta=-90.0, phi=0, qubit=q))
+                        tomo_op = sched.add(Rxy(theta=-90.0, phi=0, qubit=q), 
+                                            ref_op=last_op, 
+                                            rel_time=buffer_time)
+                        meas_ref_op = tomo_op
+                        meas_rel_time = 0.0 # Measure 緊接在 tomo_op 後面
+                        
+                    else: # basis == 'Z'
+                        # Z basis 沒有 tomo_op，所以 Measure 直接以 last_op 為參考，並加入緩衝時間
+                        meas_ref_op = last_op
+                        meas_rel_time = buffer_time
 
-                    # 加 buffer
+                    # 加 Measure
                     sched.add(Measure(q,
                                     acq_index=acq_idx * 3 + ['X', 'Y', 'Z'].index(basis),
                                     acq_protocol="SSBIntegrationComplex",
-                                    bin_mode=BinMode.APPEND))
+                                    bin_mode=BinMode.APPEND),
+                            ref_op=meas_ref_op,
+                            rel_time=meas_rel_time)
 
         return sched
 

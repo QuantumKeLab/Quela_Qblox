@@ -3247,11 +3247,13 @@ class XTomography(ExpGovernment):
     def RawDataPath(self):
         return self.__raw_data_location
 
-    def SetParameters(self, target_q:str = "q0", init_state:str = "zero", avg_n:int = 300, gate_counts:list= range(1, 100), execution:bool = True):
+    def SetParameters(self, target_q:str = "q0", init_state:str = "zero", avg_n:int = 300, gate_counts:list= range(1, 100), execution:bool = True, control_q:str = "q0", noise_q:str = "q0"):
         self.target_q = target_q
         self.init_state = init_state
         self.avg_n = avg_n
         self.execution = execution
+        self.control_q = control_q
+        self.noise_q = noise_q
         self.gate_counts =  gate_counts# 1~99 個 X gate
 
     def PrepareHardware(self):
@@ -3285,6 +3287,8 @@ class XTomography(ExpGovernment):
         for max_gate in self.gate_counts:
             meas = XTomographyPS()
             meas.target_q = self.target_q
+            meas.control_q = self.control_q
+            meas.noise_q =self.noise_q
             meas.initial_state = self.init_state
             meas._gate_counts = list(range(max_gate,max_gate + 1))  # ✅ 每次不同的 gate range
             meas.execution = self.execution
@@ -3299,10 +3303,11 @@ class XTomography(ExpGovernment):
             meas.run()
             ds = meas.dataset
             eyeson_print(f"now in gate {max_gate}")
-            if max_gate == 0:
-                datasets = ds
-            else:
-                datasets = xr.concat([datasets, ds], dim="pulse_num") 
+            if self.execution == True:
+                if max_gate == 0:
+                    datasets = ds
+                else:
+                    datasets = xr.concat([datasets, ds], dim="pulse_num") 
 
         if self.execution:
             if self.save_dir is not None:
@@ -3348,7 +3353,7 @@ class XTomography(ExpGovernment):
                     ANA = Multiplex_analyzer("t2")
                     ANA._import_data(ds,var_dimension=0,fq_Hz=QD_savior.quantum_device.get_element(var[:2]).clock_freqs.f01())
                     ANA._start_analysis(var_name=var[:2])
-                    pic_path = os.path.join(fig_path,f"{var[:2]}_TomoGateErrorTest_zero_fre_{i}_shot_5000_{datetime.now().strftime('%Y%m%d%H%M%S') if self.JOBID is None else self.JOBID}")
+                    pic_path = os.path.join(fig_path,f"{var[:2]}_TomoGateErrorTest_zero_amp_{state_type}_shot_5000_{datetime.now().strftime('%Y%m%d%H%M%S') if self.JOBID is None else self.JOBID}")
                     ANA._export_result(pic_path)                
             ds.close()
 
